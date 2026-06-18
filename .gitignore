@@ -1,0 +1,15 @@
+ # Build dirs anywhere 
+build/ 
+
+# Object files 
+*.o 
+*.so 
+*.a 
+
+# Simulation output 
+*.root 
+*.txt 
+*.out 
+
+# Temp 
+*~

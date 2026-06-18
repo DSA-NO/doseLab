@@ -21,3 +21,9 @@ target_include_directories(doseLab PRIVATE
 target_link_libraries(doseLab PRIVATE
     ${Geant4_LIBRARIES}
 )
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/macros
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/macros
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})

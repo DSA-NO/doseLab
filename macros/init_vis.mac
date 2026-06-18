@@ -1,0 +1,16 @@
+/control/verbose 0
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+
+/vis/open OGL
+/vis/drawVolume
+/vis/viewer/set/viewpointThetaPhi 45 45
+/vis/viewer/zoom 1.0
+/vis/scene/add/axes 0 0 0 1 m
+/vis/scene/add/trajectories smooth
+/vis/scene/endOfEventAction accumulate
+
+/run/initialize
+
+/control/execute macros/vis.mac
