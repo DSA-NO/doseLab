@@ -3,15 +3,15 @@
 #include <memory>
 
 #include "G4VUserPrimaryGeneratorAction.hh"
+#include "G4GeneralParticleSource.hh"
 
 class G4Event;
-class G4GeneralParticleSource;
 
 class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    DoseLabPrimaryGeneratorAction();
-    ~DoseLabPrimaryGeneratorAction() override;
+    DoseLabPrimaryGeneratorAction() = default;
+    ~DoseLabPrimaryGeneratorAction() override = default;
 
     void GeneratePrimaries(G4Event* event) override;
 
