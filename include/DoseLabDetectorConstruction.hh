@@ -3,6 +3,9 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
+#include "G4GDMLParser.hh"
+#include <memory>
+
 class G4VPhysicalVolume;
 
 class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
@@ -17,4 +20,5 @@ class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 
   private:
     const G4String fGDMLFile;
+    std::unique_ptr<G4GDMLParser> fParser;
 };
