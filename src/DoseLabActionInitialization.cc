@@ -1,11 +1,15 @@
 #include "DoseLabActionInitialization.hh"
 
 #include "DoseLabPrimaryGeneratorAction.hh"
-
-DoseLabActionInitialization::DoseLabActionInitialization() = default;
-DoseLabActionInitialization::~DoseLabActionInitialization() = default;
+#include "DoseLabRunAction.hh"
 
 void DoseLabActionInitialization::Build() const
 {
     SetUserAction(new DoseLabPrimaryGeneratorAction());
+    SetUserAction(new DoseLabRunAction());
+}
+
+void DoseLabActionInitialization::BuildForMaster() const
+{
+    SetUserAction(new DoseLabRunAction());
 }
