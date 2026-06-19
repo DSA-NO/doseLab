@@ -2,8 +2,8 @@
 
 #include "DoseLabPrimaryGeneratorAction.hh"
 
-DoseLabActionInitialization::DoseLabActionInitialization() {}
-DoseLabActionInitialization::~DoseLabActionInitialization() {}
+DoseLabActionInitialization::DoseLabActionInitialization() = default;
+DoseLabActionInitialization::~DoseLabActionInitialization() = default;
 
 void DoseLabActionInitialization::Build() const
 {

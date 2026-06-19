@@ -1,3 +1,4 @@
+# GPS source definition
 /gps/particle gamma
 /gps/energy 1.25 MeV
 /gps/position 0 0 0 cm

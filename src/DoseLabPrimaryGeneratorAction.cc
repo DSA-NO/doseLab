@@ -8,6 +8,8 @@ DoseLabPrimaryGeneratorAction::DoseLabPrimaryGeneratorAction()
 {
 }
 
+DoseLabPrimaryGeneratorAction::~DoseLabPrimaryGeneratorAction() = default;
+
 void DoseLabPrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
     fGPS->GeneratePrimaryVertex(event);

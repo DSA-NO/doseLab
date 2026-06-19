@@ -9,9 +9,9 @@ class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
     DoseLabDetectorConstruction(const G4String& gdmlFile = "");
-    virtual ~DoseLabDetectorConstruction();
+    ~DoseLabDetectorConstruction() override;
 
-    virtual G4VPhysicalVolume* Construct();
+    G4VPhysicalVolume* Construct() override;
 
   private:
     G4String fGDMLFile;

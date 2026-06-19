@@ -6,7 +6,7 @@ class DoseLabActionInitialization : public G4VUserActionInitialization
 {
   public:
     DoseLabActionInitialization();
-    virtual ~DoseLabActionInitialization();
+    ~DoseLabActionInitialization() override;
 
-    virtual void Build() const;
+    void Build() const override;
 };

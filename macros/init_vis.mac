@@ -1,13 +1,17 @@
+# Default verbosity
 /control/verbose 0
 /tracking/verbose 0
 /run/verbose 0
 /event/verbose 0
 
-# Set the number of threads at runtime if you want MT execution.
-# Example: change 1 to the desired count before /run/initialize.
+# Set threads before initialization
 /run/numberOfThreads 1
 
-/vis/open OGL
+# Initialize the kernel before loading the source macro
 /run/initialize
 
+# Configure the GPS source
+/control/execute source.mac
+
+# Visualization setup
 /control/execute vis.mac

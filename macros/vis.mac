@@ -1,11 +1,19 @@
-/vis/scene/create
-/vis/viewer/set/style surface
-/vis/viewer/set/hiddenEdge 1
+# Open the default viewer and draw the world geometry.
+/vis/open
+/vis/drawVolume
+
+# Configure the camera.
 /vis/viewer/set/viewpointThetaPhi 30 30
 /vis/viewer/zoom 1.0
-/vis/viewer/set/autoRefresh true
-/vis/drawVolume
+
+# Use surface rendering with hidden edges enabled.
+/vis/viewer/set/style surface
+/vis/viewer/set/hiddenEdge 1
+
+# Add decorations and trajectory rendering.
 /vis/scene/add/axes 0 0 0 1 m
 /vis/scene/add/trajectories smooth
 /vis/scene/endOfEventAction accumulate
-/vis/scene/list
+
+# Enable automatic refresh for interactive viewing.
+/vis/viewer/set/autoRefresh true

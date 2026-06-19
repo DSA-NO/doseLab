@@ -13,10 +13,10 @@ include(${Geant4_USE_FILE})
 add_compile_options(-Wall -Wextra -Wpedantic)
 
 add_executable(doseLab
-    ${CMAKE_CURRENT_SOURCE_DIR}/doseLab.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabDetectorConstruction.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabActionInitialization.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabPrimaryGeneratorAction.cc
+    doseLab.cc
+    src/DoseLabDetectorConstruction.cc
+    src/DoseLabActionInitialization.cc
+    src/DoseLabPrimaryGeneratorAction.cc
 )
 
 target_include_directories(doseLab PRIVATE
