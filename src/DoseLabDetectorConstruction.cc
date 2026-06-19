@@ -18,7 +18,6 @@ G4VPhysicalVolume* DoseLabDetectorConstruction::Construct()
 {
     if (!fGDMLFile.empty()) {
         G4cout << "Loading GDML: " << fGDMLFile << G4endl;
-
         fParser = std::make_unique<G4GDMLParser>();
         fParser->SetOverlapCheck(true);
         fParser->Read(fGDMLFile, false);

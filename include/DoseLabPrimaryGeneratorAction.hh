@@ -10,7 +10,7 @@ class G4Event;
 class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
-    DoseLabPrimaryGeneratorAction() = default;
+    DoseLabPrimaryGeneratorAction();
     ~DoseLabPrimaryGeneratorAction() override = default;
 
     void GeneratePrimaries(G4Event* event) override;

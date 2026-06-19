@@ -1,10 +1,9 @@
 #pragma once
 
-#include "G4VUserDetectorConstruction.hh"
-#include "globals.hh"
-
-#include "G4GDMLParser.hh"
 #include <memory>
+
+#include "G4VUserDetectorConstruction.hh"
+#include "G4GDMLParser.hh"
 
 class G4VPhysicalVolume;
 
