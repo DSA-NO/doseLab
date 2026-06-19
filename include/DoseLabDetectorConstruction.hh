@@ -8,11 +8,13 @@ class G4VPhysicalVolume;
 class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    DoseLabDetectorConstruction(const G4String& gdmlFile = "");
-    ~DoseLabDetectorConstruction() override;
+    explicit DoseLabDetectorConstruction(const G4String& gdmlFile = "");
+    ~DoseLabDetectorConstruction() override = default;
 
     G4VPhysicalVolume* Construct() override;
 
+    const G4String& GetGDMLFile() const { return fGDMLFile; }
+
   private:
-    G4String fGDMLFile;
+    const G4String fGDMLFile;
 };
