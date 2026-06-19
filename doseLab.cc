@@ -18,8 +18,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    bool interactive = (argc == 1);
+
     std::unique_ptr<G4UIExecutive> ui;
-    if (argc == 1) {
+    if (interactive) {
         ui = std::make_unique<G4UIExecutive>(argc, argv);
     }
 
@@ -34,20 +36,26 @@ int main(int argc, char** argv)
     runManager->SetUserInitialization(new DoseLabActionInitialization());
 
     G4PhysListFactory physListFactory;
-    auto* physicsList = physListFactory.GetReferencePhysList("QGSP_BERT_HP_EMZ");
+    auto* physicsList = physListFactory.GetReferencePhysList("QGSP_BERT_HP");
+
     if (!physicsList) {
         G4Exception("main", "PhysicsListCreation", FatalException,
-                    "Failed to create QGSP_BERT_HP_EMZ physics list.");
+                    "Failed to create QGSP_BERT_HP physics list.");
     }
+
     runManager->SetUserInitialization(physicsList);
 
-    auto* visManager = new G4VisExecutive();
-    visManager->Initialize();
+    G4VisManager* visManager = nullptr;
+    if (interactive) {
+        visManager = new G4VisExecutive();
+        visManager->Initialize();
+    }
 
     auto* uiManager = G4UImanager::GetUIpointer();
     uiManager->ApplyCommand("/control/macroPath ./macros");
 
-    if (!ui) {
+    if (!interactive) {
+        runManager->Initialize();
         G4String command = "/control/execute ";
         uiManager->ApplyCommand(command + argv[1]);
     } else {
