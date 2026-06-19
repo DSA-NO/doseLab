@@ -4,13 +4,8 @@
 #include "G4GeneralParticleSource.hh"
 
 DoseLabPrimaryGeneratorAction::DoseLabPrimaryGeneratorAction()
-    : fGPS(new G4GeneralParticleSource())
+    : fGPS(std::make_unique<G4GeneralParticleSource>())
 {
-}
-
-DoseLabPrimaryGeneratorAction::~DoseLabPrimaryGeneratorAction()
-{
-    delete fGPS;
 }
 
 void DoseLabPrimaryGeneratorAction::GeneratePrimaries(G4Event* event)

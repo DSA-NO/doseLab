@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "G4VUserPrimaryGeneratorAction.hh"
 
 class G4Event;
@@ -9,10 +11,10 @@ class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
   public:
     DoseLabPrimaryGeneratorAction();
-    virtual ~DoseLabPrimaryGeneratorAction();
+    ~DoseLabPrimaryGeneratorAction() override = default;
 
-    virtual void GeneratePrimaries(G4Event* event);
+    void GeneratePrimaries(G4Event* event) override;
 
   private:
-    G4GeneralParticleSource* fGPS;
+    std::unique_ptr<G4GeneralParticleSource> fGPS;
 };

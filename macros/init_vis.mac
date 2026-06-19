@@ -3,6 +3,10 @@
 /run/verbose 0
 /event/verbose 0
 
+# Set the number of threads at runtime if you want MT execution.
+# Example: change 1 to the desired count before /run/initialize.
+/run/numberOfThreads 1
+
 /vis/open OGL
 /run/initialize
 
