@@ -7,9 +7,7 @@
 #include "G4VisExecutive.hh"
 #include "QGSP_BERT_HP.hh"
 
-/*
 #include "DoseLabActionInitialization.hh"
-*/
 #include "DoseLabDetectorConstruction.hh"
 
 int main(int argc, char** argv)
@@ -28,7 +26,7 @@ int main(int argc, char** argv)
     // -------------------------------
 #ifdef G4MULTITHREADED
     auto runManager = new G4MTRunManager();
-    runManager->SetNumberOfThreads(2);  // adjust later
+    runManager->SetNumberOfThreads(10);  // adjust later
 #else
     auto runManager = new G4RunManager();
 #endif
@@ -47,7 +45,7 @@ int main(int argc, char** argv)
     runManager->SetUserInitialization(new QGSP_BERT_HP);
 
     // Actions (generator, etc.)
-    // runManager->SetUserInitialization(new DoseLabActionInitialization());
+    runManager->SetUserInitialization(new DoseLabActionInitialization());
 
     // -------------------------------
     // Visualization
@@ -59,6 +57,9 @@ int main(int argc, char** argv)
     // UI manager
     // -------------------------------
     auto uiManager = G4UImanager::GetUIpointer();
+
+    // Make sure the macro directory is visible to Geant4.
+    uiManager->ApplyCommand("/control/macroPath ./macros");
 
     // -------------------------------
     // Execution logic

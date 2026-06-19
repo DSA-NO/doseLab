@@ -12,6 +12,8 @@ include(${Geant4_USE_FILE})
 add_executable(doseLab
     ${CMAKE_CURRENT_SOURCE_DIR}/src/doseLab.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabDetectorConstruction.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabActionInitialization.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/DoseLabPrimaryGeneratorAction.cc
 )
 
 target_include_directories(doseLab PRIVATE
