@@ -7,11 +7,14 @@
 # Set threads before initialization
 /run/numberOfThreads 1
 
-# Initialize the kernel before loading the source macro
+# Initialize
 /run/initialize
 
-# Configure the GPS source
+# Load source configuration
 /control/execute source.mac
 
 # Visualization setup
 /control/execute vis.mac
+
+# Run simulation
+/run/beamOn 1000
