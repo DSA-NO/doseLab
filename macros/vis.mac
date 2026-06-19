@@ -1,19 +1,25 @@
-# Open the default viewer and draw the world geometry.
-/vis/open
+# Create scene
+/vis/scene/create
+
+# Open viewer
+/vis/open OGL
 /vis/drawVolume
 
-# Configure the camera.
+# Camera setup
 /vis/viewer/set/viewpointThetaPhi 30 30
 /vis/viewer/zoom 1.0
 
-# Use surface rendering with hidden edges enabled.
+# Rendering style
 /vis/viewer/set/style surface
 /vis/viewer/set/hiddenEdge 1
 
-# Add decorations and trajectory rendering.
+# Axes
 /vis/scene/add/axes 0 0 0 1 m
-/vis/scene/add/trajectories smooth
-/vis/scene/endOfEventAction accumulate
 
-# Enable automatic refresh for interactive viewing.
+# Trajectories
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/scene/add/trajectories smooth
+/vis/scene/endOfEventAction accumulate 100
+
+# Auto refresh
 /vis/viewer/set/autoRefresh true
