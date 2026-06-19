@@ -9,5 +9,5 @@ class DoseLabActionInitialization : public G4VUserActionInitialization
     ~DoseLabActionInitialization() override = default;
 
     void Build() const override;
-    void BuildForMaster() const override;  // optional but recommended
+    void BuildForMaster() const override;
 };
