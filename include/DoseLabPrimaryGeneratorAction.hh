@@ -31,17 +31,16 @@
 
 #include "G4VUserPrimaryGeneratorAction.hh"
 
-class G4ParticleGun;
+class G4GeneralParticleSource;
 class G4Event;
 
 namespace DoseLab
 {
 
-/// The primary generator action class with particle gum.
+/// The primary generator action class with general particle source (GPS).
 ///
-/// It defines a single particle which hits the calorimeter
-/// perpendicular to the input face. The type of the particle
-/// can be changed via the G4 build-in commands of G4ParticleGun class
+/// It uses G4GeneralParticleSource for flexible particle generation.
+/// Particles can be configured via G4 commands in macros or interactively.
 /// (see the macros provided with this example).
 
 class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
@@ -53,7 +52,7 @@ class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     void GeneratePrimaries(G4Event* event) override;
 
   private:
-    G4ParticleGun* fParticleGun = nullptr;  // G4 particle gun
+    G4GeneralParticleSource* fParticleSource = nullptr;  // G4 general particle source
 };
 
 }  // namespace DoseLab
