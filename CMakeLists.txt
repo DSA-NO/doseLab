@@ -1,53 +1,52 @@
-cmake_minimum_required(VERSION 3.16)
-project(doseLab VERSION 1.0 LANGUAGES CXX)
+#----------------------------------------------------------------------------
+# Setup the project
+#
+cmake_minimum_required(VERSION 3.16...3.27)
+project(doseLab)
 
-# Build type
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-endif()
+#----------------------------------------------------------------------------
+# Find Geant4 package, activating all available UI and Vis drivers by default
+# See the documentation for a guide on how to enable/disable specific components
+#
+find_package(Geant4 REQUIRED ui_all vis_all)
 
-# Global settings
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+#----------------------------------------------------------------------------
+# Locate sources and headers for this project
+# NB: headers are included so they will show up in IDEs
+#
+file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
+file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
-# Find Geant4
-find_package(Geant4 REQUIRED COMPONENTS ui_all vis_all gdml)
-include(${Geant4_USE_FILE})
-
-# Collect sources
-file(GLOB SOURCES CONFIGURE_DEPENDS src/*.cc)
-
-# Executable
-add_executable(doseLab
-    doseLab.cc
-    ${SOURCES}
-)
-
-# Include dirs
+#----------------------------------------------------------------------------
+# Add the executable, use our local headers, and link it to the Geant4 libraries
+#
+add_executable(doseLab doseLab.cc ${sources} ${headers})
 target_include_directories(doseLab PRIVATE include)
-
-# Compiler warnings
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(doseLab PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-# Link Geant4
 target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
 
-# Copy macros
-add_custom_command(TARGET doseLab POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/macros
-        $<TARGET_FILE_DIR:doseLab>/macros
-)
+#----------------------------------------------------------------------------
+# Copy all scripts to the build directory, i.e. the directory in which we
+# build doseLab. This is so that we can run the executable directly because it
+# relies on these scripts being in the current working directory.
+#
+set(DOSELAB_SCRIPTS
+  exampleB4.in
+  gui.mac
+  init_vis.mac
+  plotHisto.C
+  plotNtuple.C
+  run1.mac
+  run2.mac
+  vis.mac
+  )
 
-# Install
-include(GNUInstallDirs)
-
-install(TARGETS doseLab
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+foreach(_script ${DOSELAB_SCRIPTS})
+  configure_file(
+    ${PROJECT_SOURCE_DIR}/${_script}
+    ${PROJECT_BINARY_DIR}/${_script}
+    COPYONLY
+    )
+endforeach()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/macros
         DESTINATION ${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME})

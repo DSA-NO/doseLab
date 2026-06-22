@@ -23,59 +23,48 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file DoseLabDetectorConstruction.hh
-/// \brief Definition of the DoseLab::DoseLabDetectorConstruction class
+/// \file DoseLabEventAction.hh
+/// \brief Definition of the DoseLab::DoseLabEventAction class
 
-#ifndef DoseLabDetectorConstruction_h
-#define DoseLabDetectorConstruction_h 1
+#ifndef DoseLabEventAction_h
+#define DoseLabEventAction_h 1
 
-#include "G4VUserDetectorConstruction.hh"
+#include "G4UserEventAction.hh"
 #include "globals.hh"
 
-class G4VPhysicalVolume;
-class G4GlobalMagFieldMessenger;
+class G4Event;
+template <typename T> class G4THitsMap;
 
 namespace DoseLab
 {
 
-/// Detector construction class to define materials and geometry.
-/// The calorimeter is a box made of a given number of layers. A layer consists
-/// of an absorber plate and of a detection gap. The layer is replicated.
+/// Event action class
 ///
-/// Four parameters define the geometry of the calorimeter :
-///
-/// - the thickness of an absorber plate,
-/// - the thickness of a gap,
-/// - the number of layers,
-/// - the transverse size of the calorimeter (the input face is a square).
-///
-/// In ConstructSDandField() sensitive detectors of G4MultiFunctionalDetector
-/// type with primitive scorers are created and associated with the Absorber
-/// and Gap volumes.  In addition a transverse uniform magnetic field is defined
-/// via G4GlobalMagFieldMessenger class.
+/// In EndOfEventAction(), it prints the accumulated quantities of the energy
+/// deposit and track lengths of charged particles in Absober and Gap layers
+/// stored in the hits collections.
 
-class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
+class DoseLabEventAction : public G4UserEventAction
 {
   public:
-    DoseLabDetectorConstruction() = default;
-    ~DoseLabDetectorConstruction() override = default;
+    DoseLabEventAction() = default;
+    ~DoseLabEventAction() override = default;
 
-  public:
-    G4VPhysicalVolume* Construct() override;
-    void ConstructSDandField() override;
+    void BeginOfEventAction(const G4Event* event) override;
+    void EndOfEventAction(const G4Event* event) override;
 
   private:
     // methods
-    //
-    void DefineMaterials();
-    G4VPhysicalVolume* DefineVolumes();
+    G4THitsMap<G4double>* GetHitsCollection(G4int hcID, const G4Event* event) const;
+    G4double GetSum(G4THitsMap<G4double>* hitsMap) const;
+    void PrintEventStatistics(G4double absoEdep, G4double absoTrackLength, G4double gapEdep,
+                              G4double gapTrackLength) const;
 
     // data members
-    //
-    static G4ThreadLocal G4GlobalMagFieldMessenger* fMagFieldMessenger;
-    // magnetic field messenger
-
-    G4bool fCheckOverlaps = true;  // option to activate checking of volumes overlaps
+    G4int fAbsoEdepHCID = -1;
+    G4int fGapEdepHCID = -1;
+    G4int fAbsoTrackLengthHCID = -1;
+    G4int fGapTrackLengthHCID = -1;
 };
 
 }  // namespace DoseLab

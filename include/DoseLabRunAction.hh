@@ -23,59 +23,45 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file DoseLabDetectorConstruction.hh
-/// \brief Definition of the DoseLab::DoseLabDetectorConstruction class
+/// \file DoseLabRunAction.hh
+/// \brief Definition of the DoseLab::DoseLabRunAction class
 
-#ifndef DoseLabDetectorConstruction_h
-#define DoseLabDetectorConstruction_h 1
+#ifndef DoseLabRunAction_h
+#define DoseLabRunAction_h 1
 
-#include "G4VUserDetectorConstruction.hh"
-#include "globals.hh"
+#include "G4UserRunAction.hh"
 
-class G4VPhysicalVolume;
-class G4GlobalMagFieldMessenger;
+class G4Run;
 
 namespace DoseLab
 {
 
-/// Detector construction class to define materials and geometry.
-/// The calorimeter is a box made of a given number of layers. A layer consists
-/// of an absorber plate and of a detection gap. The layer is replicated.
+/// Run action class
 ///
-/// Four parameters define the geometry of the calorimeter :
+/// It accumulates statistic and computes dispersion of the energy deposit
+/// and track lengths of charged particles with use of analysis tools:
+/// H1D histograms are created in BeginOfRunAction() for the following
+/// physics quantities:
+/// - Edep in absorber
+/// - Edep in gap
+/// - Track length in absorber
+/// - Track length in gap
+/// The same values are also saved in the ntuple.
+/// The histograms and ntuple are saved in the output file in a format
+/// according to a specified file extension.
 ///
-/// - the thickness of an absorber plate,
-/// - the thickness of a gap,
-/// - the number of layers,
-/// - the transverse size of the calorimeter (the input face is a square).
+/// In EndOfRunAction(), the accumulated statistic and computed
+/// dispersion is printed.
 ///
-/// In ConstructSDandField() sensitive detectors of G4MultiFunctionalDetector
-/// type with primitive scorers are created and associated with the Absorber
-/// and Gap volumes.  In addition a transverse uniform magnetic field is defined
-/// via G4GlobalMagFieldMessenger class.
 
-class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
+class DoseLabRunAction : public G4UserRunAction
 {
   public:
-    DoseLabDetectorConstruction() = default;
-    ~DoseLabDetectorConstruction() override = default;
+    DoseLabRunAction();
+    ~DoseLabRunAction() override = default;
 
-  public:
-    G4VPhysicalVolume* Construct() override;
-    void ConstructSDandField() override;
-
-  private:
-    // methods
-    //
-    void DefineMaterials();
-    G4VPhysicalVolume* DefineVolumes();
-
-    // data members
-    //
-    static G4ThreadLocal G4GlobalMagFieldMessenger* fMagFieldMessenger;
-    // magnetic field messenger
-
-    G4bool fCheckOverlaps = true;  // option to activate checking of volumes overlaps
+    void BeginOfRunAction(const G4Run*) override;
+    void EndOfRunAction(const G4Run*) override;
 };
 
 }  // namespace DoseLab
