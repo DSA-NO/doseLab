@@ -8,6 +8,7 @@
 #ifndef DoseLabDetectorConstruction_h
 #define DoseLabDetectorConstruction_h 1
 
+#include "G4RotationMatrix.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
@@ -17,13 +18,25 @@ class G4GlobalMagFieldMessenger;
 namespace DoseLab
 {
 
+class DoseLabDetectorMessenger;
+
 /// Detector construction class to define materials and geometry.
-/// Simple water phantom setup with ion chamber cavity.
+/// Water phantom setup with configurable cylindrical ion-chamber cavity.
 ///
 /// Geometry:
-/// - World: air (40 x 40 x 40 cm³)
+/// - World: air (3 x 3 x 3 m³)
 /// - Water phantom: 30 x 30 x 30 cm³
-/// - Cavity (ion chamber): at 5 g/cm² depth (~5 cm for water)
+/// - Cavity (ion chamber): configurable radius, thickness, depth, axis, material
+///
+/// Macro interface:
+/// - /doseLab/cavity/type farmer|roos|custom
+/// - /doseLab/cavity/radius <value> <unit>
+/// - /doseLab/cavity/thickness <value> <unit>
+/// - /doseLab/cavity/depth <value> <unit>
+/// - /doseLab/cavity/axis x|y|z
+/// - /doseLab/cavity/material <G4_NIST_name>
+/// - /doseLab/cavity/update
+/// - /doseLab/cavity/print
 ///
 /// In ConstructSDandField() sensitive detectors are created for the cavity
 /// volume to score energy deposition and track length.
@@ -31,25 +44,49 @@ namespace DoseLab
 class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    DoseLabDetectorConstruction() = default;
-    ~DoseLabDetectorConstruction() override = default;
+    DoseLabDetectorConstruction();
+    ~DoseLabDetectorConstruction() override;
 
   public:
     G4VPhysicalVolume* Construct() override;
     void ConstructSDandField() override;
 
+    void SetCavityType(const G4String& type);
+    void SetCavityRadius(G4double radius);
+    void SetCavityThickness(G4double thickness);
+    void SetCavityDepth(G4double depth);
+    void SetCavityAxis(const G4String& axis);
+    void SetCavityMaterial(const G4String& materialName);
+
+    G4String GetCavitySummary() const;
+
   private:
+    enum class CavityAxis
+    {
+      kX,
+      kY,
+      kZ
+    };
+
     // methods
-    //
     void DefineMaterials();
     G4VPhysicalVolume* DefineVolumes();
+    void ApplyCavityPreset(const G4String& type);
+    G4RotationMatrix* BuildCavityRotation() const;
 
     // data members
-    //
     static G4ThreadLocal G4GlobalMagFieldMessenger* fMagFieldMessenger;
-    // magnetic field messenger
+    DoseLabDetectorMessenger* fDetectorMessenger = nullptr;
 
     G4bool fCheckOverlaps = true;  // option to activate checking of volumes overlaps
+
+    // Macro-configurable cavity parameters
+    G4double fCavityRadius = 0.;
+    G4double fCavityThickness = 0.;
+    G4double fCavityDepth = 0.;  // from phantom entrance surface (z=0)
+    G4String fCavityMaterialName = "G4_AIR";
+    CavityAxis fCavityAxis = CavityAxis::kZ;
+    G4String fCavityType = "custom";
 };
 
 }  // namespace DoseLab

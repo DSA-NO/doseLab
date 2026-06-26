@@ -6,11 +6,13 @@
 /// \brief Implementation of the DoseLab::DoseLabDetectorConstruction class
 
 #include "DoseLabDetectorConstruction.hh"
+#include "DoseLabDetectorMessenger.hh"
 
 #include "G4AutoDelete.hh"
 #include "G4Box.hh"
 #include "G4Colour.hh"
 #include "G4GlobalMagFieldMessenger.hh"
+#include "G4RotationMatrix.hh"
 #include "G4LogicalVolume.hh"
 #include "G4Material.hh"
 #include "G4MultiFunctionalDetector.hh"
@@ -18,16 +20,169 @@
 #include "G4PSEnergyDeposit.hh"
 #include "G4PSTrackLength.hh"
 #include "G4PVPlacement.hh"
+#include "G4PhysicalConstants.hh"
+#include "G4RunManager.hh"
 #include "G4SDChargedFilter.hh"
 #include "G4SDManager.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Tubs.hh"
 #include "G4VPrimitiveScorer.hh"
 #include "G4VisAttributes.hh"
+
+#include <cctype>
 
 namespace DoseLab
 {
 
 G4ThreadLocal G4GlobalMagFieldMessenger* DoseLabDetectorConstruction::fMagFieldMessenger = nullptr;
+
+namespace
+{
+
+G4String ToLower(const G4String& value)
+{
+  G4String lowered = value;
+  for (auto& ch : lowered) {
+    ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
+  return lowered;
+}
+
+}  // namespace
+
+DoseLabDetectorConstruction::DoseLabDetectorConstruction()
+{
+  fCavityRadius = 1. * cm;
+  fCavityThickness = 0.5 * cm;
+  fCavityDepth = 5. * cm;
+  fCavityMaterialName = "G4_AIR";
+  fCavityAxis = CavityAxis::kZ;
+  fCavityType = "custom";
+
+  fDetectorMessenger = new DoseLabDetectorMessenger(this);
+}
+
+DoseLabDetectorConstruction::~DoseLabDetectorConstruction()
+{
+  delete fDetectorMessenger;
+}
+
+void DoseLabDetectorConstruction::SetCavityType(const G4String& type)
+{
+  ApplyCavityPreset(type);
+}
+
+void DoseLabDetectorConstruction::SetCavityRadius(G4double radius)
+{
+  if (radius <= 0.) {
+    return;
+  }
+  fCavityRadius = radius;
+  fCavityType = "custom";
+}
+
+void DoseLabDetectorConstruction::SetCavityThickness(G4double thickness)
+{
+  if (thickness <= 0.) {
+    return;
+  }
+  fCavityThickness = thickness;
+  fCavityType = "custom";
+}
+
+void DoseLabDetectorConstruction::SetCavityDepth(G4double depth)
+{
+  if (depth <= 0.) {
+    return;
+  }
+  fCavityDepth = depth;
+  fCavityType = "custom";
+}
+
+void DoseLabDetectorConstruction::SetCavityAxis(const G4String& axis)
+{
+  auto lowered = ToLower(axis);
+  if (lowered == "x") {
+    fCavityAxis = CavityAxis::kX;
+  }
+  else if (lowered == "y") {
+    fCavityAxis = CavityAxis::kY;
+  }
+  else if (lowered == "z") {
+    fCavityAxis = CavityAxis::kZ;
+  }
+  else {
+    return;
+  }
+
+  fCavityType = "custom";
+}
+
+void DoseLabDetectorConstruction::SetCavityMaterial(const G4String& materialName)
+{
+  if (materialName.empty()) {
+    return;
+  }
+  fCavityMaterialName = materialName;
+  fCavityType = "custom";
+}
+
+G4String DoseLabDetectorConstruction::GetCavitySummary() const
+{
+  G4String axis = "z";
+  if (fCavityAxis == CavityAxis::kX) {
+    axis = "x";
+  }
+  else if (fCavityAxis == CavityAxis::kY) {
+    axis = "y";
+  }
+
+  G4String summary = "Cavity config -> type=" + fCavityType + ", radius="
+                     + std::to_string(fCavityRadius / mm)
+                     + " mm, thickness=" + std::to_string(fCavityThickness / mm)
+                     + " mm, depth=" + std::to_string(fCavityDepth / mm)
+                     + " mm, axis=" + axis + ", material=" + fCavityMaterialName;
+  return summary;
+}
+
+void DoseLabDetectorConstruction::ApplyCavityPreset(const G4String& type)
+{
+  auto lowered = ToLower(type);
+  if (lowered == "farmer") {
+    // Farmer-like cylindrical chamber: long axis perpendicular to beam.
+    fCavityRadius = 0.30 * cm;
+    fCavityThickness = 2.30 * cm;
+    fCavityAxis = CavityAxis::kX;
+    fCavityType = "farmer";
+  }
+  else if (lowered == "roos") {
+    // Roos-like parallel chamber: thin cavity with axis along beam.
+    fCavityRadius = 0.80 * cm;
+    fCavityThickness = 0.20 * cm;
+    fCavityAxis = CavityAxis::kZ;
+    fCavityType = "roos";
+  }
+  else if (lowered == "custom") {
+    fCavityType = "custom";
+  }
+}
+
+G4RotationMatrix* DoseLabDetectorConstruction::BuildCavityRotation() const
+{
+  if (fCavityAxis == CavityAxis::kZ) {
+    return nullptr;
+  }
+
+  auto rotation = new G4RotationMatrix();
+  if (fCavityAxis == CavityAxis::kX) {
+    rotation->rotateY(90. * deg);
+  }
+  else if (fCavityAxis == CavityAxis::kY) {
+    rotation->rotateX(-90. * deg);
+  }
+
+  return rotation;
+}
 
 G4VPhysicalVolume* DoseLabDetectorConstruction::Construct()
 {
@@ -49,6 +204,9 @@ void DoseLabDetectorConstruction::DefineMaterials()
   // Water material
   nistManager->FindOrBuildMaterial("G4_WATER");
 
+  // User-selected cavity material
+  nistManager->FindOrBuildMaterial(fCavityMaterialName);
+
   // Print materials
   G4cout << *(G4Material::GetMaterialTable()) << G4endl;
 }
@@ -58,16 +216,14 @@ G4VPhysicalVolume* DoseLabDetectorConstruction::DefineVolumes()
   // Geometry parameters
   G4double worldSize = 3. * m;
   G4double phantomSize = 30. * cm;
-  G4double cavityDepth = 5. * cm;  // depth from top surface of phantom
-  G4double cavitySizeXY = 2. * cm;
-  G4double cavitySizeZ = 0.5 * cm;
   G4double phantomCenterZ = -phantomSize / 2.;
 
   // Get materials
   auto worldMaterial = G4Material::GetMaterial("G4_AIR");
   auto phantomMaterial = G4Material::GetMaterial("G4_WATER");
+  auto cavityMaterial = G4Material::GetMaterial(fCavityMaterialName);
 
-  if (!worldMaterial || !phantomMaterial) {
+  if (!worldMaterial || !phantomMaterial || !cavityMaterial) {
     G4ExceptionDescription msg;
     msg << "Cannot retrieve materials already defined.";
     G4Exception("DoseLabDetectorConstruction::DefineVolumes()", "MyCode0001", FatalException, msg);
@@ -117,16 +273,16 @@ G4VPhysicalVolume* DoseLabDetectorConstruction::DefineVolumes()
   // Position at 5 g/cm^2 depth from phantom entrance surface (z = 0)
   // Phantom top is at local z = +phantomSize/2, so cavity center is at:
   // +phantomSize/2 - cavityDepth relative to phantom center.
-  G4double cavityCenterZ = phantomSize / 2 - cavityDepth;
+  G4double cavityCenterZ = phantomSize / 2 - fCavityDepth;
 
-  auto cavityS = new G4Box("Cavity",  // its name
-                           cavitySizeXY / 2, cavitySizeXY / 2, cavitySizeZ / 2);  // its size
+  auto cavityS = new G4Tubs("Cavity",  // its name
+                            0., fCavityRadius, fCavityThickness / 2, 0., twopi);  // rMin, rMax, dz
 
   auto cavityLV = new G4LogicalVolume(cavityS,  // its solid
-                                      worldMaterial,  // air cavity
+                                      cavityMaterial,
                                       "Cavity");  // its name
 
-  new G4PVPlacement(nullptr,  // no rotation
+  new G4PVPlacement(BuildCavityRotation(),  // optional rotation for chamber axis
                     G4ThreeVector(0., 0., cavityCenterZ),  // positioned at depth
                     cavityLV,  // its logical volume
                     "Cavity",  // its name
@@ -145,9 +301,12 @@ G4VPhysicalVolume* DoseLabDetectorConstruction::DefineVolumes()
       << "  Phantom: " << phantomSize / cm << " x " << phantomSize / cm << " x "
       << phantomSize / cm << " cm³ of " << phantomMaterial->GetName()
       << " (top surface at z = 0 cm)" << G4endl
-         << "  Cavity: " << cavitySizeXY / cm << " x " << cavitySizeXY / cm << " x "
-      << cavitySizeZ / cm << " cm³ at " << cavityDepth / cm << " cm depth"
+         << "  Cavity (flat cylinder): diameter " << (2. * fCavityRadius) / cm
+         << " cm, thickness " << fCavityThickness / cm << " cm at " << fCavityDepth / cm
+         << " cm depth"
       << " (global z = " << (phantomCenterZ + cavityCenterZ) / cm << " cm)" << G4endl
+         << "  Cavity material: " << cavityMaterial->GetName() << G4endl
+         << "  Cavity preset: " << fCavityType << G4endl
       << "  Source focal point convention: z = +95 cm (SSD=95 cm, SCD=100 cm)" << G4endl
          << "------------------------------------------------------------" << G4endl;
 

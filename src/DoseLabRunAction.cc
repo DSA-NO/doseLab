@@ -56,6 +56,10 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
   // Get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
+  // Clear previous run data while keeping histogram/ntuple definitions.
+  // This makes /vis/plot and /vis/reviewPlots show current-run entries.
+  analysisManager->Reset();
+
   // Open an output file
   //
   G4String fileName = "B4.root";
@@ -91,7 +95,8 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
   // save histograms & ntuple
   //
   analysisManager->Write();
-  analysisManager->CloseFile();
+  // Keep analysis objects in memory for visualization commands in UI session.
+  analysisManager->CloseFile(false);
 }
 
 }  // namespace DoseLab

@@ -10,8 +10,10 @@
 # Change the default number of threads (in multi-threaded mode)
 #/run/numberOfThreads 4
 #
-# Initialize kernel
-/run/initialize
+# Note: geometry-sensitive cavity commands should be set before /run/initialize
+# to avoid visualization scene mismatches during live geometry rebuild.
 #
-# Visualization setting
-/control/execute vis.mac
+# Typical sequence in interactive mode:
+# /doseLab/cavity/type farmer
+# /run/initialize
+# /control/execute vis.mac
