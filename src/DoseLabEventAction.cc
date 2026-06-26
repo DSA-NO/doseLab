@@ -7,6 +7,8 @@
 
 #include "DoseLabEventAction.hh"
 
+#include "DoseLabAnalysisConfig.hh"
+
 #include "G4AnalysisManager.hh"
 #include "G4Event.hh"
 #include "G4HCofThisEvent.hh"
@@ -60,9 +62,12 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
 {
   // Get hits collection IDs for cavity
   if (fCavityDoseHCID == -1) {
-    fCavityDoseHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/Dose");
-    fCavityEdepHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/Edep");
-    fCavityTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/TrackLength");
+    fCavityDoseHCID =
+      G4SDManager::GetSDMpointer()->GetCollectionID(AnalysisConfig::kCavityDoseCollection);
+    fCavityEdepHCID =
+      G4SDManager::GetSDMpointer()->GetCollectionID(AnalysisConfig::kCavityEdepCollection);
+    fCavityTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID(
+      AnalysisConfig::kCavityTrackLengthCollection);
   }
 
   // Get sum values from hits collections
@@ -76,15 +81,15 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
 
   // fill histograms
   //
-  analysisManager->FillH1(0, cavityDose);
-  analysisManager->FillH1(1, cavityEdep);
-  analysisManager->FillH1(2, cavityTrackLength);
+  analysisManager->FillH1(AnalysisConfig::kDoseH1Id, cavityDose);
+  analysisManager->FillH1(AnalysisConfig::kEdepH1Id, cavityEdep);
+  analysisManager->FillH1(AnalysisConfig::kTrackLengthH1Id, cavityTrackLength);
 
   // fill ntuple
   //
-  analysisManager->FillNtupleDColumn(0, cavityDose);
-  analysisManager->FillNtupleDColumn(1, cavityEdep);
-  analysisManager->FillNtupleDColumn(2, cavityTrackLength);
+  analysisManager->FillNtupleDColumn(AnalysisConfig::kDoseNtupleColumn, cavityDose);
+  analysisManager->FillNtupleDColumn(AnalysisConfig::kEdepNtupleColumn, cavityEdep);
+  analysisManager->FillNtupleDColumn(AnalysisConfig::kTrackLengthNtupleColumn, cavityTrackLength);
   analysisManager->AddNtupleRow();
 
   // print per event (modulo n)

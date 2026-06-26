@@ -7,6 +7,8 @@
 
 #include "DoseLabRunAction.hh"
 
+#include "DoseLabAnalysisConfig.hh"
+
 #include "G4AnalysisManager.hh"
 #include "G4RunManager.hh"
 #include "G4SystemOfUnits.hh"
@@ -37,16 +39,17 @@ DoseLabRunAction::DoseLabRunAction()
   //
 
   // Creating histograms for cavity measurements
-  analysisManager->CreateH1("Dcav", "Dose in cavity", 100, 0., 10 * gray);
-  analysisManager->CreateH1("Ecav", "Edep in cavity", 100, 0., 10 * MeV);
-  analysisManager->CreateH1("Lcav", "TrackL in cavity", 100, 0., 10 * cm);
+  analysisManager->CreateH1(AnalysisConfig::kDoseH1Name, "Dose in cavity", 100, 0., 10 * gray);
+  analysisManager->CreateH1(AnalysisConfig::kEdepH1Name, "Edep in cavity", 100, 0., 10 * MeV);
+  analysisManager->CreateH1(
+    AnalysisConfig::kTrackLengthH1Name, "TrackL in cavity", 100, 0., 10 * cm);
 
   // Creating ntuple
   //
-  analysisManager->CreateNtuple("cavity", "Cavity dose, energy and track length");
-  analysisManager->CreateNtupleDColumn("Dose");
-  analysisManager->CreateNtupleDColumn("Edep");
-  analysisManager->CreateNtupleDColumn("TrackL");
+  analysisManager->CreateNtuple(AnalysisConfig::kCavityNtupleName, AnalysisConfig::kCavityNtupleTitle);
+  analysisManager->CreateNtupleDColumn(AnalysisConfig::kDoseColumnName);
+  analysisManager->CreateNtupleDColumn(AnalysisConfig::kEdepColumnName);
+  analysisManager->CreateNtupleDColumn(AnalysisConfig::kTrackLengthColumnName);
   analysisManager->FinishNtuple();
 }
 
@@ -78,7 +81,7 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
   // print histogram statistics
   //
   auto analysisManager = G4AnalysisManager::Instance();
-  if (analysisManager->GetH1(2)) {
+  if (analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)) {
     G4cout << G4endl << " ----> print histograms statistic ";
     if (isMaster) {
       G4cout << "for the entire run " << G4endl << G4endl;
@@ -87,14 +90,23 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
       G4cout << "for the local thread " << G4endl << G4endl;
     }
 
-        G4cout << " Cavity Dose: mean = " << G4BestUnit(analysisManager->GetH1(0)->mean(), "Dose")
-          << " rms = " << G4BestUnit(analysisManager->GetH1(0)->rms(), "Dose") << G4endl;
+    G4cout << " Cavity Dose: mean = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->mean(), "Dose")
+           << " rms = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->rms(), "Dose")
+           << G4endl;
 
-        G4cout << " Cavity Energy: mean = " << G4BestUnit(analysisManager->GetH1(1)->mean(), "Energy")
-          << " rms = " << G4BestUnit(analysisManager->GetH1(1)->rms(), "Energy") << G4endl;
+    G4cout << " Cavity Energy: mean = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->mean(), "Energy")
+           << " rms = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->rms(), "Energy")
+           << G4endl;
 
-        G4cout << " Cavity Track Length: mean = " << G4BestUnit(analysisManager->GetH1(2)->mean(), "Length")
-          << " rms = " << G4BestUnit(analysisManager->GetH1(2)->rms(), "Length") << G4endl;
+    G4cout << " Cavity Track Length: mean = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->mean(), "Length")
+           << " rms = "
+           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->rms(), "Length")
+           << G4endl;
   }
 
   // save histograms & ntuple

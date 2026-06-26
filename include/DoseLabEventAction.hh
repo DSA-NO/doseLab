@@ -35,8 +35,8 @@ class DoseLabEventAction : public G4UserEventAction
     // methods
     G4THitsMap<G4double>* GetHitsCollection(G4int hcID, const G4Event* event) const;
     G4double GetSum(G4THitsMap<G4double>* hitsMap) const;
-    void PrintEventStatistics(G4double cavityDose, G4double cavityEdep,
-                  G4double cavityTrackLength) const;
+    void PrintEventStatistics(
+      G4double cavityDose, G4double cavityEdep, G4double cavityTrackLength) const;
 
     // data members
     G4int fCavityDoseHCID = -1;
