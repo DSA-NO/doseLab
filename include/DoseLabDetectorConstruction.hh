@@ -1,27 +1,6 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// doseLab - Geant4 dose calculation application
+// License: http://cern.ch/geant4/license
+// Contact: lindbohansen@gmail.com, elisabeth.hansen@dsa.no
 //
 /// \file DoseLabDetectorConstruction.hh
 /// \brief Definition of the DoseLab::DoseLabDetectorConstruction class
@@ -39,20 +18,15 @@ namespace DoseLab
 {
 
 /// Detector construction class to define materials and geometry.
-/// The calorimeter is a box made of a given number of layers. A layer consists
-/// of an absorber plate and of a detection gap. The layer is replicated.
+/// Simple water phantom setup with ion chamber cavity.
 ///
-/// Four parameters define the geometry of the calorimeter :
+/// Geometry:
+/// - World: air (40 x 40 x 40 cm³)
+/// - Water phantom: 30 x 30 x 30 cm³
+/// - Cavity (ion chamber): at 5 g/cm² depth (~5 cm for water)
 ///
-/// - the thickness of an absorber plate,
-/// - the thickness of a gap,
-/// - the number of layers,
-/// - the transverse size of the calorimeter (the input face is a square).
-///
-/// In ConstructSDandField() sensitive detectors of G4MultiFunctionalDetector
-/// type with primitive scorers are created and associated with the Absorber
-/// and Gap volumes.  In addition a transverse uniform magnetic field is defined
-/// via G4GlobalMagFieldMessenger class.
+/// In ConstructSDandField() sensitive detectors are created for the cavity
+/// volume to score energy deposition and track length.
 
 class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 {
@@ -79,7 +53,5 @@ class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
 };
 
 }  // namespace DoseLab
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #endif

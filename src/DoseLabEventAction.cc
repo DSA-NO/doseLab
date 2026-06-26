@@ -1,27 +1,6 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
+// doseLab - Geant4 dose calculation application
+// License: http://cern.ch/geant4/license
+// Contact: lindbohansen@gmail.com, elisabeth.hansen@dsa.no
 //
 /// \file DoseLabEventAction.cc
 /// \brief Implementation of the DoseLab::DoseLabEventAction class
@@ -41,8 +20,6 @@
 namespace DoseLab
 {
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 G4THitsMap<G4double>* DoseLabEventAction::GetHitsCollection(G4int hcID, const G4Event* event) const
 {
   auto hitsCollection = static_cast<G4THitsMap<G4double>*>(event->GetHCofThisEvent()->GetHC(hcID));
@@ -56,8 +33,6 @@ G4THitsMap<G4double>* DoseLabEventAction::GetHitsCollection(G4int hcID, const G4
   return hitsCollection;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 G4double DoseLabEventAction::GetSum(G4THitsMap<G4double>* hitsMap) const
 {
   G4double sumValue = 0.;
@@ -68,60 +43,42 @@ G4double DoseLabEventAction::GetSum(G4THitsMap<G4double>* hitsMap) const
   return sumValue;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void DoseLabEventAction::PrintEventStatistics(G4double absoEdep, G4double absoTrackLength,
-                                              G4double gapEdep, G4double gapTrackLength) const
+void DoseLabEventAction::PrintEventStatistics(G4double cavityEdep, G4double cavityTrackLength) const
 {
   // Print event statistics
   //
-  G4cout << "   Absorber: total energy: " << std::setw(7) << G4BestUnit(absoEdep, "Energy")
-         << "       total track length: " << std::setw(7) << G4BestUnit(absoTrackLength, "Length")
-         << G4endl << "        Gap: total energy: " << std::setw(7) << G4BestUnit(gapEdep, "Energy")
-         << "       total track length: " << std::setw(7) << G4BestUnit(gapTrackLength, "Length")
+  G4cout << "   Cavity: total energy: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
+         << "       total track length: " << std::setw(7) << G4BestUnit(cavityTrackLength, "Length")
          << G4endl;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DoseLabEventAction::BeginOfEventAction(const G4Event* /*event*/) {}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DoseLabEventAction::EndOfEventAction(const G4Event* event)
 {
-  // Get hist collections IDs
-  if (fAbsoEdepHCID == -1) {
-    fAbsoEdepHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Absorber/Edep");
-    fGapEdepHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Gap/Edep");
-    fAbsoTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Absorber/TrackLength");
-    fGapTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Gap/TrackLength");
+  // Get hits collection IDs for cavity
+  if (fCavityEdepHCID == -1) {
+    fCavityEdepHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/Edep");
+    fCavityTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/TrackLength");
   }
 
   // Get sum values from hits collections
   //
-  auto absoEdep = GetSum(GetHitsCollection(fAbsoEdepHCID, event));
-  auto gapEdep = GetSum(GetHitsCollection(fGapEdepHCID, event));
-
-  auto absoTrackLength = GetSum(GetHitsCollection(fAbsoTrackLengthHCID, event));
-  auto gapTrackLength = GetSum(GetHitsCollection(fGapTrackLengthHCID, event));
+  auto cavityEdep = GetSum(GetHitsCollection(fCavityEdepHCID, event));
+  auto cavityTrackLength = GetSum(GetHitsCollection(fCavityTrackLengthHCID, event));
 
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();
 
   // fill histograms
   //
-  analysisManager->FillH1(0, absoEdep);
-  analysisManager->FillH1(1, gapEdep);
-  analysisManager->FillH1(2, absoTrackLength);
-  analysisManager->FillH1(3, gapTrackLength);
+  analysisManager->FillH1(0, cavityEdep);
+  analysisManager->FillH1(1, cavityTrackLength);
 
   // fill ntuple
   //
-  analysisManager->FillNtupleDColumn(0, absoEdep);
-  analysisManager->FillNtupleDColumn(1, gapEdep);
-  analysisManager->FillNtupleDColumn(2, absoTrackLength);
-  analysisManager->FillNtupleDColumn(3, gapTrackLength);
+  analysisManager->FillNtupleDColumn(0, cavityEdep);
+  analysisManager->FillNtupleDColumn(1, cavityTrackLength);
   analysisManager->AddNtupleRow();
 
   // print per event (modulo n)
@@ -129,11 +86,9 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
   auto eventID = event->GetEventID();
   auto printModulo = G4RunManager::GetRunManager()->GetPrintProgress();
   if ((printModulo > 0) && (eventID % printModulo == 0)) {
-    PrintEventStatistics(absoEdep, absoTrackLength, gapEdep, gapTrackLength);
+    PrintEventStatistics(cavityEdep, cavityTrackLength);
     G4cout << "--> End of event: " << eventID << "\n" << G4endl;
   }
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 }  // namespace DoseLab

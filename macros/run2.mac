@@ -13,9 +13,12 @@
 #/process/had/verbose 0
 #
 /run/initialize
+
+# Configure Co-60 GPS source (SSD=95 cm, source-to-cavity=100 cm)
+/control/execute source.mac
 #
-# Default kinemtics:  
-# electron 300 MeV in direction (0.,0.,1.)
+# Default kinematics:
+# Co-60 GPS source from source.mac
 # 10000 events
 #
 /run/printProgress 1000

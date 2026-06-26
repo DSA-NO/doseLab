@@ -37,6 +37,7 @@ set(DOSELAB_SCRIPTS
   plotNtuple.C
   run1.mac
   run2.mac
+  source.mac
   vis.mac
   )
 
