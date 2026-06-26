@@ -10,8 +10,8 @@
 # Run menu :
 /gui/addMenu run Run
 /gui/addButton run "beamOn 1" "/run/beamOn 1"
-/gui/addButton run "Debug Run" "/control/execute simple-debug-run.mac"
-/gui/addButton run "Full Run" "/control/execute full-run.mac"
+/gui/addButton run "Debug Run" "/control/execute run-simple.mac"
+/gui/addButton run "Full Run" "/control/execute run-full.mac"
 #
 # Cavity menu :
 /gui/addMenu cavity Cavity

@@ -35,8 +35,8 @@ set(DOSELAB_SCRIPTS
   init_vis.mac
   plotHisto.C
   plotNtuple.C
-  simple-debug-run.mac
-  full-run.mac
+  run-simple.mac
+  run-full.mac
   source.mac
   vis.mac
   )
