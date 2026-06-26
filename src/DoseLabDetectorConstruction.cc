@@ -17,6 +17,7 @@
 #include "G4Material.hh"
 #include "G4MultiFunctionalDetector.hh"
 #include "G4NistManager.hh"
+#include "G4PSDoseDeposit.hh"
 #include "G4PSEnergyDeposit.hh"
 #include "G4PSTrackLength.hh"
 #include "G4PVPlacement.hh"
@@ -149,14 +150,14 @@ void DoseLabDetectorConstruction::ApplyCavityPreset(const G4String& type)
 {
   auto lowered = ToLower(type);
   if (lowered == "farmer") {
-    // Farmer-like cylindrical chamber: long axis perpendicular to beam.
+    // Farmer-like cylindrical chamber: axis perpendicular to beam.
     fCavityRadius = 0.30 * cm;
     fCavityThickness = 2.30 * cm;
     fCavityAxis = CavityAxis::kX;
     fCavityType = "farmer";
   }
   else if (lowered == "roos") {
-    // Roos-like parallel chamber: thin cavity with axis along beam.
+    // Roos-like parallel chamber: axis along beam.
     fCavityRadius = 0.80 * cm;
     fCavityThickness = 0.20 * cm;
     fCavityAxis = CavityAxis::kZ;
@@ -341,6 +342,10 @@ void DoseLabDetectorConstruction::ConstructSDandField()
   G4SDManager::GetSDMpointer()->AddNewDetector(cavityDetector);
 
   G4VPrimitiveScorer* primitive;
+
+  primitive = new G4PSDoseDeposit("Dose");
+  cavityDetector->RegisterPrimitive(primitive);
+
   primitive = new G4PSEnergyDeposit("Edep");
   cavityDetector->RegisterPrimitive(primitive);
 

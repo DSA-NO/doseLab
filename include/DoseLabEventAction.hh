@@ -19,9 +19,8 @@ namespace DoseLab
 
 /// Event action class
 ///
-/// In EndOfEventAction(), it scores and records the accumulated energy
-/// deposit and track length of charged particles in the cavity detector
-/// (simulating an ion chamber).
+/// In EndOfEventAction(), it records the primitive-scored cavity dose,
+/// energy deposit and charged track length.
 
 class DoseLabEventAction : public G4UserEventAction
 {
@@ -36,9 +35,11 @@ class DoseLabEventAction : public G4UserEventAction
     // methods
     G4THitsMap<G4double>* GetHitsCollection(G4int hcID, const G4Event* event) const;
     G4double GetSum(G4THitsMap<G4double>* hitsMap) const;
-    void PrintEventStatistics(G4double cavityEdep, G4double cavityTrackLength) const;
+    void PrintEventStatistics(G4double cavityDose, G4double cavityEdep,
+                  G4double cavityTrackLength) const;
 
     // data members
+    G4int fCavityDoseHCID = -1;
     G4int fCavityEdepHCID = -1;
     G4int fCavityTrackLengthHCID = -1;
 };

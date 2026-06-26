@@ -43,11 +43,13 @@ G4double DoseLabEventAction::GetSum(G4THitsMap<G4double>* hitsMap) const
   return sumValue;
 }
 
-void DoseLabEventAction::PrintEventStatistics(G4double cavityEdep, G4double cavityTrackLength) const
+void DoseLabEventAction::PrintEventStatistics(G4double cavityDose, G4double cavityEdep,
+                                              G4double cavityTrackLength) const
 {
   // Print event statistics
   //
-  G4cout << "   Cavity: total energy: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
+  G4cout << "   Cavity: dose: " << std::setw(7) << G4BestUnit(cavityDose, "Dose")
+         << "       total energy: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
          << "       total track length: " << std::setw(7) << G4BestUnit(cavityTrackLength, "Length")
          << G4endl;
 }
@@ -57,13 +59,15 @@ void DoseLabEventAction::BeginOfEventAction(const G4Event* /*event*/) {}
 void DoseLabEventAction::EndOfEventAction(const G4Event* event)
 {
   // Get hits collection IDs for cavity
-  if (fCavityEdepHCID == -1) {
+  if (fCavityDoseHCID == -1) {
+    fCavityDoseHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/Dose");
     fCavityEdepHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/Edep");
     fCavityTrackLengthHCID = G4SDManager::GetSDMpointer()->GetCollectionID("Cavity/TrackLength");
   }
 
   // Get sum values from hits collections
   //
+  auto cavityDose = GetSum(GetHitsCollection(fCavityDoseHCID, event));
   auto cavityEdep = GetSum(GetHitsCollection(fCavityEdepHCID, event));
   auto cavityTrackLength = GetSum(GetHitsCollection(fCavityTrackLengthHCID, event));
 
@@ -72,13 +76,15 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
 
   // fill histograms
   //
-  analysisManager->FillH1(0, cavityEdep);
-  analysisManager->FillH1(1, cavityTrackLength);
+  analysisManager->FillH1(0, cavityDose);
+  analysisManager->FillH1(1, cavityEdep);
+  analysisManager->FillH1(2, cavityTrackLength);
 
   // fill ntuple
   //
-  analysisManager->FillNtupleDColumn(0, cavityEdep);
-  analysisManager->FillNtupleDColumn(1, cavityTrackLength);
+  analysisManager->FillNtupleDColumn(0, cavityDose);
+  analysisManager->FillNtupleDColumn(1, cavityEdep);
+  analysisManager->FillNtupleDColumn(2, cavityTrackLength);
   analysisManager->AddNtupleRow();
 
   // print per event (modulo n)
@@ -86,7 +92,7 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
   auto eventID = event->GetEventID();
   auto printModulo = G4RunManager::GetRunManager()->GetPrintProgress();
   if ((printModulo > 0) && (eventID % printModulo == 0)) {
-    PrintEventStatistics(cavityEdep, cavityTrackLength);
+    PrintEventStatistics(cavityDose, cavityEdep, cavityTrackLength);
     G4cout << "--> End of event: " << eventID << "\n" << G4endl;
   }
 }
