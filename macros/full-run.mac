@@ -1,0 +1,23 @@
+# Full production run for current doseLab GPS+cavity setup.
+#
+# IMPORTANT: configure cavity before /run/initialize.
+
+# Optional:
+# /run/numberOfThreads 4
+# /control/cout/ignoreThreadsExcept 0
+
+# Cavity preset for production run
+/doseLab/cavity/type farmer
+/doseLab/cavity/depth 5 cm
+/doseLab/cavity/material G4_AIR
+/doseLab/cavity/print
+
+/run/initialize
+
+# Configure Co-60 GPS source (SSD=95 cm, source-to-cavity=100 cm)
+/control/execute source.mac
+
+# Main statistics run
+/run/printProgress 1000
+/run/beamOn 10000
+

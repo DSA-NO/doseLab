@@ -35,15 +35,15 @@ set(DOSELAB_SCRIPTS
   init_vis.mac
   plotHisto.C
   plotNtuple.C
-  run1.mac
-  run2.mac
+  simple-debug-run.mac
+  full-run.mac
   source.mac
   vis.mac
   )
 
 foreach(_script ${DOSELAB_SCRIPTS})
   configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
+    ${PROJECT_SOURCE_DIR}/macros/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
     COPYONLY
     )
