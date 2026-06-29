@@ -39,12 +39,15 @@ if(ROOT_CONFIG_EXECUTABLE)
 
   separate_arguments(ROOT_CFLAGS_LIST NATIVE_COMMAND "${ROOT_CFLAGS}")
   separate_arguments(ROOT_LIBS_LIST NATIVE_COMMAND "${ROOT_LIBS}")
+  set(GEANT4_INCLUDE_FLAGS ${Geant4_INCLUDE_DIRS})
+  list(TRANSFORM GEANT4_INCLUDE_FLAGS PREPEND -I)
 
   add_custom_command(
     OUTPUT ${PROJECT_BINARY_DIR}/doseLabRootSummary
     COMMAND ${CMAKE_CXX_COMPILER}
             ${PROJECT_SOURCE_DIR}/tools/doseLabRootSummary.cc
             -o ${PROJECT_BINARY_DIR}/doseLabRootSummary
+            ${GEANT4_INCLUDE_FLAGS}
             ${ROOT_CFLAGS_LIST}
             ${ROOT_LIBS_LIST}
     DEPENDS ${PROJECT_SOURCE_DIR}/tools/doseLabRootSummary.cc
