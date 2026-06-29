@@ -6,19 +6,22 @@
 #include "TCollection.h"
 #include "TFile.h"
 #include "TKey.h"
+#include "TLeafC.h"
 #include "TTree.h"
 
+#include "DoseLabAnalysisConfig.hh"
+#include "DoseLabOutputMetadata.hh"
 #include "G4SystemOfUnits.hh"
 
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include <initializer_list>
 #include <iostream>
-#include <set>
 #include <limits>
+#include <set>
 #include <sstream>
 #include <string>
-#include <initializer_list>
 
 namespace
 {
@@ -39,11 +42,11 @@ struct NumericSummary
 
 struct RunInfoRow
 {
-  Int_t tagHash = 0;
-  Int_t sourceCode = 0;
-  Int_t fieldCode = 0;
+  std::string tag;
+  std::string source;
+  std::string field;
   Double_t depthCm = 0.;
-  Int_t chamberCode = 0;
+  std::string chamber;
   Int_t threadId = 0;
 };
 
@@ -135,36 +138,55 @@ std::string FormatThreadIdSet(const std::set<Int_t>& threadIds)
 
 bool SameScenarioMetadata(const RunInfoRow& left, const RunInfoRow& right)
 {
-  return left.tagHash == right.tagHash && left.sourceCode == right.sourceCode
-         && left.fieldCode == right.fieldCode && left.depthCm == right.depthCm
-         && left.chamberCode == right.chamberCode;
+  return left.tag == right.tag && left.source == right.source && left.field == right.field
+         && left.depthCm == right.depthCm && left.chamber == right.chamber;
 }
 
-bool LoadRunInfoSummary(TTree* tree, RunInfoSummary& summary)
+bool HasCanonicalMetadataLabels(const RunInfoRow& row)
+{
+  return DoseLab::OutputMetadata::IsCanonicalLabel(G4String(row.source),
+                                                   DoseLab::OutputMetadata::kSourceChoices)
+         && DoseLab::OutputMetadata::IsCanonicalLabel(G4String(row.field),
+                                                      DoseLab::OutputMetadata::kFieldChoices)
+         && DoseLab::OutputMetadata::IsCanonicalLabel(
+           G4String(row.chamber), DoseLab::OutputMetadata::kChamberChoices);
+}
+
+bool LoadRunInfoSummaryFromStringSchema(TTree* tree, RunInfoSummary& summary)
 {
   if (!tree || tree->GetEntries() <= 0) {
     return false;
   }
 
-  if (!tree->GetBranch("TagHash") || !tree->GetBranch("SourceCode") || !tree->GetBranch("FieldCode")
-      || !tree->GetBranch("DepthCm") || !tree->GetBranch("ChamberCode")
-      || !tree->GetBranch("ThreadId")) {
+  if (!tree->GetBranch("Tag") || !tree->GetBranch("Source") || !tree->GetBranch("Field")
+      || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoDepthCmColumnName)
+      || !tree->GetBranch("Chamber") || !tree->GetBranch("ThreadId")) {
     return false;
   }
 
   RunInfoRow row;
-  tree->SetBranchAddress("TagHash", &row.tagHash);
-  tree->SetBranchAddress("SourceCode", &row.sourceCode);
-  tree->SetBranchAddress("FieldCode", &row.fieldCode);
-  tree->SetBranchAddress("DepthCm", &row.depthCm);
-  tree->SetBranchAddress("ChamberCode", &row.chamberCode);
-  tree->SetBranchAddress("ThreadId", &row.threadId);
+  auto* tagLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoTagColumnName));
+  auto* sourceLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoSourceColumnName));
+  auto* fieldLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoFieldColumnName));
+  auto* chamberLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoChamberColumnName));
+
+  if (!tagLeaf || !sourceLeaf || !fieldLeaf || !chamberLeaf) {
+    return false;
+  }
+
+  tree->SetBranchAddress(DoseLab::AnalysisConfig::kRunInfoDepthCmColumnName, &row.depthCm);
+  tree->SetBranchAddress(DoseLab::AnalysisConfig::kRunInfoThreadIdColumnName, &row.threadId);
 
   const auto entries = tree->GetEntries();
   for (Long64_t i = 0; i < entries; ++i) {
     if (tree->GetEntry(i) <= 0) {
       continue;
     }
+
+    row.tag = tagLeaf->GetValueString();
+    row.source = sourceLeaf->GetValueString();
+    row.field = fieldLeaf->GetValueString();
+    row.chamber = chamberLeaf->GetValueString();
 
     if (!summary.hasReferenceRow) {
       summary.referenceRow = row;
@@ -180,6 +202,11 @@ bool LoadRunInfoSummary(TTree* tree, RunInfoSummary& summary)
 
   tree->ResetBranchAddresses();
   return summary.rows > 0;
+}
+
+bool LoadRunInfoSummary(TTree* tree, RunInfoSummary& summary)
+{
+  return LoadRunInfoSummaryFromStringSchema(tree, summary);
 }
 
 bool SummarizeDoubleBranch(TTree* tree, const char* branchName, NumericSummary& summary)
@@ -290,7 +317,7 @@ int main(int argc, char** argv)
   std::cout << "\n=== doseLab ROOT Summary ===\n";
   std::cout << "File: " << filePath << "\n\n";
 
-  auto* runInfo = dynamic_cast<TTree*>(file.Get("runinfo"));
+  auto* runInfo = dynamic_cast<TTree*>(file.Get(DoseLab::AnalysisConfig::kRunInfoNtupleName));
   auto* cavity = dynamic_cast<TTree*>(file.Get("cavity"));
 
   if (!runInfo || !cavity) {
@@ -306,17 +333,20 @@ int main(int argc, char** argv)
       RunInfoSummary summary;
       if (LoadRunInfoSummary(runInfo, summary)) {
         const auto& row = summary.referenceRow;
-        std::cout << "    TagHash        = " << row.tagHash << "\n";
-        std::cout << "    SourceCode     = " << row.sourceCode << "\n";
-        std::cout << "    FieldCode      = " << row.fieldCode << "\n";
+        std::cout << "    Tag            = " << row.tag << "\n";
+        std::cout << "    Source         = " << row.source << "\n";
+        std::cout << "    Field          = " << row.field << "\n";
         std::cout << "    DepthCm        = " << row.depthCm << "\n";
-        std::cout << "    ChamberCode    = " << row.chamberCode << "\n";
+        std::cout << "    Chamber        = " << row.chamber << "\n";
         std::cout << "    WorkerRows     = " << summary.rows << "\n";
         std::cout << "    WorkerThreads  = " << summary.threadIds.size();
         if (!summary.threadIds.empty()) {
           std::cout << " [" << FormatThreadIdSet(summary.threadIds) << "]";
         }
         std::cout << "\n";
+        if (!HasCanonicalMetadataLabels(row)) {
+          std::cout << "    Warning        = noncanonical metadata label detected\n";
+        }
         if (!summary.metadataConsistent) {
           std::cout << "    Warning        = inconsistent run metadata across worker rows\n";
         }

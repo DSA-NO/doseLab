@@ -51,7 +51,7 @@ void DoseLabEventAction::PrintEventStatistics(G4double cavityDose, G4double cavi
   // Print event statistics
   //
   G4cout << "   Cavity: dose: " << std::setw(7) << G4BestUnit(cavityDose, "Dose")
-         << "       total energy: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
+      << "       energy deposit: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
          << "       total track length: " << std::setw(7) << G4BestUnit(cavityTrackLength, "Length")
          << G4endl;
 }

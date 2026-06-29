@@ -4,10 +4,11 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "~/geant4/install/include/Geant4"
+                "/home/elhansen/geant4/install/include/Geant4",
+                "/home/elhansen/micromamba/envs/root-env/include"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"

@@ -2,7 +2,7 @@
 /doseLab/output/tag vis-ref-10x10-d10cm-co60-custom
 /doseLab/output/source co60
 /doseLab/output/field 10x10-ssd100
-/doseLab/output/depth d10cm
+/doseLab/output/depth 10 cm
 /doseLab/output/chamber custom
 
 # Visualization run: 10x10 cm^2, depth = 10cm water-equivalent, Co-60 source, custom chamber.

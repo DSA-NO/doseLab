@@ -2,7 +2,7 @@
 /doseLab/output/tag vis-ref-10x10-d5cm-6mv-roos
 /doseLab/output/source 6mv
 /doseLab/output/field 10x10-ssd100
-/doseLab/output/depth d5cm
+/doseLab/output/depth 5 cm
 /doseLab/output/chamber roos
 
 # Visualization run: 10x10 cm^2, depth = 5cm water-equivalent, 6 MV source, roos chamber.

@@ -349,7 +349,7 @@ void DoseLabDetectorConstruction::ConstructSDandField()
   primitive = new G4PSEnergyDeposit("Edep");
   cavityDetector->RegisterPrimitive(primitive);
 
-  primitive = new G4PSTrackLength("TrackLength");
+  primitive = new G4PSTrackLength("TrackL");
   auto charged = new G4SDChargedFilter("chargedFilter");
   primitive->SetFilter(charged);
   cavityDetector->RegisterPrimitive(primitive);

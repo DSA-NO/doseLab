@@ -14,7 +14,7 @@
 /doseLab/output/tag run-full
 /doseLab/output/source co60
 /doseLab/output/field 10x10-ssd100
-/doseLab/output/depth d5cm
+/doseLab/output/depth 5 cm
 /doseLab/output/chamber farmer
 
 # Chamber preset for production run

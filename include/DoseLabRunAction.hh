@@ -49,6 +49,8 @@ class DoseLabRunAction : public G4UserRunAction
 
   private:
     void ConfigureCommands();
+    void SetOutputTag(const G4String& tag);
+    void SetOutputDepth(G4double depth);
     G4String BuildOutputFileName() const;
     static G4String SanitizeForFileName(const G4String& value);
 
@@ -57,7 +59,7 @@ class DoseLabRunAction : public G4UserRunAction
     G4String fOutputTag = "default";
     G4String fOutputSource = "unspecified";
     G4String fOutputField = "unspecified";
-    G4String fOutputDepth = "unspecified";
+    G4double fOutputDepthCm = -1.;
     G4String fOutputChamber = "unspecified";
 };
 
