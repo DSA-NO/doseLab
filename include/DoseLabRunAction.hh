@@ -10,7 +10,10 @@
 
 #include "G4UserRunAction.hh"
 
+#include <memory>
+
 class G4Run;
+class G4GenericMessenger;
 
 namespace DoseLab
 {
@@ -41,6 +44,19 @@ class DoseLabRunAction : public G4UserRunAction
 
     void BeginOfRunAction(const G4Run*) override;
     void EndOfRunAction(const G4Run*) override;
+
+  private:
+    void ConfigureCommands();
+    G4String BuildOutputFileName() const;
+    static G4String SanitizeForFileName(const G4String& value);
+
+    std::unique_ptr<G4GenericMessenger> fMessenger;
+
+    G4String fOutputTag = "default";
+    G4String fOutputSource = "unspecified";
+    G4String fOutputField = "unspecified";
+    G4String fOutputDepth = "unspecified";
+    G4String fOutputChamber = "unspecified";
 };
 
 }  // namespace DoseLab
