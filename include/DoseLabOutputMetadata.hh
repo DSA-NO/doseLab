@@ -45,6 +45,8 @@ enum class ChamberKind
   kCustom,
   kFarmer,
   kRoos,
+  kFarmerWalled,
+  kRoosWalled,
 };
 
 inline constexpr std::array<MetadataChoice<SourceKind>, 4> kSourceChoices{{
@@ -59,11 +61,13 @@ inline constexpr std::array<MetadataChoice<FieldKind>, 2> kFieldChoices{{
   {FieldKind::k10x10Ssd100, "10x10-ssd100"},
 }};
 
-inline constexpr std::array<MetadataChoice<ChamberKind>, 4> kChamberChoices{{
+inline constexpr std::array<MetadataChoice<ChamberKind>, 6> kChamberChoices{{
   {ChamberKind::kUnspecified, "unspecified"},
   {ChamberKind::kCustom, "custom"},
   {ChamberKind::kFarmer, "farmer"},
   {ChamberKind::kRoos, "roos"},
+  {ChamberKind::kFarmerWalled, "farmer_walled"},
+  {ChamberKind::kRoosWalled, "roos_walled"},
 }};
 
 template <typename Enum, std::size_t N>
