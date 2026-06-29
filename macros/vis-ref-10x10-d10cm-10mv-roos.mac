@@ -9,7 +9,7 @@
 # Fires a small number of events to display tracks without collecting statistics.
 
 /control/execute cavity-roos.mac
-/doseLab/cavity/depth 10cm
+/doseLab/cavity/depth 10 cm
 /doseLab/cavity/print
 
 /run/initialize
