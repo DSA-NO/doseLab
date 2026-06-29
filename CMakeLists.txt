@@ -80,8 +80,18 @@ set(DOSELAB_REQUIRED_SCRIPTS
   field-ref-10x10-ssd100.mac
   cavity-farmer.mac
   cavity-roos.mac
+  cavity-farmer-walled.mac
+  cavity-roos-walled.mac
   run-simple.mac
   run-full.mac
+  run-ref-10x10-d5cm-6mv-farmer.mac
+  run-ref-10x10-d5cm-6mv-roos.mac
+  run-ref-10x10-d5cm-6mv-farmer-walled.mac
+  run-ref-10x10-d5cm-6mv-roos-walled.mac
+  vis-ref-10x10-d5cm-6mv-farmer.mac
+  vis-ref-10x10-d5cm-6mv-roos.mac
+  vis-ref-10x10-d5cm-6mv-farmer-walled.mac
+  vis-ref-10x10-d5cm-6mv-roos-walled.mac
 )
 
 foreach(_required ${DOSELAB_REQUIRED_SCRIPTS})
