@@ -3,13 +3,14 @@
 // Contact: lindbohansen@gmail.com, elisabeth.hansen@dsa.no
 
 #include "TBranch.h"
+#include "TCollection.h"
 #include "TFile.h"
-#include "TIter.h"
 #include "TKey.h"
 #include "TTree.h"
 
 #include <cstdlib>
 #include <iomanip>
+#include <limits>
 #include <iostream>
 #include <string>
 
@@ -29,9 +30,35 @@ void PrintNumericBranchSummary(TTree* tree, const char* branchName)
     return;
   }
 
-  const double mean = tree->GetMean(branchName);
-  const double min = tree->GetMinimum(branchName);
-  const double max = tree->GetMaximum(branchName);
+  const auto n = tree->Draw(branchName, "", "goff");
+  if (n <= 0) {
+    std::cout << "  - " << branchName << ": no entries\n";
+    return;
+  }
+
+  const auto* values = tree->GetV1();
+  if (!values) {
+    std::cout << "  - " << branchName << ": unavailable\n";
+    return;
+  }
+
+  std::size_t count = static_cast<std::size_t>(n);
+  double sum = 0.;
+  double min = std::numeric_limits<double>::max();
+  double max = std::numeric_limits<double>::lowest();
+
+  for (Long64_t i = 0; i < n; ++i) {
+    const double v = values[i];
+    sum += v;
+    if (v < min) {
+      min = v;
+    }
+    if (v > max) {
+      max = v;
+    }
+  }
+
+  const double mean = sum / static_cast<double>(count);
 
   std::cout << std::fixed << std::setprecision(6);
   std::cout << "  - " << branchName << ": mean=" << mean << ", min=" << min

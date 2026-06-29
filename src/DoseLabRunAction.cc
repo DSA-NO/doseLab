@@ -13,13 +13,77 @@
 #include "G4GenericMessenger.hh"
 #include "G4RunManager.hh"
 #include "G4SystemOfUnits.hh"
+#include "G4Threading.hh"
 #include "G4UnitsTable.hh"
 #include "globals.hh"
 
 #include <cctype>
+#include <functional>
 
 namespace DoseLab
 {
+
+namespace
+{
+
+G4int SourceCode(const G4String& source)
+{
+  if (source == "co60") {
+    return 1;
+  }
+  if (source == "6mv") {
+    return 2;
+  }
+  if (source == "10mv") {
+    return 3;
+  }
+  return 0;
+}
+
+G4int FieldCode(const G4String& field)
+{
+  if (field == "10x10-ssd100") {
+    return 1;
+  }
+  return 0;
+}
+
+G4int ChamberCode(const G4String& chamber)
+{
+  if (chamber == "custom") {
+    return 1;
+  }
+  if (chamber == "farmer") {
+    return 2;
+  }
+  if (chamber == "roos") {
+    return 3;
+  }
+  return 0;
+}
+
+G4double ParseDepthCm(const G4String& depth)
+{
+  // Expected forms: d5cm, d10cm
+  if (depth.size() >= 4 && depth[0] == 'd' && depth.substr(depth.size() - 2) == "cm") {
+    const auto numberPart = depth.substr(1, depth.size() - 3);
+    try {
+      return std::stod(numberPart);
+    }
+    catch (...) {
+      return 0.;
+    }
+  }
+  return 0.;
+}
+
+G4int TagHash(const G4String& tag)
+{
+  const auto value = std::hash<std::string>{}(tag);
+  return static_cast<G4int>(value & 0x7fffffffU);
+}
+
+}  // namespace
 
 DoseLabRunAction::DoseLabRunAction()
 {
@@ -58,12 +122,17 @@ DoseLabRunAction::DoseLabRunAction()
   analysisManager->FinishNtuple();
 
   // Run metadata ntuple (one row per run)
+  // Numeric coding is robust with MT ntuple merging.
+  // SourceCode: 1=co60, 2=6mv, 3=10mv
+  // FieldCode:  1=10x10-ssd100
+  // ChamberCode: 1=custom, 2=farmer, 3=roos
   analysisManager->CreateNtuple("runinfo", "Run metadata for scenario provenance");
-  analysisManager->CreateNtupleSColumn("Tag");
-  analysisManager->CreateNtupleSColumn("Source");
-  analysisManager->CreateNtupleSColumn("Field");
-  analysisManager->CreateNtupleSColumn("Depth");
-  analysisManager->CreateNtupleSColumn("Chamber");
+  analysisManager->CreateNtupleIColumn("TagHash");
+  analysisManager->CreateNtupleIColumn("SourceCode");
+  analysisManager->CreateNtupleIColumn("FieldCode");
+  analysisManager->CreateNtupleDColumn("DepthCm");
+  analysisManager->CreateNtupleIColumn("ChamberCode");
+  analysisManager->CreateNtupleIColumn("ThreadId");
   analysisManager->FinishNtuple(1);
 }
 
@@ -143,14 +212,6 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
   // G4String fileName = "B4.hdf5";
   // G4String fileName = "B4.xml";
   analysisManager->OpenFile(fileName);
-  if (isMaster) {
-    analysisManager->FillNtupleSColumn(1, 0, fOutputTag);
-    analysisManager->FillNtupleSColumn(1, 1, fOutputSource);
-    analysisManager->FillNtupleSColumn(1, 2, fOutputField);
-    analysisManager->FillNtupleSColumn(1, 3, fOutputDepth);
-    analysisManager->FillNtupleSColumn(1, 4, fOutputChamber);
-    analysisManager->AddNtupleRow(1);
-  }
 
   G4cout << "Using " << analysisManager->GetType() << G4endl;
   G4cout << "Output tag: " << fOutputTag << G4endl;
@@ -159,9 +220,23 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 
 void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
 {
+  // Add metadata through the worker path in MT mode (same merge path as event ntuple),
+  // and directly in sequential mode.
+  const auto writeRunInfo = !G4Threading::IsMultithreadedApplication() || !isMaster;
+
   // print histogram statistics
   //
   auto analysisManager = G4AnalysisManager::Instance();
+  if (writeRunInfo) {
+    analysisManager->FillNtupleIColumn(1, 0, TagHash(fOutputTag));
+    analysisManager->FillNtupleIColumn(1, 1, SourceCode(fOutputSource));
+    analysisManager->FillNtupleIColumn(1, 2, FieldCode(fOutputField));
+    analysisManager->FillNtupleDColumn(1, 3, ParseDepthCm(fOutputDepth));
+    analysisManager->FillNtupleIColumn(1, 4, ChamberCode(fOutputChamber));
+    analysisManager->FillNtupleIColumn(1, 5, G4Threading::G4GetThreadId());
+    analysisManager->AddNtupleRow(1);
+  }
+
   if (analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)) {
     G4cout << G4endl << " ----> print histograms statistic ";
     if (isMaster) {

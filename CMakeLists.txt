@@ -24,14 +24,39 @@ add_executable(doseLab doseLab.cc ${sources} ${headers})
 target_include_directories(doseLab PRIVATE include)
 target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
 
-# Optional ROOT-based summary helper for post-run output inspection
-find_package(ROOT CONFIG QUIET)
-if(ROOT_FOUND)
-  add_executable(doseLabRootSummary tools/doseLabRootSummary.cc)
-  target_link_libraries(doseLabRootSummary PRIVATE ROOT::Core ROOT::RIO ROOT::Tree)
-  message(STATUS "ROOT found: enabled target doseLabRootSummary")
+# Optional ROOT-based summary helper for post-run output inspection.
+# Use root-config directly for robustness across ROOT/CMake version combinations.
+find_program(ROOT_CONFIG_EXECUTABLE root-config)
+if(ROOT_CONFIG_EXECUTABLE)
+  execute_process(
+    COMMAND ${ROOT_CONFIG_EXECUTABLE} --cflags
+    OUTPUT_VARIABLE ROOT_CFLAGS
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(
+    COMMAND ${ROOT_CONFIG_EXECUTABLE} --libs
+    OUTPUT_VARIABLE ROOT_LIBS
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  separate_arguments(ROOT_CFLAGS_LIST NATIVE_COMMAND "${ROOT_CFLAGS}")
+  separate_arguments(ROOT_LIBS_LIST NATIVE_COMMAND "${ROOT_LIBS}")
+
+  add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/doseLabRootSummary
+    COMMAND ${CMAKE_CXX_COMPILER}
+            ${PROJECT_SOURCE_DIR}/tools/doseLabRootSummary.cc
+            -o ${PROJECT_BINARY_DIR}/doseLabRootSummary
+            ${ROOT_CFLAGS_LIST}
+            ${ROOT_LIBS_LIST}
+    DEPENDS ${PROJECT_SOURCE_DIR}/tools/doseLabRootSummary.cc
+    COMMAND_EXPAND_LISTS
+    VERBATIM)
+
+  add_custom_target(doseLabRootSummaryTarget ALL
+    DEPENDS ${PROJECT_BINARY_DIR}/doseLabRootSummary)
+
+  message(STATUS "ROOT found via root-config: enabled target doseLabRootSummary")
 else()
-  message(STATUS "ROOT not found: skipping target doseLabRootSummary")
+  message(STATUS "ROOT not found (root-config missing): skipping target doseLabRootSummary")
 endif()
 
 #----------------------------------------------------------------------------
