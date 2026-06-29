@@ -24,6 +24,16 @@ add_executable(doseLab doseLab.cc ${sources} ${headers})
 target_include_directories(doseLab PRIVATE include)
 target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
 
+# Optional ROOT-based summary helper for post-run output inspection
+find_package(ROOT CONFIG QUIET)
+if(ROOT_FOUND)
+  add_executable(doseLabRootSummary tools/doseLabRootSummary.cc)
+  target_link_libraries(doseLabRootSummary PRIVATE ROOT::Core ROOT::RIO ROOT::Tree)
+  message(STATUS "ROOT found: enabled target doseLabRootSummary")
+else()
+  message(STATUS "ROOT not found: skipping target doseLabRootSummary")
+endif()
+
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build doseLab. This is so that we can run the executable directly because it
