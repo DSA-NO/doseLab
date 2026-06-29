@@ -27,8 +27,8 @@ namespace
 void PrintUsage()
 {
   G4cerr << " Usage: " << G4endl;
-  G4cerr << " doseLab [-m macro] [-v macro] [-t nThreads] [-p emModel]" << G4endl;
-  G4cerr << "   -m macro  : batch mode, no window" << G4endl;
+  G4cerr << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel]" << G4endl;
+  G4cerr << "   -b macro  : batch mode, no window" << G4endl;
   G4cerr << "   -v macro  : visual mode, opens Qt window, executes macro, stays open" << G4endl;
   G4cerr << "   (no args) : interactive Qt session" << G4endl;
   G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
   G4int nThreads = 0;
 #endif
   for (G4int i = 1; i < argc; i = i + 2) {
-    if (G4String(argv[i]) == "-m")
+    if (G4String(argv[i]) == "-b")
       macro = argv[i + 1];
     else if (G4String(argv[i]) == "-v")
       visMacro = argv[i + 1];
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
   }
 
   if (macro.size() && visMacro.size()) {
-    G4cerr << "Error: -m and -v are mutually exclusive." << G4endl;
+    G4cerr << "Error: -b and -v are mutually exclusive." << G4endl;
     PrintUsage();
     return 1;
   }
