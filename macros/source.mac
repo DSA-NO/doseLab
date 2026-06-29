@@ -1,24 +1,4 @@
-# GPS source definition for Co-60 treatment-like setup
-# Coordinate convention:
-# - Phantom entrance surface center is at (0,0,0)
-# - Beam axis is along -z
-# - Cavity center is at z = -5 cm
-# - Source focal point is at z = +95 cm (SSD=95 cm, SCD=100 cm)
+# Legacy alias retained for compatibility.
+# Prefer: source-co60-teletherapy.mac
 
-/gps/particle gamma
-
-# Co-60 photon spectrum (two main lines, equal emission probability)
-/gps/ene/type User
-/gps/hist/type energy
-/gps/hist/point 1.1732 1.0
-/gps/hist/point 1.3325 1.0
-
-# Circular source aperture in a plane at z = +95 cm
-/gps/pos/type Plane
-/gps/pos/shape Circle
-/gps/pos/radius 0.25 cm
-/gps/pos/centre 0 0 95 cm
-
-# Focus beam toward cavity center at z = -5 cm
-/gps/ang/type focused
-/gps/ang/focuspoint 0 0 -5 cm
+/control/execute source-co60-teletherapy.mac

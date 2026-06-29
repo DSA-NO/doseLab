@@ -15,8 +15,9 @@
 
 /run/initialize
 
-# Configure Co-60 GPS source (SSD=95 cm, source-to-cavity=100 cm)
-/control/execute source.mac
+# Configure Co-60 source identity + reference field setup
+/control/execute source-co60-teletherapy.mac
+/control/execute field-ref-10x10-ssd100.mac
 
 # Main statistics run
 /run/printProgress 1000

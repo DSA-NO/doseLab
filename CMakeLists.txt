@@ -33,12 +33,22 @@ set(DOSELAB_SCRIPTS
   cavity-farmer.mac
   cavity-roos.mac
   exampleB4.in
+  field-ref-10x10-ssd100.mac
   gui.mac
   init_vis.mac
   plotHisto.C
   plotNtuple.C
+  run-ref-10x10-d5cm-10mv.mac
+  run-ref-10x10-d5cm-6mv.mac
+  run-ref-10x10-d5cm-co60.mac
+  run-ref-10x10-d10cm-10mv.mac
+  run-ref-10x10-d10cm-6mv.mac
+  run-ref-10x10-d10cm-co60.mac
   run-simple.mac
   run-full.mac
+  source-co60-teletherapy.mac
+  source-linac-photons-10mv.mac
+  source-linac-photons-6mv.mac
   source.mac
   vis.mac
   )

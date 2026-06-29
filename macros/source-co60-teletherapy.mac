@@ -1,0 +1,10 @@
+# Co-60 teletherapy source model (source identity only).
+# This macro intentionally defines particle and energy spectrum only.
+
+/gps/particle gamma
+
+# Co-60 photon lines (MeV), equal emission probability.
+/gps/ene/type User
+/gps/hist/type energy
+/gps/hist/point 1.1732 1.0
+/gps/hist/point 1.3325 1.0

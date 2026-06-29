@@ -1,0 +1,12 @@
+# 10x10 cm^2 reference field at SSD=100 cm.
+# This first-pass model uses a parallel beam over a 10x10 square aperture.
+# Source identity (particle + spectrum) is configured in a separate source macro.
+
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 5.0 cm
+/gps/pos/halfy 5.0 cm
+/gps/pos/centre 0 0 100 cm
+
+/gps/ang/type beam1d
+/gps/direction 0 0 -1

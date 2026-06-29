@@ -15,8 +15,9 @@
 
 /run/initialize
 
-# Configure Co-60 GPS source
-/control/execute source.mac
+# Configure Co-60 source identity + reference field setup
+/control/execute source-co60-teletherapy.mac
+/control/execute field-ref-10x10-ssd100.mac
 
 # Quick event sample
 /run/printProgress 20

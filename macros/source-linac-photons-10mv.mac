@@ -1,0 +1,17 @@
+# Approximate 10 MV linac photon source model (source identity only).
+# This is a pragmatic first-pass spectrum for relative dosimetry studies.
+
+/gps/particle gamma
+
+/gps/ene/type User
+/gps/hist/type energy
+/gps/hist/point 0.20 0.10
+/gps/hist/point 0.50 0.28
+/gps/hist/point 1.00 0.60
+/gps/hist/point 2.00 0.95
+/gps/hist/point 3.00 1.00
+/gps/hist/point 4.00 0.92
+/gps/hist/point 5.00 0.78
+/gps/hist/point 6.00 0.64
+/gps/hist/point 8.00 0.36
+/gps/hist/point 10.0 0.12
