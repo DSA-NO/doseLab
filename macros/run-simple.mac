@@ -1,16 +1,17 @@
 # Quick debug run for current doseLab GPS+cavity setup.
 # Use this for smoke tests and interactive checks.
 #
-# IMPORTANT: configure cavity before /run/initialize.
+# Composition order:
+# 1) cavity preset
+# 2) run initialize
+# 3) source setup
+# 4) beamOn
 
 # Optional:
 # /run/numberOfThreads 4
 
-# Chamber preset for this debug macro
-/doseLab/cavity/type farmer
-/doseLab/cavity/depth 5 cm
-/doseLab/cavity/material G4_AIR
-/doseLab/cavity/print
+# Chamber preset
+/control/execute cavity-farmer.mac
 
 /run/initialize
 

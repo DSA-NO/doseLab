@@ -15,8 +15,8 @@
 #
 # Cavity menu :
 /gui/addMenu cavity Cavity
-/gui/addButton cavity Farmer "/doseLab/cavity/type farmer"
-/gui/addButton cavity Roos "/doseLab/cavity/type roos"
+/gui/addButton cavity Farmer "/control/execute cavity-farmer.mac"
+/gui/addButton cavity Roos "/control/execute cavity-roos.mac"
 /gui/addButton cavity Print "/doseLab/cavity/print"
 #
 # Viewer menu :

@@ -30,6 +30,8 @@ target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
 # relies on these scripts being in the current working directory.
 #
 set(DOSELAB_SCRIPTS
+  cavity-farmer.mac
+  cavity-roos.mac
   exampleB4.in
   gui.mac
   init_vis.mac

@@ -1,0 +1,7 @@
+# Standard Roos cavity preset for doseLab.
+# Use before /run/initialize in batch macros.
+
+/doseLab/cavity/type roos
+/doseLab/cavity/depth 5 cm
+/doseLab/cavity/material G4_AIR
+/doseLab/cavity/print
