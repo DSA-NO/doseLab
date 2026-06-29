@@ -63,6 +63,24 @@ set(DOSELAB_SCRIPTS
   source-linac-photons-6mv.mac
   source.mac
   vis.mac
+  vis-ref-10x10-d5cm-co60-farmer.mac
+  vis-ref-10x10-d5cm-co60-roos.mac
+  vis-ref-10x10-d5cm-co60-custom.mac
+  vis-ref-10x10-d5cm-6mv-farmer.mac
+  vis-ref-10x10-d5cm-6mv-roos.mac
+  vis-ref-10x10-d5cm-6mv-custom.mac
+  vis-ref-10x10-d5cm-10mv-farmer.mac
+  vis-ref-10x10-d5cm-10mv-roos.mac
+  vis-ref-10x10-d5cm-10mv-custom.mac
+  vis-ref-10x10-d10cm-co60-farmer.mac
+  vis-ref-10x10-d10cm-co60-roos.mac
+  vis-ref-10x10-d10cm-co60-custom.mac
+  vis-ref-10x10-d10cm-6mv-farmer.mac
+  vis-ref-10x10-d10cm-6mv-roos.mac
+  vis-ref-10x10-d10cm-6mv-custom.mac
+  vis-ref-10x10-d10cm-10mv-farmer.mac
+  vis-ref-10x10-d10cm-10mv-roos.mac
+  vis-ref-10x10-d10cm-10mv-custom.mac
   )
 
 foreach(_script ${DOSELAB_SCRIPTS})
