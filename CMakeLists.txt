@@ -69,59 +69,32 @@ endif()
 # build doseLab. This is so that we can run the executable directly because it
 # relies on these scripts being in the current working directory.
 #
-set(DOSELAB_SCRIPTS
+set(DOSELAB_REQUIRED_SCRIPTS
+  init_vis.mac
+  gui.mac
+  vis.mac
+  source.mac
+  source-linac-photons-6mv.mac
+  source-linac-photons-10mv.mac
+  source-co60-teletherapy.mac
+  field-ref-10x10-ssd100.mac
   cavity-farmer.mac
   cavity-roos.mac
-  exampleB4.in
-  field-ref-10x10-ssd100.mac
-  gui.mac
-  init_vis.mac
-  plotHisto.C
-  plotNtuple.C
-  run-ref-10x10-d5cm-10mv-custom.mac
-  run-ref-10x10-d5cm-10mv-farmer.mac
-  run-ref-10x10-d5cm-10mv-roos.mac
-  run-ref-10x10-d5cm-6mv-custom.mac
-  run-ref-10x10-d5cm-6mv-farmer.mac
-  run-ref-10x10-d5cm-6mv-roos.mac
-  run-ref-10x10-d5cm-co60-custom.mac
-  run-ref-10x10-d5cm-co60-farmer.mac
-  run-ref-10x10-d5cm-co60-roos.mac
-  run-ref-10x10-d10cm-10mv-custom.mac
-  run-ref-10x10-d10cm-10mv-farmer.mac
-  run-ref-10x10-d10cm-10mv-roos.mac
-  run-ref-10x10-d10cm-6mv-custom.mac
-  run-ref-10x10-d10cm-6mv-farmer.mac
-  run-ref-10x10-d10cm-6mv-roos.mac
-  run-ref-10x10-d10cm-co60-custom.mac
-  run-ref-10x10-d10cm-co60-farmer.mac
-  run-ref-10x10-d10cm-co60-roos.mac
   run-simple.mac
   run-full.mac
-  source-co60-teletherapy.mac
-  source-linac-photons-10mv.mac
-  source-linac-photons-6mv.mac
-  source.mac
-  vis.mac
-  vis-ref-10x10-d5cm-co60-farmer.mac
-  vis-ref-10x10-d5cm-co60-roos.mac
-  vis-ref-10x10-d5cm-co60-custom.mac
-  vis-ref-10x10-d5cm-6mv-farmer.mac
-  vis-ref-10x10-d5cm-6mv-roos.mac
-  vis-ref-10x10-d5cm-6mv-custom.mac
-  vis-ref-10x10-d5cm-10mv-farmer.mac
-  vis-ref-10x10-d5cm-10mv-roos.mac
-  vis-ref-10x10-d5cm-10mv-custom.mac
-  vis-ref-10x10-d10cm-co60-farmer.mac
-  vis-ref-10x10-d10cm-co60-roos.mac
-  vis-ref-10x10-d10cm-co60-custom.mac
-  vis-ref-10x10-d10cm-6mv-farmer.mac
-  vis-ref-10x10-d10cm-6mv-roos.mac
-  vis-ref-10x10-d10cm-6mv-custom.mac
-  vis-ref-10x10-d10cm-10mv-farmer.mac
-  vis-ref-10x10-d10cm-10mv-roos.mac
-  vis-ref-10x10-d10cm-10mv-custom.mac
-  )
+)
+
+foreach(_required ${DOSELAB_REQUIRED_SCRIPTS})
+  if(NOT EXISTS "${PROJECT_SOURCE_DIR}/macros/${_required}")
+    message(FATAL_ERROR "Missing required macro/script: macros/${_required}")
+  endif()
+endforeach()
+
+file(GLOB DOSELAB_MAC_FILES RELATIVE ${PROJECT_SOURCE_DIR}/macros ${PROJECT_SOURCE_DIR}/macros/*.mac)
+file(GLOB DOSELAB_AUX_FILES RELATIVE ${PROJECT_SOURCE_DIR}/macros ${PROJECT_SOURCE_DIR}/macros/*.in ${PROJECT_SOURCE_DIR}/macros/*.C)
+set(DOSELAB_SCRIPTS ${DOSELAB_MAC_FILES} ${DOSELAB_AUX_FILES})
+list(REMOVE_DUPLICATES DOSELAB_SCRIPTS)
+list(SORT DOSELAB_SCRIPTS)
 
 foreach(_script ${DOSELAB_SCRIPTS})
   configure_file(

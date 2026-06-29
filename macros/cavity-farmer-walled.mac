@@ -1,0 +1,6 @@
+# Standard Farmer-like walled cavity preset for doseLab.
+# Use before /run/initialize in batch or visualization macros.
+
+/doseLab/cavity/type farmer_walled
+/doseLab/cavity/depth 5 cm
+/doseLab/cavity/print

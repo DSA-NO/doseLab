@@ -1,14 +1,14 @@
 # Auto metadata for output naming/provenance
-/doseLab/output/tag run-ref-10x10-d5cm-6mv-roos-walled
+/doseLab/output/tag run-ref-10x10-d10cm-6mv-roos-walled
 /doseLab/output/source 6mv
 /doseLab/output/field 10x10-ssd100
-/doseLab/output/depth 5 cm
+/doseLab/output/depth 10 cm
 /doseLab/output/chamber roos_walled
 
-# Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, 6 MV source, Roos-like walled chamber.
+# Reference run: 10x10 cm^2, depth = 10 cm water-equivalent, 6 MV source, Roos-like walled chamber.
 
 /control/execute cavity-roos-walled.mac
-/doseLab/cavity/depth 5 cm
+/doseLab/cavity/depth 10 cm
 /doseLab/cavity/print
 
 /run/initialize
