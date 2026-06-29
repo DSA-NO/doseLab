@@ -1,6 +1,8 @@
 # Co-60 teletherapy source model (source identity only).
 # This macro intentionally defines particle and energy spectrum only.
 
+/doseLab/output/source co60
+
 /gps/particle gamma
 
 # Co-60 photon lines (MeV), equal emission probability.

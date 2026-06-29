@@ -2,6 +2,8 @@
 # This first-pass model uses a parallel beam over a 10x10 square aperture.
 # Source identity (particle + spectrum) is configured in a separate source macro.
 
+/doseLab/output/field 10x10-ssd100
+
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 5.0 cm

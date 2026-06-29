@@ -1,16 +1,9 @@
-# Auto metadata for output naming/provenance
 /doseLab/output/tag vis-ref-10x10-d5cm-6mv-farmer
-/doseLab/output/source 6mv
-/doseLab/output/field 10x10-ssd100
-/doseLab/output/depth 5 cm
-/doseLab/output/chamber farmer
 
 # Visualization run: 10x10 cm^2, depth = 5cm water-equivalent, 6 MV source, farmer chamber.
 # Fires a small number of events to display tracks without collecting statistics.
 
 /control/execute cavity-farmer.mac
-/doseLab/cavity/depth 5 cm
-/doseLab/cavity/print
 
 /run/initialize
 

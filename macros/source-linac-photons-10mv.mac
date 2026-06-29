@@ -1,6 +1,8 @@
 # Approximate 10 MV linac photon source model (source identity only).
 # This is a pragmatic first-pass spectrum for relative dosimetry studies.
 
+/doseLab/output/source 10mv
+
 /gps/particle gamma
 
 /gps/ene/type User
