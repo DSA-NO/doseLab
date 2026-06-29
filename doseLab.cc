@@ -8,6 +8,9 @@
 #include "DoseLabActionInitialization.hh"
 #include "DoseLabDetectorConstruction.hh"
 #include "FTFP_BERT.hh"
+#include "G4EmLivermorePhysics.hh"
+#include "G4EmPenelopePhysics.hh"
+#include "G4EmStandardPhysics_option4.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4RunManagerFactory.hh"
@@ -24,11 +27,12 @@ namespace
 void PrintUsage()
 {
   G4cerr << " Usage: " << G4endl;
-  G4cerr << " doseLab [-m macro] [-v macro] [-t nThreads]" << G4endl;
+  G4cerr << " doseLab [-m macro] [-v macro] [-t nThreads] [-p emModel]" << G4endl;
   G4cerr << "   -m macro  : batch mode, no window" << G4endl;
   G4cerr << "   -v macro  : visual mode, opens Qt window, executes macro, stays open" << G4endl;
   G4cerr << "   (no args) : interactive Qt session" << G4endl;
   G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
+  G4cerr << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
 }
 }  // namespace
 
@@ -36,13 +40,14 @@ int main(int argc, char** argv)
 {
   // Evaluate arguments
   //
-  if (argc > 7) {
+  if (argc > 9) {
     PrintUsage();
     return 1;
   }
 
   G4String macro;
   G4String visMacro;
+  G4String emModel = "option4";
   G4bool verboseBestUnits = true;
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
@@ -52,6 +57,9 @@ int main(int argc, char** argv)
       macro = argv[i + 1];
     else if (G4String(argv[i]) == "-v")
       visMacro = argv[i + 1];
+    else if (G4String(argv[i]) == "-p") {
+      emModel = argv[i + 1];
+    }
 #ifdef G4MULTITHREADED
     else if (G4String(argv[i]) == "-t") {
       nThreads = G4UIcommand::ConvertToInt(argv[i + 1]);
@@ -100,6 +108,23 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(detConstruction);
 
   auto physicsList = new FTFP_BERT;
+  if (emModel == "option4") {
+    physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  }
+  else if (emModel == "livermore") {
+    physicsList->ReplacePhysics(new G4EmLivermorePhysics());
+  }
+  else if (emModel == "penelope") {
+    physicsList->ReplacePhysics(new G4EmPenelopePhysics());
+  }
+  else {
+    G4cerr << "Error: unknown EM model '" << emModel
+           << "'. Use: option4, livermore, penelope" << G4endl;
+    PrintUsage();
+    delete physicsList;
+    delete runManager;
+    return 1;
+  }
   runManager->SetUserInitialization(physicsList);
 
   auto actionInitialization = new DoseLab::DoseLabActionInitialization();

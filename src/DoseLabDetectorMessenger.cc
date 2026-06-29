@@ -30,9 +30,10 @@ DoseLabDetectorMessenger::DoseLabDetectorMessenger(DoseLabDetectorConstruction* 
   fCavityDir->SetGuidance("Cavity (ion chamber) geometry commands.");
 
   fTypeCmd = new G4UIcmdWithAString("/doseLab/cavity/type", this);
-  fTypeCmd->SetGuidance("Set cavity type preset: farmer, roos, custom.");
+  fTypeCmd->SetGuidance(
+    "Set cavity type preset: farmer, roos, farmer_walled, roos_walled, custom.");
   fTypeCmd->SetParameterName("type", false);
-  fTypeCmd->SetCandidates("farmer roos custom");
+  fTypeCmd->SetCandidates("farmer roos farmer_walled roos_walled custom");
   fTypeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
   fRadiusCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/radius", this);
@@ -67,6 +68,46 @@ DoseLabDetectorMessenger::DoseLabDetectorMessenger(DoseLabDetectorConstruction* 
   fMaterialCmd->SetParameterName("material", false);
   fMaterialCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
+  fWallThicknessCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/wallThickness", this);
+  fWallThicknessCmd->SetGuidance("Set cavity wall thickness.");
+  fWallThicknessCmd->SetParameterName("wallThickness", false);
+  fWallThicknessCmd->SetUnitCategory("Length");
+  fWallThicknessCmd->SetRange("wallThickness>0.");
+  fWallThicknessCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fWallMaterialCmd = new G4UIcmdWithAString("/doseLab/cavity/wallMaterial", this);
+  fWallMaterialCmd->SetGuidance("Set cavity wall material (NIST name, e.g. G4_PLEXIGLASS).");
+  fWallMaterialCmd->SetParameterName("wallMaterial", false);
+  fWallMaterialCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fCavityCutCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/cut", this);
+  fCavityCutCmd->SetGuidance("Set production cut for cavity region.");
+  fCavityCutCmd->SetParameterName("cavityCut", false);
+  fCavityCutCmd->SetUnitCategory("Length");
+  fCavityCutCmd->SetRange("cavityCut>0.");
+  fCavityCutCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fWallCutCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/wallCut", this);
+  fWallCutCmd->SetGuidance("Set production cut for cavity wall region.");
+  fWallCutCmd->SetParameterName("wallCut", false);
+  fWallCutCmd->SetUnitCategory("Length");
+  fWallCutCmd->SetRange("wallCut>0.");
+  fWallCutCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fCavityMaxStepCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/maxStep", this);
+  fCavityMaxStepCmd->SetGuidance("Set max step length in cavity region.");
+  fCavityMaxStepCmd->SetParameterName("maxStep", false);
+  fCavityMaxStepCmd->SetUnitCategory("Length");
+  fCavityMaxStepCmd->SetRange("maxStep>0.");
+  fCavityMaxStepCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+  fWallMaxStepCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/wallMaxStep", this);
+  fWallMaxStepCmd->SetGuidance("Set max step length in cavity wall region.");
+  fWallMaxStepCmd->SetParameterName("wallMaxStep", false);
+  fWallMaxStepCmd->SetUnitCategory("Length");
+  fWallMaxStepCmd->SetRange("wallMaxStep>0.");
+  fWallMaxStepCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
   fUpdateCmd = new G4UIcmdWithoutParameter("/doseLab/cavity/update", this);
   fUpdateCmd->SetGuidance("Apply command is disabled in Qt interactive mode for stability.");
   fUpdateCmd->SetGuidance("Set cavity parameters before /run/initialize instead.");
@@ -81,6 +122,12 @@ DoseLabDetectorMessenger::~DoseLabDetectorMessenger()
 {
   delete fPrintCmd;
   delete fUpdateCmd;
+  delete fWallMaxStepCmd;
+  delete fCavityMaxStepCmd;
+  delete fWallCutCmd;
+  delete fCavityCutCmd;
+  delete fWallMaterialCmd;
+  delete fWallThicknessCmd;
   delete fMaterialCmd;
   delete fAxisCmd;
   delete fDepthCmd;
@@ -117,6 +164,30 @@ void DoseLabDetectorMessenger::SetNewValue(G4UIcommand* command, G4String newVal
   }
   else if (command == fMaterialCmd) {
     fDetector->SetCavityMaterial(newValue);
+    geometryCommand = true;
+  }
+  else if (command == fWallThicknessCmd) {
+    fDetector->SetCavityWallThickness(fWallThicknessCmd->GetNewDoubleValue(newValue));
+    geometryCommand = true;
+  }
+  else if (command == fWallMaterialCmd) {
+    fDetector->SetCavityWallMaterial(newValue);
+    geometryCommand = true;
+  }
+  else if (command == fCavityCutCmd) {
+    fDetector->SetCavityRegionCut(fCavityCutCmd->GetNewDoubleValue(newValue));
+    geometryCommand = true;
+  }
+  else if (command == fWallCutCmd) {
+    fDetector->SetWallRegionCut(fWallCutCmd->GetNewDoubleValue(newValue));
+    geometryCommand = true;
+  }
+  else if (command == fCavityMaxStepCmd) {
+    fDetector->SetCavityMaxStep(fCavityMaxStepCmd->GetNewDoubleValue(newValue));
+    geometryCommand = true;
+  }
+  else if (command == fWallMaxStepCmd) {
+    fDetector->SetWallMaxStep(fWallMaxStepCmd->GetNewDoubleValue(newValue));
     geometryCommand = true;
   }
   else if (command == fUpdateCmd) {

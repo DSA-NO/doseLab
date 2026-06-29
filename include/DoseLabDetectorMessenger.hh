@@ -41,6 +41,12 @@ class DoseLabDetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fDepthCmd;
     G4UIcmdWithAString* fAxisCmd;
     G4UIcmdWithAString* fMaterialCmd;
+    G4UIcmdWithADoubleAndUnit* fWallThicknessCmd;
+    G4UIcmdWithAString* fWallMaterialCmd;
+    G4UIcmdWithADoubleAndUnit* fCavityCutCmd;
+    G4UIcmdWithADoubleAndUnit* fWallCutCmd;
+    G4UIcmdWithADoubleAndUnit* fCavityMaxStepCmd;
+    G4UIcmdWithADoubleAndUnit* fWallMaxStepCmd;
     G4UIcmdWithoutParameter* fUpdateCmd;
     G4UIcmdWithoutParameter* fPrintCmd;
 };

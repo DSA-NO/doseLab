@@ -27,14 +27,21 @@ class DoseLabDetectorMessenger;
 /// - World: air (3 x 3 x 3 m³)
 /// - Water phantom: 30 x 30 x 30 cm³
 /// - Cavity (ion chamber): configurable radius, thickness, depth, axis, material
+/// - Simple cavity wall: configurable material and thickness
 ///
 /// Macro interface:
-/// - /doseLab/cavity/type farmer|roos|custom
+/// - /doseLab/cavity/type farmer|roos|farmer_walled|roos_walled|custom
 /// - /doseLab/cavity/radius <value> <unit>
 /// - /doseLab/cavity/thickness <value> <unit>
 /// - /doseLab/cavity/depth <value> <unit>
 /// - /doseLab/cavity/axis x|y|z
 /// - /doseLab/cavity/material <G4_NIST_name>
+/// - /doseLab/cavity/wallThickness <value> <unit>
+/// - /doseLab/cavity/wallMaterial <G4_NIST_name>
+/// - /doseLab/cavity/cut <value> <unit>
+/// - /doseLab/cavity/wallCut <value> <unit>
+/// - /doseLab/cavity/maxStep <value> <unit>
+/// - /doseLab/cavity/wallMaxStep <value> <unit>
 /// - /doseLab/cavity/update
 /// - /doseLab/cavity/print
 ///
@@ -57,6 +64,12 @@ class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
     void SetCavityDepth(G4double depth);
     void SetCavityAxis(const G4String& axis);
     void SetCavityMaterial(const G4String& materialName);
+    void SetCavityWallThickness(G4double thickness);
+    void SetCavityWallMaterial(const G4String& materialName);
+    void SetCavityRegionCut(G4double cut);
+    void SetWallRegionCut(G4double cut);
+    void SetCavityMaxStep(G4double maxStep);
+    void SetWallMaxStep(G4double maxStep);
 
     G4String GetCavitySummary() const;
 
@@ -85,6 +98,15 @@ class DoseLabDetectorConstruction : public G4VUserDetectorConstruction
     G4double fCavityThickness = 0.;
     G4double fCavityDepth = 0.;  // from phantom entrance surface (z=0)
     G4String fCavityMaterialName = "G4_AIR";
+    G4double fCavityWallThickness = 0.;
+    G4String fCavityWallMaterialName = "G4_POLYETHYLENE";
+
+    // Region-specific transport settings for small-cavity dosimetry
+    G4double fCavityRegionCut = 0.;
+    G4double fWallRegionCut = 0.;
+    G4double fCavityMaxStep = 0.;
+    G4double fWallMaxStep = 0.;
+
     CavityAxis fCavityAxis = CavityAxis::kZ;
     G4String fCavityType = "custom";
 };

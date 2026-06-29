@@ -1,0 +1,23 @@
+# Auto metadata for output naming/provenance
+/doseLab/output/tag vis-ref-10x10-d5cm-6mv-farmer-walled
+/doseLab/output/source 6mv
+/doseLab/output/field 10x10-ssd100
+/doseLab/output/depth 5 cm
+/doseLab/output/chamber farmer_walled
+
+# Visualization run: 10x10 cm^2, depth = 5cm water-equivalent, 6 MV source, farmer-like walled chamber.
+# Fires a small number of events to display tracks without collecting statistics.
+
+/doseLab/cavity/type farmer_walled
+/doseLab/cavity/depth 5 cm
+/doseLab/cavity/print
+
+/run/initialize
+
+/control/execute vis.mac
+
+/control/execute source-linac-photons-6mv.mac
+/control/execute field-ref-10x10-ssd100.mac
+
+/run/printProgress 1
+/run/beamOn 5
