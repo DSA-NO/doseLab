@@ -24,8 +24,11 @@ namespace
 void PrintUsage()
 {
   G4cerr << " Usage: " << G4endl;
-  G4cerr << " doseLab [-m macro ] [-u UIsession] [-t nThreads] [-vDefault]" << G4endl;
-  G4cerr << "   note: -t option is available only for multi-threaded mode." << G4endl;
+  G4cerr << " doseLab [-m macro] [-v macro] [-t nThreads]" << G4endl;
+  G4cerr << "   -m macro  : batch mode, no window" << G4endl;
+  G4cerr << "   -v macro  : visual mode, opens Qt window, executes macro, stays open" << G4endl;
+  G4cerr << "   (no args) : interactive Qt session" << G4endl;
+  G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
 }
 }  // namespace
 
@@ -39,7 +42,7 @@ int main(int argc, char** argv)
   }
 
   G4String macro;
-  G4String session;
+  G4String visMacro;
   G4bool verboseBestUnits = true;
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
@@ -47,28 +50,30 @@ int main(int argc, char** argv)
   for (G4int i = 1; i < argc; i = i + 2) {
     if (G4String(argv[i]) == "-m")
       macro = argv[i + 1];
-    else if (G4String(argv[i]) == "-u")
-      session = argv[i + 1];
+    else if (G4String(argv[i]) == "-v")
+      visMacro = argv[i + 1];
 #ifdef G4MULTITHREADED
     else if (G4String(argv[i]) == "-t") {
       nThreads = G4UIcommand::ConvertToInt(argv[i + 1]);
     }
 #endif
-    else if (G4String(argv[i]) == "-vDefault") {
-      verboseBestUnits = false;
-      --i;  // this option is not followed with a parameter
-    }
     else {
       PrintUsage();
       return 1;
     }
   }
 
-  // Detect interactive mode (if no macro provided) and define UI session
+  if (macro.size() && visMacro.size()) {
+    G4cerr << "Error: -m and -v are mutually exclusive." << G4endl;
+    PrintUsage();
+    return 1;
+  }
+
+  // Create Qt UI session for interactive and visual-macro modes
   //
   G4UIExecutive* ui = nullptr;
   if (!macro.size()) {
-    ui = new G4UIExecutive(argc, argv, session);
+    ui = new G4UIExecutive(argc, argv);
   }
 
   // Optionally: choose a different Random engine...
@@ -123,12 +128,22 @@ int main(int argc, char** argv)
   // Process macro or start UI session
   //
   if (macro.size()) {
-    // batch mode
+    // batch mode: no Qt window
     G4String command = "/control/execute ";
     UImanager->ApplyCommand(command + macro);
   }
+  else if (visMacro.size()) {
+    // visual macro mode: Qt window open, execute macro, keep session open for inspection
+    UImanager->ApplyCommand("/control/execute init_vis.mac");
+    if (ui->IsGUI()) {
+      UImanager->ApplyCommand("/control/execute gui.mac");
+    }
+    UImanager->ApplyCommand("/control/execute " + visMacro);
+    ui->SessionStart();
+    delete ui;
+  }
   else {
-    // interactive mode : define UI session
+    // interactive mode: no macro, full GUI session
     UImanager->ApplyCommand("/control/execute init_vis.mac");
     if (ui->IsGUI()) {
       UImanager->ApplyCommand("/control/execute gui.mac");
