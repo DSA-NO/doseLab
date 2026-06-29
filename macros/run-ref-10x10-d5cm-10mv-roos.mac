@@ -1,7 +1,7 @@
-# Reference run: 10x10 cm^2, depth = 10 cm water-equivalent, 10 MV source.
+# Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, 10 MV source, Roos chamber.
 
-/control/execute cavity-farmer.mac
-/doseLab/cavity/depth 10 cm
+/control/execute cavity-roos.mac
+/doseLab/cavity/depth 5 cm
 /doseLab/cavity/print
 
 /run/initialize

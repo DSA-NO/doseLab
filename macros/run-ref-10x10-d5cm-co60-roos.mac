@@ -1,0 +1,13 @@
+# Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, Co-60 source, Roos chamber.
+
+/control/execute cavity-roos.mac
+/doseLab/cavity/depth 5 cm
+/doseLab/cavity/print
+
+/run/initialize
+
+/control/execute source-co60-teletherapy.mac
+/control/execute field-ref-10x10-ssd100.mac
+
+/run/printProgress 1000
+/run/beamOn 10000

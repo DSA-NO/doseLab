@@ -1,0 +1,13 @@
+# Reference run: 10x10 cm^2, depth = 10 cm water-equivalent, 6 MV source, custom chamber.
+
+/doseLab/cavity/type custom
+/doseLab/cavity/depth 10 cm
+/doseLab/cavity/print
+
+/run/initialize
+
+/control/execute source-linac-photons-6mv.mac
+/control/execute field-ref-10x10-ssd100.mac
+
+/run/printProgress 1000
+/run/beamOn 10000

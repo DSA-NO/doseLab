@@ -1,6 +1,6 @@
-# Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, 6 MV source.
+# Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, 6 MV source, custom chamber.
 
-/control/execute cavity-farmer.mac
+/doseLab/cavity/type custom
 /doseLab/cavity/depth 5 cm
 /doseLab/cavity/print
 

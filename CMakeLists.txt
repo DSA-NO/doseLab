@@ -38,12 +38,24 @@ set(DOSELAB_SCRIPTS
   init_vis.mac
   plotHisto.C
   plotNtuple.C
-  run-ref-10x10-d5cm-10mv.mac
-  run-ref-10x10-d5cm-6mv.mac
-  run-ref-10x10-d5cm-co60.mac
-  run-ref-10x10-d10cm-10mv.mac
-  run-ref-10x10-d10cm-6mv.mac
-  run-ref-10x10-d10cm-co60.mac
+  run-ref-10x10-d5cm-10mv-custom.mac
+  run-ref-10x10-d5cm-10mv-farmer.mac
+  run-ref-10x10-d5cm-10mv-roos.mac
+  run-ref-10x10-d5cm-6mv-custom.mac
+  run-ref-10x10-d5cm-6mv-farmer.mac
+  run-ref-10x10-d5cm-6mv-roos.mac
+  run-ref-10x10-d5cm-co60-custom.mac
+  run-ref-10x10-d5cm-co60-farmer.mac
+  run-ref-10x10-d5cm-co60-roos.mac
+  run-ref-10x10-d10cm-10mv-custom.mac
+  run-ref-10x10-d10cm-10mv-farmer.mac
+  run-ref-10x10-d10cm-10mv-roos.mac
+  run-ref-10x10-d10cm-6mv-custom.mac
+  run-ref-10x10-d10cm-6mv-farmer.mac
+  run-ref-10x10-d10cm-6mv-roos.mac
+  run-ref-10x10-d10cm-co60-custom.mac
+  run-ref-10x10-d10cm-co60-farmer.mac
+  run-ref-10x10-d10cm-co60-roos.mac
   run-simple.mac
   run-full.mac
   source-co60-teletherapy.mac
