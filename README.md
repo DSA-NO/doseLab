@@ -14,6 +14,26 @@ Scenario macros and metadata controls are designed to keep geometry and output l
 - Geant4 with UI and visualization components
 - Optional: ROOT (for `doseLabRootSummary`)
 
+For the reproducible production-validation workflow in this repository, **micromamba is required**.
+
+## Install micromamba
+
+Official installation methods are documented at:
+
+- https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html
+
+Quick install helper (Linux/macOS):
+
+```bash
+"${SHELL}" <(curl -L micro.mamba.pm/install.sh)
+```
+
+After installation, open a new shell and verify:
+
+```bash
+micromamba --version
+```
+
 ## Quick Start
 
 From a fresh clone:
@@ -31,6 +51,21 @@ cd build
 ```
 
 ## Local Setup with micromamba
+
+### Fresh-user simulation workflow (recommended first test)
+
+Use this flow to simulate a new user machine with no inherited Geant4/ROOT shell setup:
+
+```bash
+env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
+env | grep -Ei '(^|_)(g4|geant4|rootsys|root_|cmake_prefix_path|ld_library_path)=' || true
+mkdir -p "$HOME/geant4-usr"
+cd "$HOME/geant4-usr"
+git clone git@github.com:DSA-NO/doseLab.git doseLab-micromamba
+cd doseLab-micromamba
+```
+
+Then run the production-validation workflow below.
 
 To mirror CI locally with pinned conda-forge packages, use the committed environment file:
 
