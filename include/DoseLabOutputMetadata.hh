@@ -49,6 +49,24 @@ enum class ChamberKind
   kRoosWalled,
 };
 
+enum class ScenarioKind
+{
+  kUnspecified,
+  kCustom,
+  kFarmer,
+  kRoos,
+  kFarmerWalled,
+  kRoosWalled,
+};
+
+struct ScenarioPreset
+{
+  ScenarioKind scenario;
+  const char* cavityType;
+  ChamberKind chamber;
+  G4double defaultDepthCm;
+};
+
 inline constexpr std::array<MetadataChoice<SourceKind>, 4> kSourceChoices{{
   {SourceKind::kUnspecified, "unspecified"},
   {SourceKind::kCo60, "co60"},
@@ -68,6 +86,24 @@ inline constexpr std::array<MetadataChoice<ChamberKind>, 6> kChamberChoices{{
   {ChamberKind::kRoos, "roos"},
   {ChamberKind::kFarmerWalled, "farmer_walled"},
   {ChamberKind::kRoosWalled, "roos_walled"},
+}};
+
+inline constexpr std::array<MetadataChoice<ScenarioKind>, 6> kScenarioChoices{{
+  {ScenarioKind::kUnspecified, "unspecified"},
+  {ScenarioKind::kCustom, "custom"},
+  {ScenarioKind::kFarmer, "farmer"},
+  {ScenarioKind::kRoos, "roos"},
+  {ScenarioKind::kFarmerWalled, "farmer_walled"},
+  {ScenarioKind::kRoosWalled, "roos_walled"},
+}};
+
+inline constexpr std::array<ScenarioPreset, 6> kScenarioPresets{{
+  {ScenarioKind::kUnspecified, "custom", ChamberKind::kUnspecified, -1.0},
+  {ScenarioKind::kCustom, "custom", ChamberKind::kCustom, -1.0},
+  {ScenarioKind::kFarmer, "farmer", ChamberKind::kFarmer, 5.0},
+  {ScenarioKind::kRoos, "roos", ChamberKind::kRoos, 5.0},
+  {ScenarioKind::kFarmerWalled, "farmer_walled", ChamberKind::kFarmerWalled, 5.0},
+  {ScenarioKind::kRoosWalled, "roos_walled", ChamberKind::kRoosWalled, 5.0},
 }};
 
 template <typename Enum, std::size_t N>
@@ -137,6 +173,11 @@ inline ChamberKind ParseChamberKind(const G4String& chamber)
   return ParseMetadataChoice(chamber, kChamberChoices, ChamberKind::kUnspecified);
 }
 
+inline ScenarioKind ParseScenarioKind(const G4String& scenario)
+{
+  return ParseMetadataChoice(scenario, kScenarioChoices, ScenarioKind::kUnspecified);
+}
+
 inline const char* CanonicalLabel(SourceKind source)
 {
   return CanonicalLabel(source, kSourceChoices, "unspecified");
@@ -150,6 +191,21 @@ inline const char* CanonicalLabel(FieldKind field)
 inline const char* CanonicalLabel(ChamberKind chamber)
 {
   return CanonicalLabel(chamber, kChamberChoices, "unspecified");
+}
+
+inline const char* CanonicalLabel(ScenarioKind scenario)
+{
+  return CanonicalLabel(scenario, kScenarioChoices, "unspecified");
+}
+
+inline const ScenarioPreset* FindScenarioPreset(ScenarioKind scenario)
+{
+  for (const auto& preset : kScenarioPresets) {
+    if (preset.scenario == scenario) {
+      return &preset;
+    }
+  }
+  return nullptr;
 }
 
 inline bool IsValidOutputTagChar(char ch)

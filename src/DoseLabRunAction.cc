@@ -8,6 +8,7 @@
 #include "DoseLabRunAction.hh"
 
 #include "DoseLabAnalysisConfig.hh"
+#include "DoseLabDetectorConstruction.hh"
 #include "DoseLabOutputMetadata.hh"
 
 #include "G4AnalysisManager.hh"
@@ -115,6 +116,28 @@ void DoseLabRunAction::ConfigureCommands()
   chamberCmd.SetParameterName("chamber", false);
   chamberCmd.SetCandidates(OutputMetadata::CandidateLabels(OutputMetadata::kChamberChoices));
   chamberCmd.SetStates(G4State_PreInit, G4State_Idle);
+
+  fScenarioMessenger =
+    std::make_unique<G4GenericMessenger>(this, "/doseLab/scenario/", "Scenario preset control");
+
+  auto& scenarioTypeCmd = fScenarioMessenger->DeclareMethod(
+    "type", &DoseLabRunAction::SetScenarioType,
+    "Set scenario preset and synchronize cavity geometry with output metadata.");
+  scenarioTypeCmd.SetGuidance(
+    "Set scenario preset and synchronize cavity geometry with output metadata.");
+  scenarioTypeCmd.SetParameterName("scenario", false);
+  scenarioTypeCmd.SetCandidates(OutputMetadata::CandidateLabels(OutputMetadata::kScenarioChoices));
+  scenarioTypeCmd.SetStates(G4State_PreInit, G4State_Idle);
+
+  auto& scenarioDepthCmd = fScenarioMessenger->DeclareMethodWithUnit(
+    "depth", "cm", &DoseLabRunAction::SetScenarioDepthOverride,
+    "Override scenario depth and synchronize cavity and output metadata depth.");
+  scenarioDepthCmd.SetGuidance(
+    "Override scenario depth and synchronize cavity and output metadata depth.");
+  scenarioDepthCmd.SetGuidance("Example: /doseLab/scenario/depth 5 cm");
+  scenarioDepthCmd.SetParameterName("depth", false);
+  scenarioDepthCmd.SetRange("depth>=0.");
+  scenarioDepthCmd.SetStates(G4State_PreInit, G4State_Idle);
 }
 
 void DoseLabRunAction::SetOutputTag(const G4String& tag)
@@ -133,6 +156,49 @@ void DoseLabRunAction::SetOutputTag(const G4String& tag)
 void DoseLabRunAction::SetOutputDepth(G4double depth)
 {
   fOutputDepthCm = depth / cm;
+}
+
+void DoseLabRunAction::SetScenarioType(const G4String& scenario)
+{
+  fScenarioType = scenario;
+  ApplyScenario();
+}
+
+void DoseLabRunAction::SetScenarioDepthOverride(G4double depth)
+{
+  fScenarioDepthOverrideCm = depth / cm;
+  ApplyScenario();
+}
+
+void DoseLabRunAction::ApplyScenario()
+{
+  const auto scenario = OutputMetadata::ParseScenarioKind(fScenarioType);
+  const auto* preset = OutputMetadata::FindScenarioPreset(scenario);
+  if (!preset) {
+    return;
+  }
+
+  const auto detectorBase = G4RunManager::GetRunManager()->GetUserDetectorConstruction();
+  auto detector =
+    const_cast<DoseLabDetectorConstruction*>(dynamic_cast<const DoseLabDetectorConstruction*>(detectorBase));
+
+  if (detector) {
+    detector->SetCavityType(preset->cavityType);
+  }
+
+  fOutputChamber = OutputMetadata::CanonicalLabel(preset->chamber);
+
+  G4double depthCm = preset->defaultDepthCm;
+  if (fScenarioDepthOverrideCm >= 0.) {
+    depthCm = fScenarioDepthOverrideCm;
+  }
+
+  if (depthCm >= 0.) {
+    fOutputDepthCm = depthCm;
+    if (detector) {
+      detector->SetCavityDepth(depthCm * cm);
+    }
+  }
 }
 
 G4String DoseLabRunAction::SanitizeForFileName(const G4String& value)

@@ -1,10 +1,7 @@
 # Standard Farmer cavity preset for doseLab.
 # Use before /run/initialize in batch macros.
 
-/doseLab/output/chamber farmer
-/doseLab/output/depth 5 cm
-
-/doseLab/cavity/type farmer
-/doseLab/cavity/depth 5 cm
+/doseLab/scenario/type farmer
+/doseLab/scenario/depth 5 cm
 /doseLab/cavity/material G4_AIR
 /doseLab/cavity/print
