@@ -1,5 +1,6 @@
 # Build dirs anywhere
 build/
+build-*/
 
 # Build artifacts
 *.o
@@ -9,6 +10,7 @@ build/
 # Simulation output
 *.root
 *.out
+analysis/production/latest/
 
 # Temp/editor
 *~

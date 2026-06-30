@@ -32,22 +32,19 @@ cd build
 
 ## Local Setup with micromamba
 
-To mirror CI locally with conda-forge packages, create an isolated environment:
+To mirror CI locally with pinned conda-forge packages, use the committed environment file:
 
 ```bash
-micromamba create -n doselab -c conda-forge geant4 cmake ninja cxx-compiler
-micromamba run -n doselab cmake -S . -B build-mamba -G Ninja -DDOSELAB_BUILD_ROOT_SUMMARY=OFF
-micromamba run -n doselab cmake --build build-mamba --parallel
-micromamba run -n doselab ./build-mamba/doseLab -b build-mamba/run-simple.mac
+micromamba env create -f envs/doselab-production.yml -y
+DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
+DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
+micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production
 ```
 
-If you also want to validate the ROOT summary helper locally:
+To initialize or refresh the baseline file after an intentional physics/model update:
 
 ```bash
-micromamba create -n doselab-root -c conda-forge geant4 root cmake ninja cxx-compiler
-micromamba run -n doselab-root cmake -S . -B build-mamba-root -G Ninja -DDOSELAB_BUILD_ROOT_SUMMARY=ON -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
-micromamba run -n doselab-root cmake --build build-mamba-root --parallel
-micromamba run -n doselab-root test -x build-mamba-root/doseLabRootSummary
+micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --write-baseline
 ```
 
 ## CI
@@ -55,12 +52,14 @@ micromamba run -n doselab-root test -x build-mamba-root/doseLabRootSummary
 GitHub Actions runs on every push and pull request using the workflow in `.github/workflows/ci.yml`.
 
 - **Build (Geant4)**
-   - Installs Geant4 and build tools, configures with `-DDOSELAB_BUILD_ROOT_SUMMARY=OFF`, builds, and runs a batch smoke test (`./doseLab -b run-simple.mac`).
+   - Creates a micromamba environment, configures with `-DDOSELAB_BUILD_ROOT_SUMMARY=OFF`, builds, and runs a batch smoke test (`./doseLab -b run-simple.mac`).
 - **Build (optional ROOT summary)**
-   - Tries to install ROOT, detects `root-config`, and only then configures with `-DDOSELAB_REQUIRE_ROOT_SUMMARY=ON` and builds `doseLabRootSummary`.
-   - If ROOT is unavailable on the runner, this job prints a clear skip notice.
+   - Creates a micromamba environment with ROOT, configures with `-DDOSELAB_REQUIRE_ROOT_SUMMARY=ON`, and verifies `doseLabRootSummary` exists.
+- **Production validation**
+   - Uses the pinned environment file `envs/doselab-production.yml`, runs four reference scenarios (Farmer/Roos, with/without walls), and compares metrics against `analysis/baseline/reference_metrics.json`.
+   - Uploads a metrics report artifact (`production-metrics`) for traceability.
 
-This keeps the core build mandatory while still checking the optional ROOT path when available.
+This keeps core build checks fast while enforcing a reproducible physics regression gate.
 
 ## Contributing Quickstart
 

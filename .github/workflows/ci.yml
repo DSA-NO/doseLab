@@ -32,9 +32,12 @@ jobs:
           micromamba run -n ci geant4-config --version
 
       - name: Configure
-        run: >-
-          micromamba run -n ci cmake -S . -B build-ci -G Ninja
-          -DDOSELAB_BUILD_ROOT_SUMMARY=OFF
+        run: |
+          micromamba run -n ci bash -lc '
+            cmake -S . -B build-ci -G Ninja \
+              -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
+              -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so"'
 
       - name: Build
         run: micromamba run -n ci cmake --build build-ci --parallel
@@ -62,6 +65,7 @@ jobs:
             root
             cmake
             ninja
+            expat
             cxx-compiler
 
       - name: Toolchain info
@@ -70,33 +74,50 @@ jobs:
           micromamba run -n ci-root root-config --version
           micromamba run -n ci-root geant4-config --version
 
-      - name: Detect ROOT
-        id: detect_root
-        run: |
-          if micromamba run -n ci-root command -v root-config >/dev/null 2>&1; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "path=$(micromamba run -n ci-root command -v root-config)" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Configure (ROOT required)
-        if: steps.detect_root.outputs.found == 'true'
-        run: >-
-          micromamba run -n ci-root cmake -S . -B build-root -G Ninja
-          -DDOSELAB_BUILD_ROOT_SUMMARY=ON
-          -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
-          -DDOSELAB_ROOT_CONFIG=${{ steps.detect_root.outputs.path }}
+        run: |
+          ROOT_CONFIG_PATH=$(micromamba run -n ci-root bash -lc 'command -v root-config')
+          micromamba run -n ci-root bash -lc '
+            cmake -S . -B build-root -G Ninja \
+              -DDOSELAB_BUILD_ROOT_SUMMARY=ON \
+              -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
+              -DDOSELAB_ROOT_CONFIG='"$ROOT_CONFIG_PATH"' \
+              -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so"'
 
       - name: Build (ROOT required)
-        if: steps.detect_root.outputs.found == 'true'
         run: micromamba run -n ci-root cmake --build build-root --parallel
 
       - name: Smoke test (ROOT helper)
-        if: steps.detect_root.outputs.found == 'true'
         working-directory: build-root
         run: micromamba run -n ci-root test -x ./doseLabRootSummary
 
-      - name: ROOT unavailable notice
-        if: steps.detect_root.outputs.found != 'true'
-        run: echo "root-config not available on this runner; skipped optional ROOT summary job."
+  production-validation:
+    name: Production validation
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup production environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: doselab-production
+          environment-file: envs/doselab-production.yml
+          init-shell: bash
+
+      - name: Build production profile
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
+
+      - name: Run production reference scenarios
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
+
+      - name: Check baseline
+        run: micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
+
+      - name: Upload production metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-metrics
+          path: analysis/production/latest/metrics.json

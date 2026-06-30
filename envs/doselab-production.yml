@@ -1,0 +1,13 @@
+name: doselab-production
+channels:
+  - conda-forge
+dependencies:
+  - geant4=11.2.*
+  - root=6.32.*
+  - cmake=3.30.*
+  - ninja=1.12.*
+  - expat>=2.6.3
+  - python=3.11
+  - numpy=1.26.*
+  - uproot=5.4.*
+  - cxx-compiler
