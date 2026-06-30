@@ -30,6 +30,26 @@ cd build
 ./doseLab -b run-simple.mac
 ```
 
+## Local Setup with micromamba
+
+To mirror CI locally with conda-forge packages, create an isolated environment:
+
+```bash
+micromamba create -n doselab -c conda-forge geant4 cmake ninja cxx-compiler
+micromamba run -n doselab cmake -S . -B build-mamba -G Ninja -DDOSELAB_BUILD_ROOT_SUMMARY=OFF
+micromamba run -n doselab cmake --build build-mamba --parallel
+micromamba run -n doselab ./build-mamba/doseLab -b build-mamba/run-simple.mac
+```
+
+If you also want to validate the ROOT summary helper locally:
+
+```bash
+micromamba create -n doselab-root -c conda-forge geant4 root cmake ninja cxx-compiler
+micromamba run -n doselab-root cmake -S . -B build-mamba-root -G Ninja -DDOSELAB_BUILD_ROOT_SUMMARY=ON -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
+micromamba run -n doselab-root cmake --build build-mamba-root --parallel
+micromamba run -n doselab-root test -x build-mamba-root/doseLabRootSummary
+```
+
 ## CI
 
 GitHub Actions runs on every push and pull request using the workflow in `.github/workflows/ci.yml`.
