@@ -1,6 +1,6 @@
 # doseLab
 
-[![CI](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml/badge.svg)](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml)
+[![CI (main)](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
 
 A Geant4-based dose calculation example with configurable scenarios/macros and optional ROOT post-processing.
 
