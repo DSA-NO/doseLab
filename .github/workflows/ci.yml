@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build (Geant4)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -16,7 +16,19 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libgeant4-dev
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y universe
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+          if apt-cache show libgeant4-dev >/dev/null 2>&1; then
+            sudo apt-get install -y libgeant4-dev
+          elif apt-cache show geant4 >/dev/null 2>&1; then
+            sudo apt-get install -y geant4
+          else
+            echo "No Geant4 package found in apt repositories" >&2
+            exit 1
+          fi
 
       - name: Configure
         run: >-
@@ -32,7 +44,7 @@ jobs:
 
   root-summary:
     name: Build (optional ROOT summary)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -41,7 +53,19 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build libgeant4-dev
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y universe
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
+
+          if apt-cache show libgeant4-dev >/dev/null 2>&1; then
+            sudo apt-get install -y libgeant4-dev
+          elif apt-cache show geant4 >/dev/null 2>&1; then
+            sudo apt-get install -y geant4
+          else
+            echo "No Geant4 package found in apt repositories" >&2
+            exit 1
+          fi
 
       - name: Try installing ROOT
         run: |
