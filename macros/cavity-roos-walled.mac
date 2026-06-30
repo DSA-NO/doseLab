@@ -3,4 +3,9 @@
 
 /doseLab/scenario/type roos_walled
 /doseLab/scenario/depth 5 cm
+/doseLab/cavity/material G4_AIR
+/doseLab/cavity/wallMaterial G4_PLEXIGLASS
+# Water test override (both cavity and wall):
+# /doseLab/cavity/material G4_WATER
+# /doseLab/cavity/wallMaterial G4_WATER
 /doseLab/cavity/print
