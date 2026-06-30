@@ -13,34 +13,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository -y universe
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
+      - name: Setup micromamba environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: ci
+          init-shell: bash
+          create-args: >-
+            -c conda-forge
+            geant4
+            cmake
+            ninja
+            cxx-compiler
 
-          # Use the development package directly; the plain geant4 meta-package
-          # is not consistently available on GitHub Ubuntu runners.
-          if ! sudo apt-get install -y libgeant4-dev; then
-            echo "Failed to install libgeant4-dev" >&2
-            echo "Apt candidate information:" >&2
-            apt-cache policy libgeant4-dev >&2 || true
-            exit 1
-          fi
+      - name: Toolchain info
+        run: |
+          micromamba run -n ci cmake --version
+          micromamba run -n ci ninja --version
+          micromamba run -n ci geant4-config --version
 
       - name: Configure
         run: >-
-          cmake -S . -B build-ci -G Ninja
+          micromamba run -n ci cmake -S . -B build-ci -G Ninja
           -DDOSELAB_BUILD_ROOT_SUMMARY=OFF
 
       - name: Build
-        run: cmake --build build-ci --parallel
+        run: micromamba run -n ci cmake --build build-ci --parallel
 
       - name: Smoke test (batch macro)
         working-directory: build-ci
-        run: ./doseLab -b run-simple.mac
+        run: micromamba run -n ci ./doseLab -b run-simple.mac
 
   root-summary:
     name: Build (optional ROOT summary)
@@ -50,33 +51,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          sudo add-apt-repository -y universe
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
+      - name: Setup micromamba environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: ci-root
+          init-shell: bash
+          create-args: >-
+            -c conda-forge
+            geant4
+            root
+            cmake
+            ninja
+            cxx-compiler
 
-          # Use the development package directly; the plain geant4 meta-package
-          # is not consistently available on GitHub Ubuntu runners.
-          if ! sudo apt-get install -y libgeant4-dev; then
-            echo "Failed to install libgeant4-dev" >&2
-            echo "Apt candidate information:" >&2
-            apt-cache policy libgeant4-dev >&2 || true
-            exit 1
-          fi
-
-      - name: Try installing ROOT
+      - name: Toolchain info
         run: |
-          sudo apt-get install -y root-system || true
+          micromamba run -n ci-root cmake --version
+          micromamba run -n ci-root root-config --version
+          micromamba run -n ci-root geant4-config --version
 
       - name: Detect ROOT
         id: detect_root
         run: |
-          if command -v root-config >/dev/null 2>&1; then
+          if micromamba run -n ci-root command -v root-config >/dev/null 2>&1; then
             echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "path=$(command -v root-config)" >> "$GITHUB_OUTPUT"
+            echo "path=$(micromamba run -n ci-root command -v root-config)" >> "$GITHUB_OUTPUT"
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
           fi
@@ -84,19 +83,19 @@ jobs:
       - name: Configure (ROOT required)
         if: steps.detect_root.outputs.found == 'true'
         run: >-
-          cmake -S . -B build-root -G Ninja
+          micromamba run -n ci-root cmake -S . -B build-root -G Ninja
           -DDOSELAB_BUILD_ROOT_SUMMARY=ON
           -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
           -DDOSELAB_ROOT_CONFIG=${{ steps.detect_root.outputs.path }}
 
       - name: Build (ROOT required)
         if: steps.detect_root.outputs.found == 'true'
-        run: cmake --build build-root --parallel
+        run: micromamba run -n ci-root cmake --build build-root --parallel
 
       - name: Smoke test (ROOT helper)
         if: steps.detect_root.outputs.found == 'true'
         working-directory: build-root
-        run: test -x ./doseLabRootSummary
+        run: micromamba run -n ci-root test -x ./doseLabRootSummary
 
       - name: ROOT unavailable notice
         if: steps.detect_root.outputs.found != 'true'
