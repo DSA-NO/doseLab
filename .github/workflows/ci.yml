@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build (Geant4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgeant4-dev
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build-ci -G Ninja
+          -DDOSELAB_BUILD_ROOT_SUMMARY=OFF
+
+      - name: Build
+        run: cmake --build build-ci --parallel
+
+      - name: Smoke test (batch macro)
+        working-directory: build-ci
+        run: ./doseLab -b run-simple.mac
+
+  root-summary:
+    name: Build (optional ROOT summary)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgeant4-dev
+
+      - name: Try installing ROOT
+        run: |
+          sudo apt-get install -y root-system || true
+
+      - name: Detect ROOT
+        id: detect_root
+        run: |
+          if command -v root-config >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "path=$(command -v root-config)" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configure (ROOT required)
+        if: steps.detect_root.outputs.found == 'true'
+        run: >-
+          cmake -S . -B build-root -G Ninja
+          -DDOSELAB_BUILD_ROOT_SUMMARY=ON
+          -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
+          -DDOSELAB_ROOT_CONFIG=${{ steps.detect_root.outputs.path }}
+
+      - name: Build (ROOT required)
+        if: steps.detect_root.outputs.found == 'true'
+        run: cmake --build build-root --parallel
+
+      - name: Smoke test (ROOT helper)
+        if: steps.detect_root.outputs.found == 'true'
+        working-directory: build-root
+        run: test -x ./doseLabRootSummary
+
+      - name: ROOT unavailable notice
+        if: steps.detect_root.outputs.found != 'true'
+        run: echo "root-config not available on this runner; skipped optional ROOT summary job."

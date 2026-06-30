@@ -1,15 +1,14 @@
- # Build dirs anywhere 
-build/ 
+# Build dirs anywhere
+build/
 
-# Object files 
-*.o 
-*.so 
-*.a 
+# Build artifacts
+*.o
+*.so
+*.a
 
-# Simulation output 
-*.root 
-*.txt 
-*.out 
+# Simulation output
+*.root
+*.out
 
-# Temp 
+# Temp/editor
 *~
