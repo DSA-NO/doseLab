@@ -21,12 +21,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build
 
-          if apt-cache show libgeant4-dev >/dev/null 2>&1; then
-            sudo apt-get install -y libgeant4-dev
-          elif apt-cache show geant4 >/dev/null 2>&1; then
-            sudo apt-get install -y geant4
-          else
-            echo "No Geant4 package found in apt repositories" >&2
+          # Use the development package directly; the plain geant4 meta-package
+          # is not consistently available on GitHub Ubuntu runners.
+          if ! sudo apt-get install -y libgeant4-dev; then
+            echo "Failed to install libgeant4-dev" >&2
+            echo "Apt candidate information:" >&2
+            apt-cache policy libgeant4-dev >&2 || true
             exit 1
           fi
 
@@ -58,12 +58,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build
 
-          if apt-cache show libgeant4-dev >/dev/null 2>&1; then
-            sudo apt-get install -y libgeant4-dev
-          elif apt-cache show geant4 >/dev/null 2>&1; then
-            sudo apt-get install -y geant4
-          else
-            echo "No Geant4 package found in apt repositories" >&2
+          # Use the development package directly; the plain geant4 meta-package
+          # is not consistently available on GitHub Ubuntu runners.
+          if ! sudo apt-get install -y libgeant4-dev; then
+            echo "Failed to install libgeant4-dev" >&2
+            echo "Apt candidate information:" >&2
+            apt-cache policy libgeant4-dev >&2 || true
             exit 1
           fi
 
