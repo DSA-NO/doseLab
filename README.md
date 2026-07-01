@@ -2,23 +2,33 @@
 
 [![CI (main)](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/DSA-NO/doseLab/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
 
-A Geant4-based dose calculation example with configurable scenarios/macros and optional ROOT post-processing.
+## Introduction
 
-The example supports reference scenario presets for both Farmer and Roos ionization chambers, including variants with and without cavity wall material.
-Scenario macros and metadata controls are designed to keep geometry and output labeling aligned across these configurations.
+doseLab is a Geant4-based simulation project for ionization chamber dosimetry in a water phantom.
+It includes reference scenarios for Farmer-type and Roos-type chambers, with variants both with and without wall material.
 
-## Prerequisites
+The project is intended as a practical simulation and regression-validation framework where users can configure:
 
-- CMake >= 3.16
-- A C++17 compiler
-- Geant4 with UI and visualization components
-- Optional: ROOT (for `doseLabRootSummary`)
+- physics lists (including EM model selections)
+- chamber geometry and cavity presets
+- materials and phantom/chamber setup
+- production cuts, step controls, and run settings through Geant4 macros
+- output metadata and scenario tagging for traceable ROOT output
 
-For the reproducible production-validation workflow in this repository, **micromamba is required**.
+## How To Run
 
-## Install micromamba
+You can run doseLab in two supported ways:
 
-Official installation methods are documented at:
+- **A) Reproducible micromamba workflow** (recommended for consistency with CI)
+- **B) Your own local Geant4 environment** (recommended if you already maintain a validated Geant4 setup)
+
+### A) Run with micromamba (recommended)
+
+This path mirrors CI and gives the most reproducible dependency stack.
+
+#### 1) Install micromamba
+
+Official instructions:
 
 - https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html
 
@@ -28,92 +38,90 @@ Quick install helper (Linux/macOS):
 "${SHELL}" <(curl -L micro.mamba.pm/install.sh)
 ```
 
-After installation, open a new shell and verify:
+Verify:
 
 ```bash
 micromamba --version
 ```
 
-## Quick Start
-
-From a fresh clone:
+#### 2) Clone and run
 
 ```bash
-cmake -S . -B build
-cmake --build build -j
-```
+git clone git@github.com:DSA-NO/doseLab.git
+cd doseLab
 
-Run an example macro:
-
-```bash
-cd build
-./doseLab -b run-simple.mac
-```
-
-## Local Setup with micromamba
-
-### Fresh-user simulation workflow (recommended first test)
-
-Use this flow to simulate a new user machine with no inherited Geant4/ROOT shell setup:
-
-```bash
-env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
-env | grep -Ei '(^|_)(g4|geant4|rootsys|root_|cmake_prefix_path|ld_library_path)=' || true
-mkdir -p "$HOME/geant4-usr"
-cd "$HOME/geant4-usr"
-git clone git@github.com:DSA-NO/doseLab.git doseLab-micromamba
-cd doseLab-micromamba
-```
-
-Then run the production-validation workflow below.
-
-To mirror CI locally with pinned conda-forge packages, use the committed environment file:
-
-```bash
 micromamba env create -f envs/doselab-production.yml -y
 DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
 DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
 micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production
 ```
 
-To initialize or refresh the baseline file after an intentional physics/model update:
+#### 3) Optional: initialize/refresh baseline intentionally
+
+Use only after intentional physics/model changes and validation:
 
 ```bash
 micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --write-baseline
 ```
 
-## CI
+#### Optional fresh-user simulation
 
-GitHub Actions runs on every push and pull request using the workflow in `.github/workflows/ci.yml`.
-
-- **Build (Geant4)**
-   - Creates a micromamba environment, configures with `-DDOSELAB_BUILD_ROOT_SUMMARY=OFF`, builds, and runs a batch smoke test (`./doseLab -b run-simple.mac`).
-- **Build (optional ROOT summary)**
-   - Creates a micromamba environment with ROOT, configures with `-DDOSELAB_REQUIRE_ROOT_SUMMARY=ON`, and verifies `doseLabRootSummary` exists.
-- **Production validation**
-   - Uses the pinned environment file `envs/doselab-production.yml`, runs four reference scenarios (Farmer/Roos, with/without walls), and compares metrics against `analysis/baseline/reference_metrics.json`.
-   - Uploads a metrics report artifact (`production-metrics`) for traceability.
-
-This keeps core build checks fast while enforcing a reproducible physics regression gate.
-
-## Contributing Quickstart
-
-Before opening a pull request, run the same baseline checks locally:
+If you want to simulate a "new user" shell with no inherited Geant4/ROOT setup:
 
 ```bash
+env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
+env | grep -Ei '(^|_)(g4|geant4|rootsys|root_|cmake_prefix_path|ld_library_path)=' || true
+```
+
+Then clone and run from that shell.
+
+### B) Run with your own local Geant4 environment
+
+Use this path if Geant4 (and optionally ROOT) are already installed and configured on your system.
+
+#### 1) Prerequisites
+
+- CMake >= 3.16
+- C++17 compiler
+- Geant4 with UI and visualization components
+- Optional ROOT for `doseLabRootSummary`
+
+#### 2) Configure and build
+
+```bash
+git clone git@github.com:DSA-NO/doseLab.git
+cd doseLab
+
 cmake -S . -B build
 cmake --build build -j
-cd build
-./doseLab -b run-simple.mac
 ```
 
-Optional local ROOT validation:
+#### 3) Run examples
 
 ```bash
-cmake -S . -B build-root -DDOSELAB_BUILD_ROOT_SUMMARY=ON -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
-cmake --build build-root -j
-test -x build-root/doseLabRootSummary
+cd build
+./doseLab -b run-simple.mac
+./doseLab -b run-ref-10x10-d5cm-6mv-farmer.mac
 ```
+
+#### 4) Optional ROOT helper build control
+
+```bash
+cmake -S . -B build -DDOSELAB_BUILD_ROOT_SUMMARY=ON -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
+cmake --build build -j
+```
+
+## CI
+
+GitHub Actions runs on push and pull requests using `.github/workflows/ci.yml`.
+
+- **Build (Geant4)**
+  - Creates a micromamba environment, configures with `-DDOSELAB_BUILD_ROOT_SUMMARY=OFF`, builds, and runs a batch smoke test.
+- **Build (optional ROOT summary)**
+  - Creates a micromamba environment with ROOT and verifies `doseLabRootSummary` is produced.
+- **Production validation**
+  - Uses `envs/doselab-production.yml`, runs four reference scenarios (Farmer/Roos, with/without walls), and compares metrics against `analysis/baseline/reference_metrics.json`.
+  - Uploads `analysis/production/latest/metrics.json` as a CI artifact.
 
 ## ROOT Summary Helper
 
@@ -121,38 +129,21 @@ When ROOT is available, CMake builds an additional executable:
 
 - `doseLabRootSummary`
 
-This helper reads and summarizes output ROOT files.
+This helper reads and summarizes doseLab ROOT outputs.
 
-### ROOT detection behavior
+ROOT detection order in CMake:
 
-CMake tries to find `root-config` in this order:
-
-1. `DOSELAB_ROOT_CONFIG` cache variable (explicit path)
+1. `DOSELAB_ROOT_CONFIG` (explicit path)
 2. `PATH`
 3. `$ROOTSYS/bin`
 4. `$CONDA_PREFIX/bin`
-5. Common local env locations under `$HOME`:
-   - `micromamba/envs/*/bin`
-   - `miniconda3/envs/*/bin`
-   - `anaconda3/envs/*/bin`
-
-If ROOT is not found, the main `doseLab` executable still builds by default.
+5. Common local env locations under `$HOME`
 
 ## Useful CMake Options
 
 - `-DDOSELAB_BUILD_ROOT_SUMMARY=ON|OFF`
-  - Enable/disable building `doseLabRootSummary` (default `ON`)
 - `-DDOSELAB_REQUIRE_ROOT_SUMMARY=ON|OFF`
-  - Fail configure if ROOT summary helper cannot be configured (default `OFF`)
 - `-DDOSELAB_ROOT_CONFIG=/absolute/path/to/root-config`
-  - Explicit override for ROOT detection
-
-Example with explicit ROOT path:
-
-```bash
-cmake -S . -B build -DDOSELAB_ROOT_CONFIG=/path/to/root-config
-cmake --build build -j
-```
 
 ## Install
 
@@ -164,23 +155,26 @@ cmake --install build --prefix /desired/prefix
 
 Installed content:
 
-- `doseLab` binary in `${CMAKE_INSTALL_BINDIR}`
-- `doseLabRootSummary` binary in `${CMAKE_INSTALL_BINDIR}` (if enabled/found)
+- `doseLab` in `${CMAKE_INSTALL_BINDIR}`
+- `doseLabRootSummary` in `${CMAKE_INSTALL_BINDIR}` (if enabled/found)
 - `macros/` in `${CMAKE_INSTALL_DATADIR}/doseLab`
 
 ## Troubleshooting
 
 If CMake reports ROOT missing:
 
-1. Ensure `root-config` works in your shell:
-   ```bash
-   root-config --version
-   ```
-2. Reconfigure with explicit ROOT path:
-   ```bash
-   cmake -S . -B build -DDOSELAB_ROOT_CONFIG=$(command -v root-config)
-   ```
-3. To require ROOT summary at configure time:
-   ```bash
-   cmake -S . -B build -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON
-   ```
+```bash
+root-config --version
+cmake -S . -B build -DDOSELAB_ROOT_CONFIG=$(command -v root-config)
+```
+
+If baseline checks fail unexpectedly:
+
+- verify you are using the intended environment (`doselab-production`)
+- re-run the reference scenarios before checking baseline
+- compare current report `analysis/production/latest/metrics.json` to baseline
+
+## Acknowledgements
+
+- This project uses Geant4 and follows the Geant4 license terms: http://cern.ch/geant4/license
+- Parts of this code and documentation workflow were developed with assistance from GitHub Copilot in VS Code (GPT-5.3-Codex)
