@@ -217,6 +217,15 @@ If baseline checks fail unexpectedly:
 - re-run the reference scenarios before checking baseline
 - compare current report `analysis/production/latest/metrics.json` to baseline
 
+If `DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh` fails with `command not found`:
+
+- your interactive shell may expose `micromamba` via shell init/function, while scripts require an executable path
+- use an absolute executable path instead:
+
+```bash
+DOSELAB_ENV_CMD="$HOME/.local/bin/micromamba" ./scripts/build-production.sh
+```
+
 ## Acknowledgements
 
 - This project uses Geant4 and follows the Geant4 license terms: http://cern.ch/geant4/license
