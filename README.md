@@ -127,6 +127,16 @@ micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir bui
 
 #### 4) How to run after setup
 
+Macro families (quick reference):
+
+- `cavity-*`: chamber geometry presets only (Farmer/Roos, walled and non-walled).
+- `depth-*`: chamber placement depth + aligned output depth metadata.
+- `field-*`: field shape/size/position + field metadata.
+- `source-*`: source particle/energy spectrum + source metadata.
+- `run-ref-*`: composed batch reference runs.
+- `vis-ref-*`: composed visual reference runs.
+- `run-fano-*`: composed Fano-like chamber checks (use `-p` to sweep EM model).
+
 Run a quick single macro test:
 
 ```bash

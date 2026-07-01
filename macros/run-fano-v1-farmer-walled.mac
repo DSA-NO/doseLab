@@ -1,0 +1,8 @@
+# Fano-like v1 run wrapper: Farmer walled chamber.
+#
+# Select EM model at launch with:
+#   doseLab -p option4|livermore|penelope -b run-fano-v1-farmer-walled.mac
+
+/doseLab/output/tag run-fano-v1-farmer-walled
+/control/execute cavity-farmer-walled.mac
+/control/execute fano-base.mac

@@ -1,0 +1,7 @@
+# Reference depth macro: cavity center at 5 cm from phantom entrance (z=0).
+#
+# This macro owns depth placement and aligned output depth metadata.
+# Keep chamber geometry selection in cavity-*.mac macros.
+
+/doseLab/scenario/depth 5 cm
+/doseLab/output/depth 5 cm

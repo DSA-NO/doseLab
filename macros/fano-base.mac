@@ -1,0 +1,30 @@
+# Reusable Fano-like base macro for doseLab.
+#
+# Intended usage:
+# 1) In a wrapper macro, set tag and chamber metadata.
+# 2) In a wrapper macro, execute a chamber macro (cavity-*.mac).
+# 3) Then execute this base macro.
+#
+# Example wrapper sequence:
+#   /doseLab/output/tag fano-v1-farmer-option4
+#   /control/execute cavity-farmer.mac
+#   /control/execute fano-base.mac
+
+# Apply reference depth placement + aligned output depth metadata.
+/control/execute depth-ref-5cm-center.mac
+
+# Fano-like homogenization: force cavity and wall to water.
+# Chamber dimensions/orientation still come from the chosen preset.
+/doseLab/cavity/material G4_WATER
+/doseLab/cavity/wallMaterial G4_WATER
+/doseLab/cavity/print
+
+/run/initialize
+
+# Reuse existing source and field definitions.
+/control/execute source-co60-teletherapy.mac
+/control/execute field-ref-10x10-ssd100.mac
+
+# Fast-gate event count. Wrapper macros may override this file later for full runs.
+/run/printProgress 10000
+/run/beamOn 200000

@@ -1,0 +1,8 @@
+# Fano-like v1 run wrapper: Farmer chamber.
+#
+# Select EM model at launch with:
+#   doseLab -p option4|livermore|penelope -b run-fano-v1-farmer.mac
+
+/doseLab/output/tag run-fano-v1-farmer
+/control/execute cavity-farmer.mac
+/control/execute fano-base.mac

@@ -2,7 +2,6 @@
 # Use before /run/initialize in batch or visualization macros.
 
 /doseLab/scenario/type roos_walled
-/doseLab/scenario/depth 5 cm
 /doseLab/cavity/material G4_AIR
 /doseLab/cavity/wallMaterial G4_PLEXIGLASS
 # Water test override (both cavity and wall):
