@@ -37,6 +37,37 @@ To avoid mixing host and environment-specific builds, use dedicated build direct
 
 Recommended rule: do not reuse the same build directory across micromamba and host-Geant4 workflows.
 
+## Parallel Setup (Local Geant4 + Micromamba)
+
+If you use both workflows on the same machine, keep your shell neutral by default and opt in per session.
+
+- Do not auto-source `geant4.sh` in shell startup files.
+- Do not auto-activate a conda/mamba environment in shell startup files.
+- Activate only one stack at a time in a given shell.
+
+Quick checks before configuring/building:
+
+```bash
+env | grep -Ei '(^|_)(g4|geant4|rootsys|root_|cmake_prefix_path|ld_library_path)=' || true
+echo "CONDA_DEFAULT_ENV=${CONDA_DEFAULT_ENV:-none}"
+```
+
+Typical session switches:
+
+```bash
+# Local Geant4 session
+source "$HOME/geant4/install/bin/geant4.sh"
+
+# Micromamba session
+micromamba activate doselab-production
+
+# Return to neutral (example)
+micromamba deactivate || true
+unset Geant4_DIR G4INSTALL G4SYSTEM G4DATASETSDIR ROOTSYS CMAKE_PREFIX_PATH LD_LIBRARY_PATH
+```
+
+This avoids mixed include/library paths and reduces hard-to-debug CMake/runtime conflicts.
+
 ### A) Run with micromamba (recommended)
 
 This path mirrors CI and gives the most reproducible dependency stack.
@@ -229,4 +260,5 @@ DOSELAB_ENV_CMD="$HOME/.local/bin/micromamba" ./scripts/build-production.sh
 ## Acknowledgements
 
 - This project uses Geant4 and follows the Geant4 license terms: http://cern.ch/geant4/license
-- Parts of this code and documentation workflow were developed with assistance from GitHub Copilot in VS Code (GPT-5.3-Codex)
+- Parts of this code and documentation workflow were developed with assistance from GitHub Copilot in VS Code.
+- Copilot may route requests across different language models depending on context and availability.

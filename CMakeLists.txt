@@ -29,6 +29,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 add_executable(doseLab doseLab.cc ${sources} ${headers})
 target_include_directories(doseLab PRIVATE include)
 target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
+target_compile_definitions(doseLab PRIVATE DOSELAB_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
 # Optional ROOT-based summary helper for post-run output inspection.
 option(DOSELAB_BUILD_ROOT_SUMMARY "Build doseLabRootSummary helper when ROOT is available" ON)
