@@ -79,6 +79,32 @@ Use only after intentional physics/model changes and validation:
 micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --write-baseline
 ```
 
+#### 4) How to run after setup
+
+Run a quick single macro test:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLab -b ./build-production/run-simple.mac
+```
+
+Run the four production reference scenarios:
+
+```bash
+DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
+```
+
+Check results against baseline:
+
+```bash
+micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production
+```
+
+Summarize a ROOT output file:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLabRootSummary ./build-production/doseLab-run-ref-10x10-d5cm-6mv-farmer-walled.root
+```
+
 #### Optional fresh-user simulation
 
 If you want to simulate a "new user" shell with no inherited Geant4/ROOT setup:
