@@ -22,6 +22,21 @@ You can run doseLab in two supported ways:
 - **A) Reproducible micromamba workflow** (recommended for consistency with CI)
 - **B) Your own local Geant4 environment** (recommended if you already maintain a validated Geant4 setup)
 
+## Build Folder Policy
+
+To avoid mixing host and environment-specific builds, use dedicated build directories:
+
+- `build-production`
+  - Canonical reproducible build used for baseline checks and CI parity.
+- `build-dev-mamba`
+  - Optional local sandbox for iterative development inside the micromamba environment.
+- `build-check`
+  - Temporary sanity-check directory; safe to delete after validation.
+- `build`
+  - Reserved for local host-Geant4 builds (non-micromamba path), if you use that workflow.
+
+Recommended rule: do not reuse the same build directory across micromamba and host-Geant4 workflows.
+
 ### A) Run with micromamba (recommended)
 
 This path mirrors CI and gives the most reproducible dependency stack.
