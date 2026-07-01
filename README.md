@@ -69,8 +69,10 @@ micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir bui
 If you want to simulate a "new user" shell with no inherited Geant4/ROOT setup:
 
 ```bash
-env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
+env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="$HOME/.local/bin:$HOME/micromamba/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
 env | grep -Ei '(^|_)(g4|geant4|rootsys|root_|cmake_prefix_path|ld_library_path)=' || true
+command -v micromamba
+micromamba --version
 ```
 
 Then clone and run from that shell.
