@@ -66,6 +66,21 @@ micromamba deactivate || true
 unset Geant4_DIR G4INSTALL G4SYSTEM G4DATASETSDIR ROOTSYS CMAKE_PREFIX_PATH LD_LIBRARY_PATH
 ```
 
+Optional local shell helpers:
+
+If you switch often, you may prefer small shell functions in your own shell startup file. These are not provided by doseLab itself, but they can make session switching faster:
+
+```bash
+use_doselab_mamba() {
+  micromamba activate doselab-production
+}
+
+use_doselab_geant4() {
+  micromamba deactivate || true
+  source "$HOME/geant4/install/bin/geant4.sh"
+}
+```
+
 This avoids mixed include/library paths and reduces hard-to-debug CMake/runtime conflicts.
 
 ### A) Run with micromamba (recommended)
