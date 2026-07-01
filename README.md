@@ -118,6 +118,18 @@ Run a quick single macro test:
 micromamba run -n doselab-production ./build-production/doseLab -b ./build-production/run-simple.mac
 ```
 
+Run a visual macro from the micromamba environment:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
+```
+
+Note: `-n` belongs to `micromamba run` and must be followed by the environment name, not the executable path. If the environment is already activated in your shell, you can also run the binary directly:
+
+```bash
+./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
+```
+
 Run the four production reference scenarios:
 
 ```bash
