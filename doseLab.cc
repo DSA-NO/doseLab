@@ -7,6 +7,7 @@
 
 #include "DoseLabActionInitialization.hh"
 #include "DoseLabDetectorConstruction.hh"
+#include "DoseLabMacroRuntime.hh"
 #include "FTFP_BERT.hh"
 #include "G4EmLivermorePhysics.hh"
 #include "G4EmPenelopePhysics.hh"
@@ -139,6 +140,14 @@ int main(int argc, char** argv)
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
 
+  const auto runtimeMacroConfig = DoseLab::MacroRuntime::ResolveRuntimeMacroConfig(argv, macro, visMacro);
+  {
+    G4String warning;
+    if (!DoseLab::MacroRuntime::ApplyWorkingDirectory(runtimeMacroConfig, warning)) {
+      G4cerr << "Warning: " << warning << G4endl;
+    }
+  }
+
   // Activate score ntuple writer
   // The verbose level can be also set via UI commands
   // /score/ntuple/writerVerbose level
@@ -155,7 +164,7 @@ int main(int argc, char** argv)
   if (macro.size()) {
     // batch mode: no Qt window
     G4String command = "/control/execute ";
-    UImanager->ApplyCommand(command + macro);
+    UImanager->ApplyCommand(command + runtimeMacroConfig.batchMacroArg);
   }
   else if (visMacro.size()) {
     // visual macro mode: Qt window open, execute macro, keep session open for inspection
@@ -163,7 +172,7 @@ int main(int argc, char** argv)
     if (ui->IsGUI()) {
       UImanager->ApplyCommand("/control/execute gui.mac");
     }
-    UImanager->ApplyCommand("/control/execute " + visMacro);
+    UImanager->ApplyCommand("/control/execute " + runtimeMacroConfig.visMacroArg);
     ui->SessionStart();
     delete ui;
   }
