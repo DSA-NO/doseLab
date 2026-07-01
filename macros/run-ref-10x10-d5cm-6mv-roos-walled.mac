@@ -3,6 +3,7 @@
 # Reference run: 10x10 cm^2, depth = 5 cm water-equivalent, 6 MV source, Roos-like walled chamber.
 
 /control/execute cavity-roos-walled.mac
+/control/execute depth-ref-5cm-center.mac
 
 /run/initialize
 
