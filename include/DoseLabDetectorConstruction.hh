@@ -42,7 +42,7 @@ class DoseLabDetectorMessenger;
 /// - /doseLab/cavity/wallCut <value> <unit>
 /// - /doseLab/cavity/maxStep <value> <unit>
 /// - /doseLab/cavity/wallMaxStep <value> <unit>
-/// - /doseLab/cavity/update
+/// - /doseLab/cavity/update (deprecated no-op; set cavity commands before /run/initialize)
 /// - /doseLab/cavity/print
 ///
 /// In ConstructSDandField() sensitive detectors are created for the cavity

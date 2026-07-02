@@ -109,9 +109,9 @@ DoseLabDetectorMessenger::DoseLabDetectorMessenger(DoseLabDetectorConstruction* 
   fWallMaxStepCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
   fUpdateCmd = new G4UIcmdWithoutParameter("/doseLab/cavity/update", this);
-  fUpdateCmd->SetGuidance("Apply command is disabled in Qt interactive mode for stability.");
-  fUpdateCmd->SetGuidance("Set cavity parameters before /run/initialize instead.");
-  fUpdateCmd->AvailableForStates(G4State_Idle);
+  fUpdateCmd->SetGuidance("Deprecated no-op kept for backward compatibility.");
+  fUpdateCmd->SetGuidance("Set cavity commands before /run/initialize instead.");
+  fUpdateCmd->AvailableForStates(G4State_PreInit);
 
   fPrintCmd = new G4UIcmdWithoutParameter("/doseLab/cavity/print", this);
   fPrintCmd->SetGuidance("Print current cavity configuration.");
@@ -201,7 +201,7 @@ void DoseLabDetectorMessenger::SetNewValue(G4UIcommand* command, G4String newVal
   }
 
   if (geometryCommand) {
-    G4cout << "Cavity parameters updated. Run /doseLab/cavity/update to apply geometry changes."
+    G4cout << "Cavity parameter updated. Set all cavity commands before /run/initialize."
            << G4endl;
   }
 }

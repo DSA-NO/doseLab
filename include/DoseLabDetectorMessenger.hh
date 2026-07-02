@@ -47,7 +47,7 @@ class DoseLabDetectorMessenger : public G4UImessenger
     G4UIcmdWithADoubleAndUnit* fWallCutCmd;
     G4UIcmdWithADoubleAndUnit* fCavityMaxStepCmd;
     G4UIcmdWithADoubleAndUnit* fWallMaxStepCmd;
-    G4UIcmdWithoutParameter* fUpdateCmd;
+    G4UIcmdWithoutParameter* fUpdateCmd;  // Deprecated no-op retained for backward compatibility.
     G4UIcmdWithoutParameter* fPrintCmd;
 };
 
