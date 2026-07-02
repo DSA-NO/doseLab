@@ -1,0 +1,13 @@
+# Return to visualization-friendly settings and draw scoring projections.
+# Requires existing meshes (e.g. waterPlane and chamberPlane) with quantity name "dose".
+
+/tracking/storeTrajectory 1
+/vis/viewer/set/autoRefresh false
+
+# Draw XY projections for both meshes.
+/score/drawProjection waterPlane dose defaultLinearColorMap 100
+/score/drawProjection chamberPlane dose defaultLinearColorMap 100
+
+/vis/viewer/set/autoRefresh true
+/vis/viewer/refresh
+/vis/viewer/update

@@ -1,7 +1,7 @@
 # Switch from interactive visualization to memory-safe production running.
 # Use this before large /run/beamOn values after inspecting events in vis mode.
 
-/vis/disable
+/vis/viewer/set/autoRefresh false
 /tracking/storeTrajectory 0
 /vis/scene/endOfEventAction refresh
 /run/printProgress 100
