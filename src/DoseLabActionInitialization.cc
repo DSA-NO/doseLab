@@ -23,7 +23,7 @@ DoseLabActionInitialization::DoseLabActionInitialization(
 
 void DoseLabActionInitialization::BuildForMaster() const
 {
-  SetUserAction(new DoseLabRunAction());
+  SetUserAction(new DoseLabRunAction(fDetectorConstruction));
 }
 
 void DoseLabActionInitialization::Build() const
