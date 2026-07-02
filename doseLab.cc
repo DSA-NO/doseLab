@@ -15,6 +15,7 @@
 
 #include "G4AnalysisManager.hh"
 #include "G4RunManagerFactory.hh"
+#include "G4ScoringManager.hh"
 #include "G4SteppingVerbose.hh"
 #include "G4TScoreNtupleWriter.hh"
 #include "G4UIExecutive.hh"
@@ -127,6 +128,10 @@ int main(int argc, char** argv)
 
   auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction);
   runManager->SetUserInitialization(actionInitialization);
+
+  // Register /score UI commands before any user macro is parsed.
+  // Mesh-scoring macros invoke /score/* prior to /run/initialize.
+  G4ScoringManager::GetScoringManager();
 
   // Initialize visualization
   auto visManager = new G4VisExecutive;
