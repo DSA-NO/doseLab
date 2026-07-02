@@ -6,6 +6,18 @@
 /control/execute cavity-roos-walled.mac
 /control/execute depth-ref-5cm-center.mac
 
+# Create scoring meshes for dose visualization
+/score/create/boxMesh waterPlane
+/score/mesh/boxSize 10 10 0.1 cm
+/score/mesh/nBin 20 20 1
+/score/quantity/doseDeposit dose
+
+/score/create/boxMesh chamberPlane
+/score/mesh/translate 0 0 -5 cm
+/score/mesh/boxSize 10 10 0.1 cm
+/score/mesh/nBin 20 20 1
+/score/quantity/doseDeposit dose
+
 /run/initialize
 
 /control/execute vis.mac
