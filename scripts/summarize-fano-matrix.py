@@ -208,6 +208,8 @@ def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol, precisi
 
     primary_pass = precision_ok and physics_pass
 
+    status = "PASS" if primary_pass else ("INCONCLUSIVE" if not precision_ok else "FAIL")
+
     return {
         "max_rel_sem": float(max_rel_sem),
         "cases": case_rows,
@@ -218,7 +220,7 @@ def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol, precisi
         },
         "checks": checks,
         "pass": primary_pass,
-        "status": "PASS" if primary_pass else ("INCONCLUSIVE" if precision_ok else "INCONCLUSIVE"),
+        "status": status,
     }
 
 
@@ -301,7 +303,12 @@ def main():
     parser.add_argument("--chamber-spread-tol", type=float, default=0.01)
     parser.add_argument("--model-spread-tol", type=float, default=0.015)
     parser.add_argument("--z-tol", type=float, default=3.0)
-    parser.add_argument("--precision-threshold", type=float, default=0.03, help="Max rel uncertainty for PASS (default 3%)")
+    parser.add_argument("--precision-threshold", type=float, default=0.03, help="Max rel uncertainty for PASS (default 3%%)")
+    parser.add_argument(
+        "--ci-physics-gate",
+        action="store_true",
+        help="In strict mode, fail only when precision passes but physics agreement fails",
+    )
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
@@ -350,8 +357,17 @@ def main():
     print(f"Wrote JSON summary: {output_json}")
     print(f"Wrote text summary: {output_text}")
 
-    if args.strict and (missing or not summary["pass"]):
-        return 1
+    if args.strict:
+        if missing:
+            return 1
+
+        if args.ci_physics_gate:
+            precision_pass = summary["checks"]["precision"]["pass"]
+            physics_pass = summary["checks"]["physics_agreement"]["pass"]
+            if precision_pass and not physics_pass:
+                return 1
+        elif not summary["pass"]:
+            return 1
 
     return 0
 

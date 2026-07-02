@@ -161,6 +161,48 @@ Run the four production reference scenarios:
 DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
 ```
 
+Run Fano matrix in full-statistics mode (default, 20M primaries per case):
+
+```bash
+DOSELAB_ENV_CMD=micromamba ./scripts/run-fano-matrix.sh
+```
+
+Run Fano matrix in fast mode (2M primaries per case):
+
+```bash
+DOSELAB_ENV_CMD=micromamba DOSELAB_FANO_MODE=fast ./scripts/run-fano-matrix.sh
+```
+
+Override primaries explicitly (takes precedence over mode):
+
+```bash
+DOSELAB_ENV_CMD=micromamba DOSELAB_FANO_PRIMARIES=5000000 ./scripts/run-fano-matrix.sh
+```
+
+Summarize and gate Fano results (strict):
+
+```bash
+micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py --strict
+```
+
+CI-style gate (fails only if precision passes and physics agreement fails):
+
+```bash
+micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py --strict --ci-physics-gate
+```
+
+Archive the current Fano summary to a dated baseline folder:
+
+```bash
+./scripts/archive-fano-baseline.sh
+```
+
+Include ROOT files in the archive snapshot:
+
+```bash
+DOSELAB_FANO_INCLUDE_ROOT=1 ./scripts/archive-fano-baseline.sh
+```
+
 Check results against baseline:
 
 ```bash

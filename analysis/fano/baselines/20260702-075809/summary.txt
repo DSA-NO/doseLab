@@ -1,0 +1,30 @@
+doseLab Fano matrix summary
+Status: PASS
+
+Precision Check:
+  max relative uncertainty: 1.33% (threshold: 3.00%)
+  PASS
+
+Physics Agreement (vs option4 per chamber):
+  chamber        livermore ratio  z-score  penelope ratio  z-score
+  farmer            0.995006   -0.3073      1.000882    0.0543
+  roos              0.998285   -0.0915      0.995247   -0.2541
+  farmer-walled     0.995006   -0.3073      1.000882    0.0543
+  roos-walled       1.008098    0.4299      1.008430    0.4478
+
+Physics Agreement Check:
+  Worst: roos-walled/penelope z=0.4478 (tol=3.00)
+  PASS
+
+Geometry Diagnostics (informational):
+  Chamber spread across models per chamber:
+    farmer       :   0.588% (tol=1.500%)
+    roos         :   0.476% (tol=1.500%)
+    farmer-walled:   0.588% (tol=1.500%)
+    roos-walled  :   0.838% (tol=1.500%)
+  Model spread across chambers per model:
+    option4      :   0.615% (tol=1.000%)
+    livermore    :   0.847% (tol=1.000%)
+    penelope     :   0.701% (tol=1.000%)
+
+Overall: PASS

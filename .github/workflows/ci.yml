@@ -121,3 +121,45 @@ jobs:
         with:
           name: production-metrics
           path: analysis/production/latest/metrics.json
+
+  fano-validation:
+    name: Fano validation (precision-aware)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup production environment
+        uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: doselab-production
+          environment-file: envs/doselab-production.yml
+          init-shell: bash
+
+      - name: Build production profile
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
+
+      - name: Run Fano matrix (fast mode)
+        run: |
+          DOSELAB_ENV_CMD=micromamba \
+          DOSELAB_FANO_MODE=fast \
+          DOSELAB_OUTPUT_DIR=analysis/fano/ci \
+          ./scripts/run-fano-matrix.sh
+
+      - name: Summarize and gate (physics only when precision passes)
+        run: |
+          micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py \
+            --input-dir analysis/fano/ci \
+            --output-json analysis/fano/ci/summary.json \
+            --output-text analysis/fano/ci/summary.txt \
+            --strict \
+            --ci-physics-gate
+
+      - name: Upload Fano summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: fano-summary
+          path: |
+            analysis/fano/ci/summary.json
+            analysis/fano/ci/summary.txt

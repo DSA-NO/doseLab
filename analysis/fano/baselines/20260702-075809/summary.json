@@ -1,0 +1,267 @@
+{
+  "input_dir": "analysis/fano/latest",
+  "expected_cases": 12,
+  "found_cases": 12,
+  "missing_files": [],
+  "summary": {
+    "max_rel_sem": 0.01329132141074495,
+    "cases": [
+      {
+        "chamber": "farmer",
+        "model": "option4",
+        "tag": "run-fano-v1-farmer-option4",
+        "entries": 20000000,
+        "dose_mean": 5.19529150416965e-26,
+        "dose_sem": 5.964686588165688e-28,
+        "dose_rel_sem": 0.01148094689851096
+      },
+      {
+        "chamber": "farmer",
+        "model": "livermore",
+        "tag": "run-fano-v1-farmer-livermore",
+        "entries": 20000000,
+        "dose_mean": 5.169345094418642e-26,
+        "dose_sem": 5.975986138150286e-28,
+        "dose_rel_sem": 0.011560431793579766
+      },
+      {
+        "chamber": "farmer",
+        "model": "penelope",
+        "tag": "run-fano-v1-farmer-penelope",
+        "entries": 20000000,
+        "dose_mean": 5.199874947140719e-26,
+        "dose_sem": 5.965284098505792e-28,
+        "dose_rel_sem": 0.01147197607470532
+      },
+      {
+        "chamber": "roos",
+        "model": "option4",
+        "tag": "run-fano-v1-roos-option4",
+        "entries": 20000000,
+        "dose_mean": 5.203315566637521e-26,
+        "dose_sem": 6.886802585805777e-28,
+        "dose_rel_sem": 0.013235412109083664
+      },
+      {
+        "chamber": "roos",
+        "model": "livermore",
+        "tag": "run-fano-v1-roos-livermore",
+        "entries": 20000000,
+        "dose_mean": 5.194389406712387e-26,
+        "dose_sem": 6.90402991371831e-28,
+        "dose_rel_sem": 0.01329132141074495
+      },
+      {
+        "chamber": "roos",
+        "model": "penelope",
+        "tag": "run-fano-v1-roos-penelope",
+        "entries": 20000000,
+        "dose_mean": 5.178584039773977e-26,
+        "dose_sem": 6.87885544958619e-28,
+        "dose_rel_sem": 0.013283274726746392
+      },
+      {
+        "chamber": "farmer-walled",
+        "model": "option4",
+        "tag": "run-fano-v1-farmer-walled-option4",
+        "entries": 20000000,
+        "dose_mean": 5.195291504169647e-26,
+        "dose_sem": 5.96468658816568e-28,
+        "dose_rel_sem": 0.01148094689851095
+      },
+      {
+        "chamber": "farmer-walled",
+        "model": "livermore",
+        "tag": "run-fano-v1-farmer-walled-livermore",
+        "entries": 20000000,
+        "dose_mean": 5.169345094418636e-26,
+        "dose_sem": 5.97598613815029e-28,
+        "dose_rel_sem": 0.011560431793579785
+      },
+      {
+        "chamber": "farmer-walled",
+        "model": "penelope",
+        "tag": "run-fano-v1-farmer-walled-penelope",
+        "entries": 20000000,
+        "dose_mean": 5.199874947140698e-26,
+        "dose_sem": 5.965284098505785e-28,
+        "dose_rel_sem": 0.011471976074705353
+      },
+      {
+        "chamber": "roos-walled",
+        "model": "option4",
+        "tag": "run-fano-v1-roos-walled-option4",
+        "entries": 20000000,
+        "dose_mean": 5.171413685400258e-26,
+        "dose_sem": 6.858449085519412e-28,
+        "dose_rel_sem": 0.013262232539782941
+      },
+      {
+        "chamber": "roos-walled",
+        "model": "livermore",
+        "tag": "run-fano-v1-roos-walled-livermore",
+        "entries": 20000000,
+        "dose_mean": 5.213294182721357e-26,
+        "dose_sem": 6.917157977298422e-28,
+        "dose_rel_sem": 0.013268305479909906
+      },
+      {
+        "chamber": "roos-walled",
+        "model": "penelope",
+        "tag": "run-fano-v1-roos-walled-penelope",
+        "entries": 20000000,
+        "dose_mean": 5.215009401534059e-26,
+        "dose_sem": 6.910028967456076e-28,
+        "dose_rel_sem": 0.013250271352192398
+      }
+    ],
+    "physics_checks_per_chamber": [
+      {
+        "chamber": "farmer",
+        "model": "livermore",
+        "vs_reference": "option4",
+        "ratio": 0.9950057836542601,
+        "z": -0.3073005095793892,
+        "pass": true
+      },
+      {
+        "chamber": "farmer",
+        "model": "penelope",
+        "vs_reference": "option4",
+        "ratio": 1.000882230182347,
+        "z": 0.05433347134005639,
+        "pass": true
+      },
+      {
+        "chamber": "roos",
+        "model": "livermore",
+        "vs_reference": "option4",
+        "ratio": 0.9982845245861376,
+        "z": -0.09153534840773199,
+        "pass": true
+      },
+      {
+        "chamber": "roos",
+        "model": "penelope",
+        "vs_reference": "option4",
+        "ratio": 0.9952469677176383,
+        "z": -0.2540790624764056,
+        "pass": true
+      },
+      {
+        "chamber": "farmer-walled",
+        "model": "livermore",
+        "vs_reference": "option4",
+        "ratio": 0.9950057836542594,
+        "z": -0.3073005095794301,
+        "pass": true
+      },
+      {
+        "chamber": "farmer-walled",
+        "model": "penelope",
+        "vs_reference": "option4",
+        "ratio": 1.0008822301823435,
+        "z": 0.054333471339838735,
+        "pass": true
+      },
+      {
+        "chamber": "roos-walled",
+        "model": "livermore",
+        "vs_reference": "option4",
+        "ratio": 1.0080984620200342,
+        "z": 0.42994424253328367,
+        "pass": true
+      },
+      {
+        "chamber": "roos-walled",
+        "model": "penelope",
+        "vs_reference": "option4",
+        "ratio": 1.0084301351208622,
+        "z": 0.4477852973591469,
+        "pass": true
+      }
+    ],
+    "spreads": {
+      "by_model_across_chambers": [
+        {
+          "model": "option4",
+          "spread_fraction": 0.006145225429262784,
+          "spread_percent": 0.6145225429262784
+        },
+        {
+          "model": "livermore",
+          "spread_fraction": 0.008473594233369401,
+          "spread_percent": 0.8473594233369401
+        },
+        {
+          "model": "penelope",
+          "spread_fraction": 0.007007119763705594,
+          "spread_percent": 0.7007119763705594
+        }
+      ],
+      "by_chamber_across_models": [
+        {
+          "chamber": "farmer",
+          "spread_fraction": 0.005884512205676231,
+          "spread_percent": 0.5884512205676231
+        },
+        {
+          "chamber": "roos",
+          "spread_fraction": 0.004763302769235796,
+          "spread_percent": 0.4763302769235796
+        },
+        {
+          "chamber": "farmer-walled",
+          "spread_fraction": 0.005884512205673365,
+          "spread_percent": 0.5884512205673366
+        },
+        {
+          "chamber": "roos-walled",
+          "spread_fraction": 0.008383943512605015,
+          "spread_percent": 0.8383943512605015
+        }
+      ]
+    },
+    "checks": {
+      "precision": {
+        "max_rel_sem": 0.01329132141074495,
+        "threshold": 0.03,
+        "status": "PASS",
+        "pass": true
+      },
+      "physics_agreement": {
+        "threshold_z": 3.0,
+        "worst": {
+          "chamber": "roos-walled",
+          "model": "penelope",
+          "vs_reference": "option4",
+          "ratio": 1.0084301351208622,
+          "z": 0.4477852973591469,
+          "pass": true
+        },
+        "pass": true
+      },
+      "diagnostics": {
+        "chamber_spread": {
+          "threshold_fraction": 0.01,
+          "worst": {
+            "model": "livermore",
+            "spread_fraction": 0.008473594233369401,
+            "spread_percent": 0.8473594233369401
+          }
+        },
+        "model_spread": {
+          "threshold_fraction": 0.015,
+          "worst": {
+            "chamber": "roos-walled",
+            "spread_fraction": 0.008383943512605015,
+            "spread_percent": 0.8383943512605015
+          }
+        }
+      }
+    },
+    "pass": true,
+    "status": "PASS"
+  },
+  "overall_pass": true
+}
