@@ -25,10 +25,6 @@
 namespace DoseLab
 {
 
-namespace
-{
-}  // namespace
-
 DoseLabRunAction::DoseLabRunAction()
 {
   ConfigureCommands();
