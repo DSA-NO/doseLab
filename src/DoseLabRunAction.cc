@@ -25,7 +25,8 @@
 namespace DoseLab
 {
 
-DoseLabRunAction::DoseLabRunAction()
+DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction)
+: fDetectorConstruction(detectorConstruction)
 {
   ConfigureCommands();
 
@@ -174,12 +175,8 @@ void DoseLabRunAction::ApplyScenario()
     return;
   }
 
-  const auto detectorBase = G4RunManager::GetRunManager()->GetUserDetectorConstruction();
-  auto detector =
-    const_cast<DoseLabDetectorConstruction*>(dynamic_cast<const DoseLabDetectorConstruction*>(detectorBase));
-
-  if (detector) {
-    detector->SetCavityType(preset->cavityType);
+  if (fDetectorConstruction) {
+    fDetectorConstruction->SetCavityType(preset->cavityType);
   }
 
   fOutputChamber = OutputMetadata::CanonicalLabel(preset->chamber);
@@ -191,8 +188,8 @@ void DoseLabRunAction::ApplyScenario()
 
   if (depthCm >= 0.) {
     fOutputDepthCm = depthCm;
-    if (detector) {
-      detector->SetCavityDepth(depthCm * cm);
+    if (fDetectorConstruction) {
+      fDetectorConstruction->SetCavityDepth(depthCm * cm);
     }
   }
 }

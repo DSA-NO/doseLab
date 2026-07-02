@@ -20,6 +20,8 @@ class G4GenericMessenger;
 namespace DoseLab
 {
 
+class DoseLabDetectorConstruction;
+
 /// Run action class
 ///
 /// It accumulates statistic and computes dispersion of the energy deposit
@@ -41,7 +43,7 @@ namespace DoseLab
 class DoseLabRunAction : public G4UserRunAction
 {
   public:
-    DoseLabRunAction();
+    explicit DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction = nullptr);
     ~DoseLabRunAction() override = default;
 
     void BeginOfRunAction(const G4Run*) override;
@@ -56,6 +58,7 @@ class DoseLabRunAction : public G4UserRunAction
     void ApplyScenario();
     G4String BuildOutputFileName() const;
     static G4String SanitizeForFileName(const G4String& value);
+    DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
 
     std::unique_ptr<G4GenericMessenger> fMessenger;
     std::unique_ptr<G4GenericMessenger> fScenarioMessenger;

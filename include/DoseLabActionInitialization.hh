@@ -15,14 +15,18 @@ namespace DoseLab
 
 /// Action initialization class.
 
+class DoseLabDetectorConstruction;
 class DoseLabActionInitialization : public G4VUserActionInitialization
 {
   public:
-    DoseLabActionInitialization() = default;
+    explicit DoseLabActionInitialization(DoseLabDetectorConstruction* detectorConstruction = nullptr);
     ~DoseLabActionInitialization() override = default;
 
     void BuildForMaster() const override;
     void Build() const override;
+
+  private:
+    DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
 };
 
 }  // namespace DoseLab

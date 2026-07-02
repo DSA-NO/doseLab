@@ -128,7 +128,7 @@ int main(int argc, char** argv)
   }
   runManager->SetUserInitialization(physicsList);
 
-  auto actionInitialization = new DoseLab::DoseLabActionInitialization();
+  auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction);
   runManager->SetUserInitialization(actionInitialization);
 
   // Initialize visualization

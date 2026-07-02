@@ -8,21 +8,28 @@
 #include "DoseLabActionInitialization.hh"
 
 #include "DoseLabEventAction.hh"
+#include "DoseLabDetectorConstruction.hh"
 #include "DoseLabPrimaryGeneratorAction.hh"
 #include "DoseLabRunAction.hh"
 
 namespace DoseLab
 {
 
+DoseLabActionInitialization::DoseLabActionInitialization(
+  DoseLabDetectorConstruction* detectorConstruction)
+: fDetectorConstruction(detectorConstruction)
+{
+}
+
 void DoseLabActionInitialization::BuildForMaster() const
 {
-  SetUserAction(new DoseLabRunAction);
+  SetUserAction(new DoseLabRunAction());
 }
 
 void DoseLabActionInitialization::Build() const
 {
   SetUserAction(new DoseLabPrimaryGeneratorAction);
-  SetUserAction(new DoseLabRunAction);
+  SetUserAction(new DoseLabRunAction(fDetectorConstruction));
   SetUserAction(new DoseLabEventAction);
 }
 
