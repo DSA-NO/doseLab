@@ -17,3 +17,6 @@ analysis/production/latest/
 
 # Local-only backup helper
 scripts/backup-mirror-weekly.sh
+
+# Python cache artifacts
+scripts/__pycache__/
