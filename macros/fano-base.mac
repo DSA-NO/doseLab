@@ -27,4 +27,4 @@
 
 # Fast-gate event count. Wrapper macros may override this file later for full runs.
 /run/printProgress 10000
-/run/beamOn 2000000
+/run/beamOn 20000000
