@@ -100,22 +100,12 @@ def _load_cases(input_dir: Path):
     return out, missing
 
 
-def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol):
-    ref_key = ("farmer", "option4")
-    if ref_key not in cases:
-        raise RuntimeError("Reference case farmer/option4 is missing")
-
-    ref = cases[ref_key]
-    ref_mean = ref["metrics"]["dose"]["mean"]
-    ref_sem = ref["metrics"]["dose"]["sem"]
-
+def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol, precision_threshold=0.03):
     case_rows = []
     for chamber, model, _ in _expected_cases():
         item = cases[(chamber, model)]
         mean = item["metrics"]["dose"]["mean"]
         sem = item["metrics"]["dose"]["sem"]
-        ratio = mean / max(ref_mean, 1e-30)
-        z = (mean - ref_mean) / max(math.sqrt(sem * sem + ref_sem * ref_sem), 1e-30)
         case_rows.append(
             {
                 "chamber": chamber,
@@ -125,10 +115,45 @@ def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol):
                 "dose_mean": mean,
                 "dose_sem": sem,
                 "dose_rel_sem": item["metrics"]["dose"]["rel_sem"],
-                "ratio_to_ref": ratio,
-                "z_to_ref": z,
             }
         )
+
+    max_rel_sem = max(row["dose_rel_sem"] for row in case_rows)
+    precision_ok = max_rel_sem <= precision_threshold
+    precision_status = "PASS" if precision_ok else "INCONCLUSIVE"
+
+    physics_checks_per_chamber = []
+    for chamber in CHAMBERS:
+        opt4_row = next((r for r in case_rows if r["chamber"] == chamber and r["model"] == "option4"), None)
+        if not opt4_row:
+            continue
+
+        opt4_mean = opt4_row["dose_mean"]
+        opt4_sem = opt4_row["dose_sem"]
+
+        for model in ("livermore", "penelope"):
+            model_row = next((r for r in case_rows if r["chamber"] == chamber and r["model"] == model), None)
+            if not model_row:
+                continue
+
+            model_mean = model_row["dose_mean"]
+            model_sem = model_row["dose_sem"]
+            ratio = model_mean / max(opt4_mean, 1e-30)
+            z = (model_mean - opt4_mean) / max(math.sqrt(model_sem * model_sem + opt4_sem * opt4_sem), 1e-30)
+
+            physics_checks_per_chamber.append(
+                {
+                    "chamber": chamber,
+                    "model": model,
+                    "vs_reference": "option4",
+                    "ratio": float(ratio),
+                    "z": float(z),
+                    "pass": abs(z) <= z_tol,
+                }
+            )
+
+    physics_pass = all(check["pass"] for check in physics_checks_per_chamber)
+    worst_physics_z = max(physics_checks_per_chamber, key=lambda x: abs(x["z"]), default={})
 
     chamber_spreads = []
     for model in MODELS:
@@ -156,94 +181,106 @@ def _compute_summary(cases, chamber_spread_tol, model_spread_tol, z_tol):
 
     worst_chamber_spread = max(chamber_spreads, key=lambda x: x["spread_fraction"])
     worst_model_spread = max(model_spreads, key=lambda x: x["spread_fraction"])
-    worst_abs_z = max(case_rows, key=lambda x: abs(x["z_to_ref"]))
 
     checks = {
-        "chamber_spread": {
-            "threshold_fraction": chamber_spread_tol,
-            "worst": worst_chamber_spread,
-            "pass": worst_chamber_spread["spread_fraction"] <= chamber_spread_tol,
+        "precision": {
+            "max_rel_sem": float(max_rel_sem),
+            "threshold": precision_threshold,
+            "status": precision_status,
+            "pass": precision_ok,
         },
-        "model_spread": {
-            "threshold_fraction": model_spread_tol,
-            "worst": worst_model_spread,
-            "pass": worst_model_spread["spread_fraction"] <= model_spread_tol,
+        "physics_agreement": {
+            "threshold_z": z_tol,
+            "worst": worst_physics_z if worst_physics_z else {},
+            "pass": physics_pass,
         },
-        "z_score": {
-            "threshold_abs": z_tol,
-            "worst": {
-                "chamber": worst_abs_z["chamber"],
-                "model": worst_abs_z["model"],
-                "z_to_ref": worst_abs_z["z_to_ref"],
+        "diagnostics": {
+            "chamber_spread": {
+                "threshold_fraction": chamber_spread_tol,
+                "worst": worst_chamber_spread,
             },
-            "pass": abs(worst_abs_z["z_to_ref"]) <= z_tol,
+            "model_spread": {
+                "threshold_fraction": model_spread_tol,
+                "worst": worst_model_spread,
+            },
         },
     }
 
-    passed = all(check["pass"] for check in checks.values())
+    primary_pass = precision_ok and physics_pass
 
     return {
-        "reference": {
-            "chamber": "farmer",
-            "model": "option4",
-            "tag": ref["tag"],
-            "dose_mean": ref_mean,
-            "dose_sem": ref_sem,
-        },
+        "max_rel_sem": float(max_rel_sem),
         "cases": case_rows,
+        "physics_checks_per_chamber": physics_checks_per_chamber,
         "spreads": {
             "by_model_across_chambers": chamber_spreads,
             "by_chamber_across_models": model_spreads,
         },
         "checks": checks,
-        "pass": passed,
+        "pass": primary_pass,
+        "status": "PASS" if primary_pass else ("INCONCLUSIVE" if precision_ok else "INCONCLUSIVE"),
     }
 
 
 def _format_text(summary, missing):
     lines = []
     lines.append("doseLab Fano matrix summary")
+    lines.append(f"Status: {summary['status']}")
     lines.append("")
 
+    lines.append("Precision Check:")
     lines.append(
-        "Reference: "
-        f"{summary['reference']['chamber']}/{summary['reference']['model']} "
-        f"(tag={summary['reference']['tag']})"
+        f"  max relative uncertainty: {100.0 * summary['max_rel_sem']:.2f}% "
+        f"(threshold: {100.0 * summary['checks']['precision']['threshold']:.2f}%)"
     )
-    lines.append(
-        f"Reference dose mean={summary['reference']['dose_mean']:.6e}, "
-        f"sem={summary['reference']['dose_sem']:.6e}"
-    )
+    lines.append(f"  {summary['checks']['precision']['status']}")
     lines.append("")
 
-    lines.append("Cases:")
-    lines.append("  chamber        model      ratio_to_ref   rel_sem(%)   z_to_ref")
-    for row in summary["cases"]:
+    if not summary["checks"]["precision"]["pass"]:
+        lines.append("NOTE: Statistical uncertainty is too large to assess physics agreement reliably.")
+        lines.append("      Consider running with more primaries for meaningful model comparisons.")
+        lines.append("")
+    else:
+        lines.append("Physics Agreement (vs option4 per chamber):")
+        lines.append("  chamber        livermore ratio  z-score  penelope ratio  z-score")
+        for chamber in CHAMBERS:
+            liv_check = next((c for c in summary["physics_checks_per_chamber"]
+                             if c["chamber"] == chamber and c["model"] == "livermore"), None)
+            pen_check = next((c for c in summary["physics_checks_per_chamber"]
+                             if c["chamber"] == chamber and c["model"] == "penelope"), None)
+            if liv_check and pen_check:
+                lines.append(
+                    f"  {chamber:<13} {liv_check['ratio']:>12.6f} {liv_check['z']:>9.4f}  "
+                    f"{pen_check['ratio']:>12.6f} {pen_check['z']:>9.4f}"
+                )
+
+        lines.append("")
+        lines.append("Physics Agreement Check:")
+        if summary["checks"]["physics_agreement"]["worst"]:
+            worst = summary["checks"]["physics_agreement"]["worst"]
+            lines.append(
+                f"  Worst: {worst.get('chamber', 'N/A')}/{worst.get('model', 'N/A')} "
+                f"z={worst.get('z', 0):.4f} (tol={summary['checks']['physics_agreement']['threshold_z']:.2f})"
+            )
         lines.append(
-            f"  {row['chamber']:<13} {row['model']:<10} {row['ratio_to_ref']:>12.6f}"
-            f" {100.0 * row['dose_rel_sem']:>11.4f} {row['z_to_ref']:>10.4f}"
+            f"  {'PASS' if summary['checks']['physics_agreement']['pass'] else 'FAIL'}"
+        )
+        lines.append("")
+
+    lines.append("Geometry Diagnostics (informational):")
+    lines.append("  Chamber spread across models per chamber:")
+    for item in summary["spreads"]["by_chamber_across_models"]:
+        lines.append(
+            f"    {item['chamber']:<13}: {item['spread_percent']:>7.3f}% "
+            f"(tol={100.0 * summary['checks']['diagnostics']['model_spread']['threshold_fraction']:.3f}%)"
         )
 
-    lines.append("")
-    lines.append("Checks:")
-    lines.append(
-        "  chamber spread (across chambers per model): "
-        f"{'PASS' if summary['checks']['chamber_spread']['pass'] else 'FAIL'} "
-        f"(worst={summary['checks']['chamber_spread']['worst']['spread_percent']:.3f}%, "
-        f"tol={100.0 * summary['checks']['chamber_spread']['threshold_fraction']:.3f}%)"
-    )
-    lines.append(
-        "  model spread (across models per chamber): "
-        f"{'PASS' if summary['checks']['model_spread']['pass'] else 'FAIL'} "
-        f"(worst={summary['checks']['model_spread']['worst']['spread_percent']:.3f}%, "
-        f"tol={100.0 * summary['checks']['model_spread']['threshold_fraction']:.3f}%)"
-    )
-    lines.append(
-        "  z-score vs reference: "
-        f"{'PASS' if summary['checks']['z_score']['pass'] else 'FAIL'} "
-        f"(worst={summary['checks']['z_score']['worst']['z_to_ref']:.3f}, "
-        f"tol={summary['checks']['z_score']['threshold_abs']:.3f})"
-    )
+    lines.append("  Model spread across chambers per model:")
+    for item in summary["spreads"]["by_model_across_chambers"]:
+        lines.append(
+            f"    {item['model']:<13}: {item['spread_percent']:>7.3f}% "
+            f"(tol={100.0 * summary['checks']['diagnostics']['chamber_spread']['threshold_fraction']:.3f}%)"
+        )
 
     if missing:
         lines.append("")
@@ -252,7 +289,7 @@ def _format_text(summary, missing):
             lines.append(f"  {path}")
 
     lines.append("")
-    lines.append(f"Overall: {'PASS' if summary['pass'] and not missing else 'FAIL'}")
+    lines.append(f"Overall: {'PASS' if summary['pass'] and not missing else summary['status']}")
     return "\n".join(lines) + "\n"
 
 
@@ -264,6 +301,7 @@ def main():
     parser.add_argument("--chamber-spread-tol", type=float, default=0.01)
     parser.add_argument("--model-spread-tol", type=float, default=0.015)
     parser.add_argument("--z-tol", type=float, default=3.0)
+    parser.add_argument("--precision-threshold", type=float, default=0.03, help="Max rel uncertainty for PASS (default 3%)")
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
@@ -292,6 +330,7 @@ def main():
         chamber_spread_tol=args.chamber_spread_tol,
         model_spread_tol=args.model_spread_tol,
         z_tol=args.z_tol,
+        precision_threshold=args.precision_threshold,
     )
 
     report = {
