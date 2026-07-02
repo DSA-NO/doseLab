@@ -29,6 +29,7 @@
 # Draw smooth trajectories at end of event, showing trajectory points
 # as markers 2 pixels wide:
 /vis/scene/add/trajectories smooth
+/tracking/storeTrajectory 1
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 1
@@ -54,7 +55,9 @@
 #/vis/modeling/trajectories/drawByParticleID-0/set e+ yellow
 #
 # To superimpose all of the events from a given run:
-/vis/scene/endOfEventAction accumulate
+# /vis/scene/endOfEventAction accumulate
+# Safer default for mixed vis/production sessions: do not retain all events.
+/vis/scene/endOfEventAction refresh
 #
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
