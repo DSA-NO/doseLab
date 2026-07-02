@@ -15,6 +15,7 @@
 #include "G4Exception.hh"
 #include "G4GenericMessenger.hh"
 #include "G4RunManager.hh"
+#include "G4ScoringManager.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Threading.hh"
 #include "G4UnitsTable.hh"
@@ -213,6 +214,10 @@ G4String DoseLabRunAction::BuildOutputFileName() const
 
 void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 {
+  // Initialize scoring manager for command-based mesh visualization.
+  // Enables /score/ commands to create and visualize dose distributions in real-time.
+  G4ScoringManager::GetScoringManager();
+
   // Get analysis manager.
   auto analysisManager = G4AnalysisManager::Instance();
 
