@@ -14,7 +14,7 @@
 /score/close
 
 /score/create/boxMesh chamberPlane
-/score/mesh/translate 0 0 -5 cm
+/score/mesh/translate/xyz 0 0 -5 cm
 /score/mesh/boxSize 10 10 0.1 cm
 /score/mesh/nBin 20 20 1
 /score/quantity/doseDeposit dose
