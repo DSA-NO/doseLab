@@ -5,36 +5,9 @@ ENV_NAME="${DOSELAB_ENV_NAME:-doselab-production}"
 BUILD_DIR="${DOSELAB_BUILD_DIR:-build-production}"
 OUT_DIR="${DOSELAB_OUTPUT_DIR:-analysis/production/latest}"
 
-resolve_env_cmd() {
-  local candidate="${DOSELAB_ENV_CMD:-}"
-
-  if [[ -n "$candidate" ]]; then
-    if [[ -x "$candidate" ]]; then
-      printf '%s\n' "$candidate"
-      return 0
-    fi
-    if command -v "$candidate" >/dev/null 2>&1; then
-      command -v "$candidate"
-      return 0
-    fi
-  fi
-
-  for cmd in micromamba mamba conda; do
-    if command -v "$cmd" >/dev/null 2>&1; then
-      command -v "$cmd"
-      return 0
-    fi
-  done
-
-  for path in "$HOME/.local/bin/micromamba" "$HOME/micromamba/bin/micromamba"; do
-    if [[ -x "$path" ]]; then
-      printf '%s\n' "$path"
-      return 0
-    fi
-  done
-
-  return 1
-}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./env-helpers.sh
+source "$SCRIPT_DIR/env-helpers.sh"
 
 ENV_CMD="$(resolve_env_cmd || true)"
 
