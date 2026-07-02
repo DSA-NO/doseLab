@@ -18,6 +18,8 @@ jobs:
         with:
           environment-name: ci
           init-shell: bash
+          cache-environment: true
+          cache-downloads: true
           create-args: >-
             -c conda-forge
             geant4
@@ -59,6 +61,8 @@ jobs:
         with:
           environment-name: ci-root
           init-shell: bash
+          cache-environment: true
+          cache-downloads: true
           create-args: >-
             -c conda-forge
             geant4
@@ -106,6 +110,8 @@ jobs:
           environment-name: doselab-production
           environment-file: envs/doselab-production.yml
           init-shell: bash
+          cache-environment: true
+          cache-downloads: true
 
       - name: Build production profile
         run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
@@ -136,6 +142,8 @@ jobs:
           environment-name: doselab-production
           environment-file: envs/doselab-production.yml
           init-shell: bash
+          cache-environment: true
+          cache-downloads: true
 
       - name: Build production profile
         run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
