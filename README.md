@@ -197,6 +197,18 @@ Archive the current Fano summary to a dated baseline folder:
 ./scripts/archive-fano-baseline.sh
 ```
 
+Run full baseline workflow in one command (matrix run, summarize, archive):
+
+```bash
+DOSELAB_ENV_CMD=micromamba ./scripts/run-fano-baseline.sh
+```
+
+Run the same workflow in fast mode:
+
+```bash
+DOSELAB_ENV_CMD=micromamba DOSELAB_FANO_MODE=fast ./scripts/run-fano-baseline.sh
+```
+
 Include ROOT files in the archive snapshot:
 
 ```bash
