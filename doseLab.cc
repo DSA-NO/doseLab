@@ -140,6 +140,8 @@ int main(int argc, char** argv)
   // Get the pointer to the User Interface manager
   auto UImanager = G4UImanager::GetUIpointer();
 
+  // Resolve macro paths from invocation context and move to the macro working
+  // directory so nested /control/execute behaves the same in CLI and IDE runs.
   const auto runtimeMacroConfig = DoseLab::MacroRuntime::ResolveRuntimeMacroConfig(argv, macro, visMacro);
   {
     G4String warning;

@@ -169,6 +169,8 @@ void DoseLabRunAction::SetScenarioDepthOverride(G4double depth)
 
 void DoseLabRunAction::ApplyScenario()
 {
+  // Scenario commands intentionally synchronize both output metadata and
+  // detector cavity presets; users are expected to run these before /run/initialize.
   const auto scenario = OutputMetadata::ParseScenarioKind(fScenarioType);
   const auto* preset = OutputMetadata::FindScenarioPreset(scenario);
   if (!preset) {

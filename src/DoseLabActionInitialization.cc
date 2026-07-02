@@ -23,12 +23,15 @@ DoseLabActionInitialization::DoseLabActionInitialization(
 
 void DoseLabActionInitialization::BuildForMaster() const
 {
+  // Keep detector wiring on the master action too: scenario commands can be
+  // evaluated in master context before worker initialization.
   SetUserAction(new DoseLabRunAction(fDetectorConstruction));
 }
 
 void DoseLabActionInitialization::Build() const
 {
   SetUserAction(new DoseLabPrimaryGeneratorAction);
+  // Worker run action mutates detector presets from /doseLab/scenario/*.
   SetUserAction(new DoseLabRunAction(fDetectorConstruction));
   SetUserAction(new DoseLabEventAction);
 }

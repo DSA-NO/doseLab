@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Shared helper used by production/fano scripts to resolve the environment
+# command consistently in one place.
+
 resolve_env_cmd() {
   local candidate="${DOSELAB_ENV_CMD:-}"
 

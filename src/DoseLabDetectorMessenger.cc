@@ -109,6 +109,8 @@ DoseLabDetectorMessenger::DoseLabDetectorMessenger(DoseLabDetectorConstruction* 
   fWallMaxStepCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
   fUpdateCmd = new G4UIcmdWithoutParameter("/doseLab/cavity/update", this);
+  // Live geometry rebuild is intentionally disabled for stability in Qt/ToolsSG;
+  // keep the command as a deprecated no-op to avoid breaking old macros.
   fUpdateCmd->SetGuidance("Deprecated no-op kept for backward compatibility.");
   fUpdateCmd->SetGuidance("Set cavity commands before /run/initialize instead.");
   fUpdateCmd->AvailableForStates(G4State_PreInit);
