@@ -30,23 +30,15 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
 {
   ConfigureCommands();
 
-  // set printing event number per each event
+  // Print progress every event (reference macros are low-statistics).
   G4RunManager::GetRunManager()->SetPrintProgress(1);
 
-  // Create analysis manager
-  // The choice of the output format is done via the specified
-  // file extension.
+  // Create analysis manager.
   auto analysisManager = G4AnalysisManager::Instance();
 
-  // Create directories
-  // analysisManager->SetHistoDirectoryName("histograms");
-  // analysisManager->SetNtupleDirectoryName("ntuple");
   analysisManager->SetVerboseLevel(1);
   analysisManager->SetNtupleMerging(true);
-  // Note: merging ntuples is available only with Root output
-
-  // Book histograms, ntuple
-  //
+  // Ntuple merging is available with ROOT output.
 
   // Creating histograms for cavity measurements
   analysisManager->CreateH1(AnalysisConfig::kDoseH1Name, "Dose in cavity", 100, 0., 10 * gray);
@@ -55,8 +47,6 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
   analysisManager->CreateH1(
     AnalysisConfig::kTrackLengthH1Name, "Track length in cavity", 100, 0., 10 * cm);
 
-  // Creating ntuple
-  //
   analysisManager->CreateNtuple(AnalysisConfig::kCavityNtupleName, AnalysisConfig::kCavityNtupleTitle);
   analysisManager->CreateNtupleDColumn(AnalysisConfig::kDoseColumnName);
   analysisManager->CreateNtupleDColumn(AnalysisConfig::kEdepColumnName);
@@ -223,23 +213,15 @@ G4String DoseLabRunAction::BuildOutputFileName() const
 
 void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 {
-  // inform the runManager to save random number seed
-  // G4RunManager::GetRunManager()->SetRandomNumberStore(true);
-
-  // Get analysis manager
+  // Get analysis manager.
   auto analysisManager = G4AnalysisManager::Instance();
 
   // Clear previous run data while keeping histogram/ntuple definitions.
   // This makes /vis/plot and /vis/reviewPlots show current-run entries.
   analysisManager->Reset();
 
-  // Open an output file
-  //
+  // Open output file.
   G4String fileName = BuildOutputFileName();
-  // Other supported output types:
-  // G4String fileName = "B4.csv";
-  // G4String fileName = "B4.hdf5";
-  // G4String fileName = "B4.xml";
   analysisManager->OpenFile(fileName);
 
   G4cout << "Using " << analysisManager->GetType() << G4endl;

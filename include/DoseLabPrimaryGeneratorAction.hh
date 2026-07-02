@@ -20,7 +20,7 @@ namespace DoseLab
 ///
 /// It uses G4GeneralParticleSource for flexible particle generation.
 /// Particles can be configured via G4 commands in macros or interactively.
-/// (see the macros provided with this example).
+/// See the macros in macros/source-*.mac for standard source presets.
 
 class DoseLabPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {

@@ -85,9 +85,6 @@ int main(int argc, char** argv)
     ui = new G4UIExecutive(argc, argv);
   }
 
-  // Optionally: choose a different Random engine...
-  // G4Random::setTheEngine(new CLHEP::MTwistEngine);
-
   // Use G4SteppingVerboseWithUnits
   if (verboseBestUnits) {
     G4int precision = 4;
@@ -150,16 +147,12 @@ int main(int argc, char** argv)
     }
   }
 
-  // Activate score ntuple writer
-  // The verbose level can be also set via UI commands
-  // /score/ntuple/writerVerbose level
-  // The default file type ("root") can be changed in xml, csv, hdf5
-  // scoreNtupleWriter.SetDefaultFileType("xml");
+  // Activate score ntuple writer (ROOT output by default).
+  // Verbosity can also be adjusted via /score/ntuple/writerVerbose.
   G4TScoreNtupleWriter<G4AnalysisManager> scoreNtupleWriter;
   scoreNtupleWriter.SetVerboseLevel(1);
   scoreNtupleWriter.SetNtupleMerging(true);
-  // Note: merging ntuples is available only with Root output
-  // (the default in G4TScoreNtupleWriter)
+  // Ntuple merging is available with ROOT output.
 
   // Process macro or start UI session
   //
@@ -188,11 +181,7 @@ int main(int argc, char** argv)
     delete ui;
   }
 
-  // Job termination
-  // Free the store: user actions, physics_list and detector_description are
-  // owned and deleted by the run manager, so they should not be deleted
-  // in the main() program !
-
+  // User actions, physics list, and detector construction are owned by runManager.
   delete visManager;
   delete runManager;
 }

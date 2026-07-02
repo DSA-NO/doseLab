@@ -1,11 +1,8 @@
-# Macro file for the visualization setting for the initialization phase 
-# of the B4 example when running in interactive mode
-#
+# Visualization defaults for interactive doseLab runs.
 
 # Open a viewer
 /vis/open
-# This opens the default viewer - see examples/basic/B1/vis.mac for a
-# more comprehensive overview of options. Also the documentation.
+# Opens the default viewer; adjust here as needed for your local setup.
 #
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:

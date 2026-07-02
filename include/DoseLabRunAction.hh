@@ -22,22 +22,10 @@ namespace DoseLab
 
 class DoseLabDetectorConstruction;
 
-/// Run action class
+/// Run action for cavity dosimetry output and metadata.
 ///
-/// It accumulates statistic and computes dispersion of the energy deposit
-/// and track lengths of charged particles with use of analysis tools:
-/// H1D histograms are created in BeginOfRunAction() for the following
-/// physics quantities:
-/// - Edep in absorber
-/// - Edep in gap
-/// - Track length in absorber
-/// - Track length in gap
-/// The same values are also saved in the ntuple.
-/// The histograms and ntuple are saved in the output file in a format
-/// according to a specified file extension.
-///
-/// In EndOfRunAction(), the accumulated statistic and computed
-/// dispersion is printed.
+/// Creates histograms and ntuples for cavity dose, deposited energy, and
+/// charged-particle track length, and writes run-level metadata.
 ///
 
 class DoseLabRunAction : public G4UserRunAction
