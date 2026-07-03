@@ -9,8 +9,19 @@ CALIB_MODE="${DOSELAB_CALIB_MODE:-fast}"
 CALIB_PRIMARIES="${DOSELAB_CALIB_PRIMARIES:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # shellcheck source=./env-helpers.sh
 source "$SCRIPT_DIR/env-helpers.sh"
+
+if [[ "$SOURCE_MACROS_DIR" != /* ]]; then
+  SOURCE_MACROS_DIR="$REPO_ROOT/$SOURCE_MACROS_DIR"
+fi
+if [[ "$BUILD_DIR" != /* ]]; then
+  BUILD_DIR="$REPO_ROOT/$BUILD_DIR"
+fi
+if [[ "$OUT_DIR" != /* ]]; then
+  OUT_DIR="$REPO_ROOT/$OUT_DIR"
+fi
 
 ENV_CMD="$(resolve_env_cmd || true)"
 

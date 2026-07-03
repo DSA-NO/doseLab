@@ -216,6 +216,42 @@ Include ROOT files in the archive snapshot:
 DOSELAB_FANO_INCLUDE_ROOT=1 ./scripts/archive-fano-baseline.sh
 ```
 
+Run calibration matrix (Dw/Dc and kQ workflow) in fast mode (default):
+
+```bash
+DOSELAB_ENV_CMD=micromamba ./scripts/run-calibration-matrix.sh
+```
+
+Run calibration matrix in full-statistics mode:
+
+```bash
+DOSELAB_ENV_CMD=micromamba DOSELAB_CALIB_MODE=full ./scripts/run-calibration-matrix.sh
+```
+
+Summarize calibration matrix results (strict):
+
+```bash
+micromamba run -n doselab-production ./scripts/summarize-calibration-matrix.py --strict
+```
+
+Archive the current calibration summary to a dated baseline folder:
+
+```bash
+./scripts/archive-calibration-baseline.sh
+```
+
+Run full calibration baseline workflow in one command (matrix run, summarize, archive):
+
+```bash
+DOSELAB_ENV_CMD=micromamba ./scripts/run-calibration-baseline.sh
+```
+
+Include calibration ROOT files in the archive snapshot:
+
+```bash
+DOSELAB_CALIB_INCLUDE_ROOT=1 ./scripts/archive-calibration-baseline.sh
+```
+
 Check results against baseline:
 
 ```bash
