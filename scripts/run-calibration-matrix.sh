@@ -61,28 +61,6 @@ resolve_calib_primaries() {
   esac
 }
 
-apply_calib_primaries() {
-  local primaries="$1"
-  local macro_path="$BUILD_DIR/calibration-base.mac"
-
-  if [[ ! "$primaries" =~ ^[0-9]+$ ]]; then
-    echo "Invalid DOSELAB_CALIB_PRIMARIES='$primaries' (must be integer)" >&2
-    exit 1
-  fi
-
-  if [[ ! -f "$macro_path" ]]; then
-    echo "Missing macro to patch: $macro_path" >&2
-    exit 1
-  fi
-
-  sed -i -E "s|^/run/beamOn[[:space:]]+[0-9]+$|/run/beamOn ${primaries}|" "$macro_path"
-
-  if ! grep -Eq "^/run/beamOn[[:space:]]+${primaries}$" "$macro_path"; then
-    echo "Failed to set beamOn primaries in $macro_path" >&2
-    exit 1
-  fi
-}
-
 sync_required_macros() {
   local required=(
     cavity-farmer.mac
@@ -135,7 +113,10 @@ fi
 
 sync_required_macros
 CALIB_PRIMARIES="$(resolve_calib_primaries)"
-apply_calib_primaries "$CALIB_PRIMARIES"
+if [[ ! "$CALIB_PRIMARIES" =~ ^[0-9]+$ ]]; then
+  echo "Invalid DOSELAB_CALIB_PRIMARIES='$CALIB_PRIMARIES' (must be integer)" >&2
+  exit 1
+fi
 echo "[doseLab] primaries per case: $CALIB_PRIMARIES"
 
 CHAMBERS=(
@@ -180,9 +161,11 @@ for chamber in "${CHAMBERS[@]}"; do
             echo "/doseLab/cavity/material G4_WATER"
             echo "/doseLab/cavity/wallMaterial G4_WATER"
           fi
+          echo "/control/execute calibration-base.mac"
           echo "/control/execute ${source_macro}"
           echo "/control/execute field-ref-10x10-ssd100.mac"
-          echo "/control/execute calibration-base.mac"
+          echo "/run/printProgress 10000"
+          echo "/run/beamOn ${CALIB_PRIMARIES}"
         } > "$case_macro"
 
         echo "[doseLab] running beam=${beam} chamber=${chamber} model=${model} medium=${medium}"

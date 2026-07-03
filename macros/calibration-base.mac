@@ -9,7 +9,3 @@
 /control/execute depth-ref-5cm-center.mac
 
 /run/initialize
-
-# Fast-gate event count. Runner scripts may patch for fast/full campaigns.
-/run/printProgress 10000
-/run/beamOn 2000000
