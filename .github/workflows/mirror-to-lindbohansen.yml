@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Clone source repository as a bare mirror
         run: |
-          git clone --mirror "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" source-mirror.git
+          git clone --bare "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" source-mirror.git
 
       - name: Mirror to lindbohansen/doseLab
         env:
