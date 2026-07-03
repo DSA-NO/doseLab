@@ -1,0 +1,15 @@
+# Reusable base macro for Dw/Dc calibration-style runs.
+# Wrapper/run scripts should set:
+# - output tag
+# - chamber geometry preset
+# - source macro
+# - optional cavity/wall material overrides (for Dw surrogate)
+
+# Apply reference depth placement + aligned output depth metadata.
+/control/execute depth-ref-5cm-center.mac
+
+/run/initialize
+
+# Fast-gate event count. Runner scripts may patch for fast/full campaigns.
+/run/printProgress 10000
+/run/beamOn 2000000
