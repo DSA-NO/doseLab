@@ -1,0 +1,36 @@
+name: Mirror to lindbohansen/doseLab
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mirror-to-lindbohansen
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Clone source repository as a bare mirror
+        run: |
+          git clone --mirror "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" source-mirror.git
+
+      - name: Mirror to lindbohansen/doseLab
+        env:
+          DOSELAB_MIRROR_PAT: ${{ secrets.DOSELAB_MIRROR_PAT }}
+        run: |
+          if [[ -z "${DOSELAB_MIRROR_PAT}" ]]; then
+            echo "Missing DOSELAB_MIRROR_PAT secret." >&2
+            exit 1
+          fi
+
+          cd source-mirror.git
+          git remote add mirror https://x-access-token:${DOSELAB_MIRROR_PAT}@github.com/lindbohansen/doseLab.git
+          git push --mirror mirror
