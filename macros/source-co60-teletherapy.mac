@@ -5,8 +5,9 @@
 
 /gps/particle gamma
 
-# Co-60 photon lines (MeV), equal emission probability.
+# Co-60 photon lines (MeV) with realistic relative intensities.
+# Intensities are very close but not exactly equal in evaluated data.
 /gps/ene/type User
 /gps/hist/type energy
-/gps/hist/point 1.1732 1.0
-/gps/hist/point 1.3325 1.0
+/gps/hist/point 1.1732 0.9985
+/gps/hist/point 1.3325 0.9998
