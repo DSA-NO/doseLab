@@ -6,6 +6,7 @@
 
 doseLab is a Geant4-based simulation project for ionization chamber dosimetry in a water phantom.
 It includes reference scenarios for Farmer-type and Roos-type chambers, with variants both with and without wall material.
+It can run both Fano checks and beam quality calibration-style runs; a more detailed description will be added to the wiki.
 
 The project is intended as a practical simulation and regression-validation framework where users can configure:
 
