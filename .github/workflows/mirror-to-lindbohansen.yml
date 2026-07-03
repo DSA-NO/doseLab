@@ -34,4 +34,5 @@ jobs:
 
           cd source-mirror.git
           git remote add mirror https://x-access-token:${DOSELAB_MIRROR_PAT}@github.com/lindbohansen/doseLab.git
-          git push --mirror mirror
+          # Push only main so review branches and other refs are not copied.
+          git push mirror +refs/heads/main:refs/heads/main
