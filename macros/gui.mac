@@ -10,14 +10,19 @@
 # Run menu :
 /gui/addMenu run Run
 /gui/addButton run "beamOn 1" "/run/beamOn 1"
-/gui/addButton run "Debug Run" "/control/execute run-simple.mac"
-/gui/addButton run "Full Run" "/control/execute run-full.mac"
+/gui/addButton run "beamOn 10" "/run/beamOn 10"
 #
-# Cavity menu :
-/gui/addMenu cavity Cavity
-/gui/addButton cavity Farmer "/control/execute cavity-farmer.mac"
-/gui/addButton cavity Roos "/control/execute cavity-roos.mac"
-/gui/addButton cavity Print "/doseLab/cavity/print"
+# Reference visualization scenarios (configure + initialize + short beamOn)
+/gui/addMenu ref "Vis Ref"
+/gui/addButton ref "Farmer" "/control/execute vis-ref-10x10-d5cm-6mv-farmer.mac"
+/gui/addButton ref "Farmer Walled" "/control/execute vis-ref-10x10-d5cm-6mv-farmer-walled.mac"
+/gui/addButton ref "Roos" "/control/execute vis-ref-10x10-d5cm-6mv-roos.mac"
+/gui/addButton ref "Roos Walled" "/control/execute vis-ref-10x10-d5cm-6mv-roos-walled.mac"
+#
+# Helpers for switching visualization behavior and score overlays.
+/gui/addMenu helper Helpers
+/gui/addButton helper "Disable Vis (safe run mode)" "/control/execute helper-disable-vis.mac"
+/gui/addButton helper "Draw Dose Projections" "/control/execute helper-draw-projections.mac"
 #
 # Viewer menu :
 /gui/addMenu viewer Viewer
