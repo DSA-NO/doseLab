@@ -20,6 +20,7 @@ jobs:
     steps:
       - name: Clone source repository as a bare mirror
         run: |
+          # Use a bare clone so GitHub's hidden refs/pull/* refs are not fetched.
           git clone --bare "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" source-mirror.git
 
       - name: Mirror to lindbohansen/doseLab
