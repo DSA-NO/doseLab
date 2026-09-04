@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   mirror:
+    if: github.repository == 'DSA-NO/doseLab'
     runs-on: ubuntu-22.04
 
     steps:
