@@ -26,6 +26,7 @@ jobs:
             cmake
             ninja
             expat
+            zlib
             cxx-compiler
 
       - name: Toolchain info
@@ -40,7 +41,9 @@ jobs:
             cmake -S . -B build-ci -G Ninja \
               -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so"'
+              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
+              -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
 
       - name: Build
         run: micromamba run -n ci cmake --build build-ci --parallel
@@ -71,6 +74,7 @@ jobs:
             cmake
             ninja
             expat
+            zlib
             cxx-compiler
 
       - name: Toolchain info
@@ -88,7 +92,9 @@ jobs:
               -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
               -DDOSELAB_ROOT_CONFIG='"$ROOT_CONFIG_PATH"' \
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so"'
+              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
+              -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
 
       - name: Build (ROOT required)
         run: micromamba run -n ci-root cmake --build build-root --parallel
