@@ -35,7 +35,9 @@ jobs:
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
               -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
               -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
+              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so" \
+              -DFREETYPE_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DFREETYPE_LIBRARY="$CONDA_PREFIX/lib/libfreetype.so"'
 
       - name: Build
         run: micromamba run -n geant4-doseLab cmake --build build-ci --parallel
@@ -77,7 +79,9 @@ jobs:
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
               -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
               -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
+              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so" \
+              -DFREETYPE_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DFREETYPE_LIBRARY="$CONDA_PREFIX/lib/libfreetype.so"'
 
       - name: Build (ROOT required)
         run: micromamba run -n geant4-doseLab cmake --build build-root --parallel
