@@ -16,28 +16,20 @@ jobs:
       - name: Setup micromamba environment
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-name: ci
+          environment-file: environment.yml
           init-shell: bash
           cache-environment: true
           cache-downloads: true
-          create-args: >-
-            -c conda-forge
-            geant4
-            cmake
-            ninja
-            expat
-            zlib
-            cxx-compiler
 
       - name: Toolchain info
         run: |
-          micromamba run -n ci cmake --version
-          micromamba run -n ci ninja --version
-          micromamba run -n ci geant4-config --version
+          micromamba run -n geant4-doseLab cmake --version
+          micromamba run -n geant4-doseLab ninja --version
+          micromamba run -n geant4-doseLab geant4-config --version
 
       - name: Configure
         run: |
-          micromamba run -n ci bash -lc '
+          micromamba run -n geant4-doseLab bash -lc '
             cmake -S . -B build-ci -G Ninja \
               -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
@@ -46,11 +38,11 @@ jobs:
               -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
 
       - name: Build
-        run: micromamba run -n ci cmake --build build-ci --parallel
+        run: micromamba run -n geant4-doseLab cmake --build build-ci --parallel
 
       - name: Smoke test (batch macro)
         working-directory: build-ci
-        run: micromamba run -n ci ./doseLab -b run-simple.mac
+        run: micromamba run -n geant4-doseLab ./doseLab -b run-simple.mac
 
   root-summary:
     name: Build (optional ROOT summary)
@@ -63,30 +55,21 @@ jobs:
       - name: Setup micromamba environment
         uses: mamba-org/setup-micromamba@v2
         with:
-          environment-name: ci-root
+          environment-file: environment.yml
           init-shell: bash
           cache-environment: true
           cache-downloads: true
-          create-args: >-
-            -c conda-forge
-            geant4
-            root
-            cmake
-            ninja
-            expat
-            zlib
-            cxx-compiler
 
       - name: Toolchain info
         run: |
-          micromamba run -n ci-root cmake --version
-          micromamba run -n ci-root root-config --version
-          micromamba run -n ci-root geant4-config --version
+          micromamba run -n geant4-doseLab cmake --version
+          micromamba run -n geant4-doseLab root-config --version
+          micromamba run -n geant4-doseLab geant4-config --version
 
       - name: Configure (ROOT required)
         run: |
-          ROOT_CONFIG_PATH=$(micromamba run -n ci-root bash -lc 'command -v root-config')
-          micromamba run -n ci-root bash -lc '
+          ROOT_CONFIG_PATH=$(micromamba run -n geant4-doseLab bash -lc 'command -v root-config')
+          micromamba run -n geant4-doseLab bash -lc '
             cmake -S . -B build-root -G Ninja \
               -DDOSELAB_BUILD_ROOT_SUMMARY=ON \
               -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
@@ -97,11 +80,11 @@ jobs:
               -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so"'
 
       - name: Build (ROOT required)
-        run: micromamba run -n ci-root cmake --build build-root --parallel
+        run: micromamba run -n geant4-doseLab cmake --build build-root --parallel
 
       - name: Smoke test (ROOT helper)
         working-directory: build-root
-        run: micromamba run -n ci-root test -x ./doseLabRootSummary
+        run: micromamba run -n geant4-doseLab test -x ./doseLabRootSummary
 
   production-validation:
     name: Production validation
