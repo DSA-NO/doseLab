@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/home/elhansen/geant4/install/include/Geant4",
-                "/home/elhansen/micromamba/envs/root-env/include"
+                "/home/elhansen/micromamba/envs/doselab-production/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
