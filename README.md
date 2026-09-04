@@ -18,7 +18,15 @@ The project is intended as a practical simulation and regression-validation fram
 
 ## Quick start (simple)
 
-If you want the easiest path, use the shipped micromamba helper:
+If micromamba is missing or stale, refresh it first. These helper scripts are intended for Linux/macOS shells; on Windows, use WSL, Git Bash, or another Unix-like shell and follow the same steps.
+
+```bash
+cd doseLab
+./scripts/install-micromamba.sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Then use the shipped micromamba helper:
 
 ```bash
 cd doseLab
