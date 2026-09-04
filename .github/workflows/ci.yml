@@ -25,6 +25,7 @@ jobs:
             geant4
             cmake
             ninja
+            expat
             cxx-compiler
 
       - name: Toolchain info
