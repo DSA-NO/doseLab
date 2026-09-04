@@ -16,6 +16,28 @@ The project is intended as a practical simulation and regression-validation fram
 - production cuts, step controls, and run settings through Geant4 macros
 - output metadata and scenario tagging for traceable ROOT output
 
+## Quick start (simple)
+
+If you want the easiest path, use the shipped micromamba helper:
+
+```bash
+cd doseLab
+./scripts/run-micromamba.sh build
+./scripts/run-micromamba.sh run
+```
+
+This creates or reuses the `geant4-doseLab` environment from `environment.yml`, builds the app, and runs it with the default macro. For a shell inside that environment:
+
+```bash
+./scripts/run-micromamba.sh shell
+```
+
+You can also pass a specific macro directly:
+
+```bash
+./scripts/run-micromamba.sh run -b run-simple.mac
+```
+
 ## How To Run
 
 You can run doseLab in two supported ways:
