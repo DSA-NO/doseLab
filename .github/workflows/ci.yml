@@ -16,9 +16,11 @@ jobs:
       - name: Setup micromamba environment
         uses: mamba-org/setup-micromamba@v3
         with:
+          environment-name: geant4-doseLab
           environment-file: environment.yml
           init-shell: bash
           cache-environment: true
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
           cache-downloads: true
 
       - name: Toolchain info
@@ -57,9 +59,11 @@ jobs:
       - name: Setup micromamba environment
         uses: mamba-org/setup-micromamba@v3
         with:
+          environment-name: geant4-doseLab
           environment-file: environment.yml
           init-shell: bash
           cache-environment: true
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
           cache-downloads: true
 
       - name: Toolchain info
@@ -105,6 +109,7 @@ jobs:
           environment-file: envs/doselab-production.yml
           init-shell: bash
           cache-environment: true
+          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
           cache-downloads: true
 
       - name: Build production profile
@@ -137,6 +142,7 @@ jobs:
           environment-file: envs/doselab-production.yml
           init-shell: bash
           cache-environment: true
+          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
           cache-downloads: true
 
       - name: Build production profile
