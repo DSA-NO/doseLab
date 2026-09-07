@@ -2,12 +2,14 @@ name: geant4-doseLab
 channels:
   - conda-forge
 dependencies:
-  - geant4
-  - cmake
-  - ninja
+  - geant4 =11.4.2
+  - cmake >=4.4,<4.5
+  - ninja >=1.12,<1.13
   - expat >=2.8.1
   - zlib >=1.3.2
   - freetype >=2.14.3
-  - cxx-compiler
+  - cxx-compiler >=2.0,<2.1
+  - gcc >=15,<16
+  - gxx >=15,<16
   - python >=3.11
   - r-base >=4.3
