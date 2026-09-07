@@ -46,6 +46,23 @@ You can also pass a specific macro directly:
 ./scripts/run-micromamba.sh run -b run-simple.mac
 ```
 
+## Fresh-user clone test (recommended)
+
+This is a good idea for reproducibility checks. It simulates a first-time user in a clean shell, clones from GitHub, and runs the same helper workflow.
+
+```bash
+env -i HOME="$HOME" USER="$USER" TERM="${TERM:-xterm-256color}" LANG="${LANG:-C.UTF-8}" PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash --noprofile --norc
+
+git clone https://github.com/DSA-NO/doseLab.git
+cd doseLab
+./scripts/install-micromamba.sh
+export PATH="$HOME/.local/bin:$PATH"
+./scripts/run-micromamba.sh build
+./scripts/run-micromamba.sh run
+```
+
+This catches onboarding issues such as missing shell init, stale local Geant4 settings, or path-dependent macro/runtime assumptions.
+
 ## How To Run
 
 You can run doseLab in two supported ways:
