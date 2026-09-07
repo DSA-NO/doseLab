@@ -36,13 +36,25 @@ ensure_env() {
   fi
 }
 
+run_hardened_configure_build() {
+  local post_cmd="${1:-}"
+  local build_cmd
+  build_cmd="cd '$APP_ROOT' && rm -rf build && export CPATH=\"\$CONDA_PREFIX/include\${CPATH:+:\$CPATH}\" CPLUS_INCLUDE_PATH=\"\$CONDA_PREFIX/include\${CPLUS_INCLUDE_PATH:+:\$CPLUS_INCLUDE_PATH}\" LIBRARY_PATH=\"\$CONDA_PREFIX/lib\${LIBRARY_PATH:+:\$LIBRARY_PATH}\" && cmake -S . -B build -G Ninja -DCMAKE_INCLUDE_PATH=\"\$CONDA_PREFIX/include\" -DCMAKE_LIBRARY_PATH=\"\$CONDA_PREFIX/lib\" -DEXPAT_INCLUDE_DIR=\"\$CONDA_PREFIX/include\" -DEXPAT_LIBRARY=\"\$CONDA_PREFIX/lib/libexpat.so\" -DZLIB_INCLUDE_DIR=\"\$CONDA_PREFIX/include\" -DZLIB_LIBRARY=\"\$CONDA_PREFIX/lib/libz.so\" -DXercesC_INCLUDE_DIR=\"\$CONDA_PREFIX/include\" -DXercesC_LIBRARY=\"\$CONDA_PREFIX/lib/libxerces-c.so\" && cmake --build build --parallel"
+
+  if [[ -n "$post_cmd" ]]; then
+    "$MICROMAMBA_BIN" run -n "$ENV_NAME" bash -c "$build_cmd && $post_cmd"
+  else
+    "$MICROMAMBA_BIN" run -n "$ENV_NAME" bash -c "$build_cmd"
+  fi
+}
+
 mode="${1:-run}"
 shift || true
 
 case "$mode" in
   build)
     ensure_env
-    "$MICROMAMBA_BIN" run -n "$ENV_NAME" bash -lc "cd '$APP_ROOT' && rm -rf build && cmake -S . -B build -G Ninja && cmake --build build --parallel"
+    run_hardened_configure_build
     ;;
 
   run)
@@ -56,7 +68,7 @@ case "$mode" in
     else
       run_cmd="./build/${APP_NAME} -b run-simple.mac"
     fi
-    "$MICROMAMBA_BIN" run -n "$ENV_NAME" bash -lc "cd '$APP_ROOT' && rm -rf build && cmake -S . -B build -G Ninja && cmake --build build --parallel && ${run_cmd}"
+    run_hardened_configure_build "${run_cmd}"
     ;;
 
   shell)
