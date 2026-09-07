@@ -36,6 +36,67 @@ ensure_env() {
   fi
 }
 
+resolve_macro_path() {
+  local macro_path="$1"
+
+  if [[ "$macro_path" == */* || "$macro_path" == .* ]]; then
+    printf '%s\n' "$macro_path"
+    return 0
+  fi
+
+  if [[ -f "$APP_ROOT/macros/$macro_path" ]]; then
+    printf '%s\n' "macros/$macro_path"
+    return 0
+  fi
+
+  if [[ -f "$APP_ROOT/build/$macro_path" ]]; then
+    printf '%s\n' "build/$macro_path"
+    return 0
+  fi
+
+  printf '%s\n' "$macro_path"
+}
+
+prepare_run_cmd() {
+  local -a raw_args=("$@")
+  local -a rewritten_args=()
+  local expecting_macro_path=0
+  local arg
+
+  for arg in "${raw_args[@]}"; do
+    if [[ "$expecting_macro_path" -eq 1 ]]; then
+      rewritten_args+=("$(resolve_macro_path "$arg")")
+      expecting_macro_path=0
+      continue
+    fi
+
+    case "$arg" in
+      -b|-v)
+        rewritten_args+=("$arg")
+        expecting_macro_path=1
+        ;;
+      *.mac)
+        rewritten_args+=("$(resolve_macro_path "$arg")")
+        ;;
+      *)
+        rewritten_args+=("$arg")
+        ;;
+    esac
+  done
+
+  if [[ "$expecting_macro_path" -eq 1 ]]; then
+    echo "ERROR: missing macro path after -b or -v" >&2
+    exit 2
+  fi
+
+  local -a quoted_args=()
+  for arg in "${rewritten_args[@]}"; do
+    quoted_args+=("$(printf '%q' "$arg")")
+  done
+
+  printf './build/%s %s' "$APP_NAME" "${quoted_args[*]}"
+}
+
 run_hardened_configure_build() {
   local post_cmd="${1:-}"
   local build_cmd
@@ -60,13 +121,9 @@ case "$mode" in
   run)
     ensure_env
     if [[ $# -gt 0 ]]; then
-      run_args=()
-      for arg in "$@"; do
-        run_args+=("$(printf '%q' "$arg")")
-      done
-      run_cmd="./build/${APP_NAME} ${run_args[*]}"
+      run_cmd="$(prepare_run_cmd "$@")"
     else
-      run_cmd="./build/${APP_NAME} -b run-simple.mac"
+      run_cmd="$(prepare_run_cmd -b macros/run-simple.mac)"
     fi
     run_hardened_configure_build "${run_cmd}"
     ;;
@@ -81,7 +138,7 @@ case "$mode" in
     echo "Examples:"
     echo "  $0 build"
     echo "  $0 run"
-    echo "  $0 run -b run-simple.mac"
+    echo "  $0 run -b macros/run-simple.mac"
     echo "  $0 shell"
     exit 2
     ;;
