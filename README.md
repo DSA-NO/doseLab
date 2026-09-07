@@ -57,6 +57,12 @@ You can also pass a specific macro directly:
 ./scripts/run-micromamba.sh run -b run-simple.mac
 ```
 
+For a quick visualization run:
+
+```bash
+./scripts/run-micromamba.sh run -v vis.mac
+```
+
 ## How To Run
 
 You can run doseLab in two supported ways:
