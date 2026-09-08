@@ -39,7 +39,7 @@ This catches onboarding issues such as missing shell init, stale local Geant4 se
 Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
+micromamba run -n geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 If you already have the repository checked out, use this shorter path:
 
@@ -113,7 +113,7 @@ Typical session switches:
 source "$HOME/geant4/install/bin/geant4.sh"
 
 # Micromamba session
-micromamba activate doselab-production
+micromamba activate geant4-doseLab
 
 # Return to neutral (example)
 micromamba deactivate || true
@@ -126,7 +126,7 @@ If you switch often, you may prefer small shell functions in your own shell star
 
 ```bash
 use_doselab_mamba() {
-  micromamba activate doselab-production
+  micromamba activate geant4-doseLab
 }
 
 use_doselab_geant4() {
@@ -165,10 +165,10 @@ micromamba --version
 git clone git@github.com:DSA-NO/doseLab.git
 cd doseLab
 
-micromamba env create -f envs/doselab-production.yml -y
+micromamba env create -f environment.yml -y
 DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
 DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
-micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production
+micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
 ```
 
 #### 3) Optional: initialize/refresh baseline intentionally
@@ -176,7 +176,7 @@ micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir bui
 Use only after intentional physics/model changes and validation:
 
 ```bash
-micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --write-baseline
+micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --write-baseline
 ```
 
 #### 4) How to run after setup
@@ -195,19 +195,19 @@ Macro families (quick reference):
 Run a quick single macro test:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLab -b ./build-production/run-simple.mac
+micromamba run -n geant4-doseLab ./build-production/doseLab -b ./build-production/run-simple.mac
 ```
 
 Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
+micromamba run -n geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 
 Use `-r on|off` to enable or disable radioactive decay physics. For example:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLab -r on -b ./build-production/run-simple.mac
+micromamba run -n geant4-doseLab ./build-production/doseLab -r on -b ./build-production/run-simple.mac
 ```
 
 ## Output metadata and file naming
@@ -305,7 +305,7 @@ Nested macro path robustness:
 Run a visual macro from the micromamba environment:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
+micromamba run -n geant4-doseLab ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
 ```
 
 Note: `-n` belongs to `micromamba run` and must be followed by the environment name, not the executable path. If the environment is already activated in your shell, you can also run the binary directly:
@@ -341,13 +341,13 @@ DOSELAB_ENV_CMD=micromamba DOSELAB_FANO_PRIMARIES=5000000 ./scripts/run-fano-mat
 Summarize and gate Fano results (strict):
 
 ```bash
-micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py --strict
+micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py --strict
 ```
 
 CI-style gate (fails only if precision passes and physics agreement fails):
 
 ```bash
-micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py --strict --ci-physics-gate
+micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py --strict --ci-physics-gate
 ```
 
 Archive the current Fano summary to a dated baseline folder:
@@ -389,7 +389,7 @@ DOSELAB_ENV_CMD=micromamba DOSELAB_CALIB_MODE=full ./scripts/run-calibration-mat
 Summarize calibration matrix results (strict):
 
 ```bash
-micromamba run -n doselab-production ./scripts/summarize-calibration-matrix.py --strict
+micromamba run -n geant4-doseLab ./scripts/summarize-calibration-matrix.py --strict
 ```
 
 Archive the current calibration summary to a dated baseline folder:
@@ -413,13 +413,13 @@ DOSELAB_CALIB_INCLUDE_ROOT=1 ./scripts/archive-calibration-baseline.sh
 Check results against baseline:
 
 ```bash
-micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production
+micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
 ```
 
 Summarize a ROOT output file:
 
 ```bash
-micromamba run -n doselab-production ./build-production/doseLabRootSummary ./build-production/doseLab-run-ref-10x10-d5cm-6mv-farmer-walled.root
+micromamba run -n geant4-doseLab ./build-production/doseLabRootSummary ./build-production/doseLab-run-ref-10x10-d5cm-6mv-farmer-walled.root
 ```
 
 #### Optional fresh-user simulation
@@ -535,7 +535,7 @@ cmake -S . -B build -DDOSELAB_ROOT_CONFIG=$(command -v root-config)
 
 If baseline checks fail unexpectedly:
 
-- verify you are using the intended environment (`doselab-production`)
+- verify you are using the intended environment (`geant4-doseLab`)
 - re-run the reference scenarios before checking baseline
 - compare current report `analysis/production/latest/metrics.json` to baseline
 

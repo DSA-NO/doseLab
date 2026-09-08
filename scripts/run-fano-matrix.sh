@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_NAME="${DOSELAB_ENV_NAME:-doselab-production}"
+ENV_NAME="${DOSELAB_ENV_NAME:-geant4-doseLab}"
 BUILD_DIR="${DOSELAB_BUILD_DIR:-build-production}"
 OUT_DIR="${DOSELAB_OUTPUT_DIR:-analysis/fano/latest}"
 SOURCE_MACROS_DIR="${DOSELAB_SOURCE_MACROS_DIR:-macros}"

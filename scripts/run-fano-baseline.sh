@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_NAME="${DOSELAB_ENV_NAME:-doselab-production}"
+ENV_NAME="${DOSELAB_ENV_NAME:-geant4-doseLab}"
 OUT_DIR="${DOSELAB_OUTPUT_DIR:-analysis/fano/latest}"
 SUMMARY_JSON="${DOSELAB_FANO_SUMMARY_JSON:-${OUT_DIR}/summary.json}"
 SUMMARY_TEXT="${DOSELAB_FANO_SUMMARY_TEXT:-${OUT_DIR}/summary.txt}"

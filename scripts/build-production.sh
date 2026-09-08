@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ENV_NAME="${DOSELAB_ENV_NAME:-doselab-production}"
-ENV_FILE="${DOSELAB_ENV_FILE:-envs/doselab-production.yml}"
+ENV_NAME="${DOSELAB_ENV_NAME:-geant4-doseLab}"
+ENV_FILE="${DOSELAB_ENV_FILE:-environment.yml}"
 BUILD_DIR="${DOSELAB_BUILD_DIR:-build-production}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

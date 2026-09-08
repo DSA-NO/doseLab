@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - geant4 =11.4.2
+  - root =6.32.*
   - cmake >=4.4,<4.5
   - ninja >=1.12,<1.13
   - expat >=2.8.1
@@ -12,4 +13,6 @@ dependencies:
   - gcc >=15,<16
   - gxx >=15,<16
   - python >=3.11
+  - numpy =1.26.*
+  - uproot =5.4.*
   - r-base >=4.3

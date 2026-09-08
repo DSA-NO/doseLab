@@ -69,11 +69,11 @@ jobs:
       - name: Setup production environment
         uses: mamba-org/setup-micromamba@v3
         with:
-          environment-name: doselab-production
-          environment-file: envs/doselab-production.yml
+          environment-name: geant4-doseLab
+          environment-file: environment.yml
           init-shell: bash
           cache-environment: true
-          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
           cache-downloads: true
 
       - name: Build production profile
@@ -83,7 +83,7 @@ jobs:
         run: DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
 
       - name: Check baseline
-        run: micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
+        run: micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
 
       - name: Upload production metrics
         uses: actions/upload-artifact@v4
@@ -102,11 +102,11 @@ jobs:
       - name: Setup production environment
         uses: mamba-org/setup-micromamba@v3
         with:
-          environment-name: doselab-production
-          environment-file: envs/doselab-production.yml
+          environment-name: geant4-doseLab
+          environment-file: environment.yml
           init-shell: bash
           cache-environment: true
-          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
           cache-downloads: true
 
       - name: Build production profile
@@ -121,7 +121,7 @@ jobs:
 
       - name: Summarize and gate (physics only when precision passes)
         run: |
-          micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py \
+          micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py \
             --input-dir analysis/fano/ci \
             --output-json analysis/fano/ci/summary.json \
             --output-text analysis/fano/ci/summary.txt \
