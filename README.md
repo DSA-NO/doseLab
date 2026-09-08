@@ -243,6 +243,8 @@ The `runinfo` ntuple uses the standardized schema:
 - `Events`
 - `ThreadId`
 
+Policy: `runinfo` stores one row per run in sequential mode, and one row per worker in MT mode. Use `ThreadId` to identify worker provenance.
+
 Note: the `/doseLab/output/field` and `/doseLab/output/chamber` commands populate the standardized `Geometry` and `Region` runinfo columns.
 
 Preset token convention:
