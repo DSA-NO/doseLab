@@ -246,6 +246,7 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
   // Add metadata through the worker path in MT mode (same merge path as event ntuple),
   // and directly in sequential mode.
   const auto writeRunInfo = !G4Threading::IsMultithreadedApplication() || !isMaster;
+  const auto finalizeOutput = !G4Threading::IsMultithreadedApplication() || isMaster;
 
   // print histogram statistics
   //
@@ -269,14 +270,9 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
     analysisManager->AddNtupleRow(1);
   }
 
-  if (analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)) {
+  if (finalizeOutput && analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)) {
     G4cout << G4endl << " ----> print histograms statistic ";
-    if (isMaster) {
-      G4cout << "for the entire run " << G4endl << G4endl;
-    }
-    else {
-      G4cout << "for the local thread " << G4endl << G4endl;
-    }
+    G4cout << "for the run " << G4endl << G4endl;
 
     G4cout << " Cavity Dose: mean = "
            << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->mean(), "Dose")
@@ -297,11 +293,22 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
            << G4endl;
   }
 
-  // save histograms & ntuple
-  //
-  analysisManager->Write();
-  // Keep analysis objects in memory for visualization commands in UI session.
-  analysisManager->CloseFile(false);
+  if (finalizeOutput) {
+    // save histograms & ntuple
+    analysisManager->Write();
+    // Keep analysis objects in memory for visualization commands in UI session.
+    analysisManager->CloseFile(false);
+
+    G4cout << "Run complete: events=" << run->GetNumberOfEvent()
+           << ", file=" << BuildOutputFileName()
+           << ", source=" << OutputMetadata::CanonicalLabel(source)
+           << ", geometry=" << OutputMetadata::CanonicalLabel(field)
+           << ", region=" << OutputMetadata::CanonicalLabel(chamber)
+           << ", depth_cm=" << fOutputDepthCm
+           << ", em=" << fEmModel
+           << ", decay=" << (fEnableRadioactiveDecay ? "on" : "off")
+           << G4endl;
+  }
 }
 
 }  // namespace DoseLab
