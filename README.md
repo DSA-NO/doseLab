@@ -250,6 +250,43 @@ Preset token convention:
 - canonical walled preset tokens use hyphens: `farmer-walled`, `roos-walled`
 - underscore aliases (`farmer_walled`, `roos_walled`) are still accepted for compatibility
 
+## Cross-lab macro contract
+
+The three labs follow one shared macro structure contract so geometry differences do not fragment workflow conventions.
+
+CLI contract (all labs):
+
+- `-b <macro>` batch mode
+- `-v <macro>` visual mode
+- `-t <N>` threads (MT builds)
+- `-p option4|livermore|penelope` EM model selection
+- `-r on|off` radioactive decay physics toggle
+
+Namespace contract:
+
+- geometry commands stay under a lab prefix (for doseLab this is primarily `/doseLab/cavity/*`)
+- output metadata commands stay under `/.../output/*`
+- scenario/preset commands stay under `/.../scenario/*`
+
+Source composition contract:
+
+- run macros compose source via `/control/execute source-<preset>.mac`
+- source preset macros set source identity and spectrum only
+- source preset macros must not call `/run/initialize` or `/run/beamOn`
+- optional compatibility alias macro is `source.mac`
+
+Shared source preset catalog (required naming):
+
+- `source-co60.mac`
+- `source-6mv.mac`
+- `source-10mv.mac`
+- `source.mac` (alias macro pointing to the default preset for quick runs)
+
+Nested macro path robustness:
+
+- add `/control/macroPath .:macros:../macros` before nested `/control/execute` in composed run macros
+- this keeps behavior consistent for repo-root and build-directory invocation styles
+
 Run a visual macro from the micromamba environment:
 
 ```bash
