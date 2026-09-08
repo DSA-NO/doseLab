@@ -18,6 +18,7 @@
 #include "G4RunManager.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Threading.hh"
+#include "G4UImanager.hh"
 #include "G4UnitsTable.hh"
 #include "globals.hh"
 
@@ -231,6 +232,19 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
   // Open output file.
   G4String fileName = BuildOutputFileName();
   analysisManager->OpenFile(fileName);
+
+  if (fEnableRadioactiveDecay
+      && (!G4Threading::IsMultithreadedApplication() || !isMaster)) {
+    auto* uiManager = G4UImanager::GetUIpointer();
+    const auto status = uiManager->ApplyCommand(
+      "/process/had/rdm/thresholdForVeryLongDecayTime 1e+60 year");
+    if (status != 0) {
+      G4ExceptionDescription msg;
+      msg << "Failed to set global long-decay-time threshold; UI status=" << status;
+      G4Exception("DoseLabRunAction::BeginOfRunAction", "DoseLabDecay001", FatalException, msg);
+      return;
+    }
+  }
 
   G4cout << "Using " << analysisManager->GetType() << G4endl;
   G4cout << "Output tag: " << fOutputTag << G4endl;

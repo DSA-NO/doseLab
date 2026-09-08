@@ -247,6 +247,8 @@ Policy: `runinfo` stores one row per run in sequential mode, and one row per wor
 
 At end-of-run, output file write/close is finalized once in the safe context (sequential run or master in MT). A concise "Run complete" summary line is printed with events, output file, and key metadata.
 
+When radioactive decay is enabled (`-r on`), doseLab globally applies a long-decay-time threshold (`/process/had/rdm/thresholdForVeryLongDecayTime 1e+60 year`) at run start so long-lived ions (for example Cs-137) can decay within simulated events.
+
 Note: the `/doseLab/output/field` and `/doseLab/output/chamber` commands populate the standardized `Geometry` and `Region` runinfo columns.
 
 Preset token convention:
