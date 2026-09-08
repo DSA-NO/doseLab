@@ -7,7 +7,7 @@
 
 /run/initialize
 
-/control/execute source-linac-photons-6mv.mac
+/control/execute source-6mv.mac
 /control/execute field-ref-10x10-ssd100.mac
 
 /run/printProgress 1000

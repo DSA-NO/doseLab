@@ -67,9 +67,9 @@ sync_required_macros() {
     cavity-roos.mac
     cavity-farmer-walled.mac
     cavity-roos-walled.mac
-    source-co60-teletherapy.mac
-    source-linac-photons-6mv.mac
-    source-linac-photons-10mv.mac
+    source-co60.mac
+    source-6mv.mac
+    source-10mv.mac
     field-ref-10x10-ssd100.mac
     depth-ref-5cm-center.mac
     calibration-base.mac
@@ -88,13 +88,13 @@ source_macro_for_beam() {
   local beam="$1"
   case "$beam" in
     co60)
-      echo "source-co60-teletherapy.mac"
+      echo "source-co60.mac"
       ;;
     6mv)
-      echo "source-linac-photons-6mv.mac"
+      echo "source-6mv.mac"
       ;;
     10mv)
-      echo "source-linac-photons-10mv.mac"
+      echo "source-10mv.mac"
       ;;
     *)
       echo "Unknown beam key: $beam" >&2

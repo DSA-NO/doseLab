@@ -30,7 +30,7 @@ class DoseLabDetectorMessenger;
 /// - Simple cavity wall: configurable material and thickness
 ///
 /// Macro interface:
-/// - /doseLab/cavity/type farmer|roos|farmer_walled|roos_walled|custom
+/// - /doseLab/cavity/type farmer|roos|farmer-walled|roos-walled|custom
 /// - /doseLab/cavity/radius <value> <unit>
 /// - /doseLab/cavity/thickness <value> <unit>
 /// - /doseLab/cavity/depth <value> <unit>

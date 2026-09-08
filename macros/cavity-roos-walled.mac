@@ -1,7 +1,7 @@
 # Standard Roos-like walled cavity preset for doseLab.
 # Use before /run/initialize in batch or visualization macros.
 
-/doseLab/scenario/type roos_walled
+/doseLab/scenario/type roos-walled
 /doseLab/cavity/material G4_AIR
 /doseLab/cavity/wallMaterial G4_PLEXIGLASS
 # Water test override (both cavity and wall):

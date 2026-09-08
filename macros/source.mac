@@ -1,4 +1,4 @@
 # Legacy alias retained for compatibility.
-# Prefer: source-co60-teletherapy.mac
+# Prefer: source-co60.mac
 
-/control/execute source-co60-teletherapy.mac
+/control/execute source-co60.mac

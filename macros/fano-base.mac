@@ -22,7 +22,7 @@
 /run/initialize
 
 # Reuse existing source and field definitions.
-/control/execute source-co60-teletherapy.mac
+/control/execute source-co60.mac
 /control/execute field-ref-10x10-ssd100.mac
 
 # Fast-gate event count. Wrapper macros may override this file later for full runs.

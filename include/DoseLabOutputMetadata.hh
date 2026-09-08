@@ -84,8 +84,8 @@ inline constexpr std::array<MetadataChoice<ChamberKind>, 6> kChamberChoices{{
   {ChamberKind::kCustom, "custom"},
   {ChamberKind::kFarmer, "farmer"},
   {ChamberKind::kRoos, "roos"},
-  {ChamberKind::kFarmerWalled, "farmer_walled"},
-  {ChamberKind::kRoosWalled, "roos_walled"},
+  {ChamberKind::kFarmerWalled, "farmer-walled"},
+  {ChamberKind::kRoosWalled, "roos-walled"},
 }};
 
 inline constexpr std::array<MetadataChoice<ScenarioKind>, 6> kScenarioChoices{{
@@ -93,8 +93,8 @@ inline constexpr std::array<MetadataChoice<ScenarioKind>, 6> kScenarioChoices{{
   {ScenarioKind::kCustom, "custom"},
   {ScenarioKind::kFarmer, "farmer"},
   {ScenarioKind::kRoos, "roos"},
-  {ScenarioKind::kFarmerWalled, "farmer_walled"},
-  {ScenarioKind::kRoosWalled, "roos_walled"},
+  {ScenarioKind::kFarmerWalled, "farmer-walled"},
+  {ScenarioKind::kRoosWalled, "roos-walled"},
 }};
 
 inline constexpr std::array<ScenarioPreset, 6> kScenarioPresets{{
@@ -102,17 +102,29 @@ inline constexpr std::array<ScenarioPreset, 6> kScenarioPresets{{
   {ScenarioKind::kCustom, "custom", ChamberKind::kCustom, -1.0},
   {ScenarioKind::kFarmer, "farmer", ChamberKind::kFarmer, 5.0},
   {ScenarioKind::kRoos, "roos", ChamberKind::kRoos, 5.0},
-  {ScenarioKind::kFarmerWalled, "farmer_walled", ChamberKind::kFarmerWalled, 5.0},
-  {ScenarioKind::kRoosWalled, "roos_walled", ChamberKind::kRoosWalled, 5.0},
+  {ScenarioKind::kFarmerWalled, "farmer-walled", ChamberKind::kFarmerWalled, 5.0},
+  {ScenarioKind::kRoosWalled, "roos-walled", ChamberKind::kRoosWalled, 5.0},
 }};
+
+inline G4String NormalizeMetadataLabel(const G4String& label)
+{
+  G4String normalized = label;
+  for (auto& ch : normalized) {
+    if (ch == '_') {
+      ch = '-';
+    }
+  }
+  return normalized;
+}
 
 template <typename Enum, std::size_t N>
 inline Enum ParseMetadataChoice(const G4String& label,
                                 const std::array<MetadataChoice<Enum>, N>& choices,
                                 Enum fallback)
 {
+  const auto normalized = NormalizeMetadataLabel(label);
   for (const auto& choice : choices) {
-    if (label == choice.label) {
+    if (normalized == choice.label) {
       return choice.value;
     }
   }

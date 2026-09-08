@@ -80,7 +80,7 @@ sync_required_macros() {
     cavity-roos-walled.mac
     depth-ref-5cm-center.mac
     fano-base.mac
-    source-co60-teletherapy.mac
+    source-co60.mac
     field-ref-10x10-ssd100.mac
   )
 

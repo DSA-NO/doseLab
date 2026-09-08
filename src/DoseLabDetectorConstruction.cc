@@ -232,7 +232,7 @@ void DoseLabDetectorConstruction::ApplyCavityPreset(const G4String& type)
     fCavityAxis = CavityAxis::kZ;
     fCavityType = "roos";
   }
-  else if (lowered == "farmer_walled") {
+  else if (lowered == "farmer-walled" || lowered == "farmer_walled") {
     // Farmer-like cavity with a simple representative wall.
     fCavityRadius = 0.30 * cm;
     fCavityThickness = 2.30 * cm;
@@ -244,9 +244,9 @@ void DoseLabDetectorConstruction::ApplyCavityPreset(const G4String& type)
     fWallRegionCut = 0.01 * mm;
     fCavityMaxStep = 0.05 * mm;
     fWallMaxStep = 0.05 * mm;
-    fCavityType = "farmer_walled";
+    fCavityType = "farmer-walled";
   }
-  else if (lowered == "roos_walled") {
+  else if (lowered == "roos-walled" || lowered == "roos_walled") {
     // Roos-like cavity with a simple representative wall.
     fCavityRadius = 0.80 * cm;
     fCavityThickness = 0.20 * cm;
@@ -258,7 +258,7 @@ void DoseLabDetectorConstruction::ApplyCavityPreset(const G4String& type)
     fWallRegionCut = 0.01 * mm;
     fCavityMaxStep = 0.05 * mm;
     fWallMaxStep = 0.05 * mm;
-    fCavityType = "roos_walled";
+    fCavityType = "roos-walled";
   }
   else if (lowered == "custom") {
     fCavityType = "custom";

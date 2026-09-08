@@ -31,9 +31,9 @@ DoseLabDetectorMessenger::DoseLabDetectorMessenger(DoseLabDetectorConstruction* 
 
   fTypeCmd = new G4UIcmdWithAString("/doseLab/cavity/type", this);
   fTypeCmd->SetGuidance(
-    "Set cavity type preset: farmer, roos, farmer_walled, roos_walled, custom.");
+    "Set cavity type preset: farmer, roos, farmer-walled, roos-walled, custom.");
   fTypeCmd->SetParameterName("type", false);
-  fTypeCmd->SetCandidates("farmer roos farmer_walled roos_walled custom");
+  fTypeCmd->SetCandidates("farmer roos farmer-walled roos-walled farmer_walled roos_walled custom");
   fTypeCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
   fRadiusCmd = new G4UIcmdWithADoubleAndUnit("/doseLab/cavity/radius", this);

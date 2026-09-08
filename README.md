@@ -187,6 +187,7 @@ Macro families (quick reference):
 - `depth-*`: chamber placement depth + aligned output depth metadata.
 - `field-*`: field shape/size/position + field metadata.
 - `source-*`: source particle/energy spectrum + source metadata.
+  Canonical names are `source-co60.mac`, `source-6mv.mac`, and `source-10mv.mac`.
 - `run-ref-*`: composed batch reference runs.
 - `vis-ref-*`: composed visual reference runs.
 - `run-fano-*`: composed Fano-like chamber checks (use `-p` to sweep EM model).
@@ -217,7 +218,7 @@ Set metadata in a macro before `/run/beamOn`:
 
 ```tcl
 /doseLab/output/tag run-ref-10x10-d5cm-6mv-farmer
-/doseLab/output/source linac-photons-6mv
+/doseLab/output/source 6mv
 /doseLab/output/field 10x10-ssd100
 /doseLab/output/chamber farmer
 /doseLab/output/depth 5 cm
@@ -243,6 +244,11 @@ The `runinfo` ntuple uses the standardized schema:
 - `ThreadId`
 
 Note: the `/doseLab/output/field` and `/doseLab/output/chamber` commands populate the standardized `Geometry` and `Region` runinfo columns.
+
+Preset token convention:
+
+- canonical walled preset tokens use hyphens: `farmer-walled`, `roos-walled`
+- underscore aliases (`farmer_walled`, `roos_walled`) are still accepted for compatibility
 
 Run a visual macro from the micromamba environment:
 

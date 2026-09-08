@@ -23,7 +23,7 @@
 /run/initialize
 
 # Configure Co-60 source identity + reference field setup
-/control/execute source-co60-teletherapy.mac
+/control/execute source-co60.mac
 /control/execute field-ref-10x10-ssd100.mac
 
 # Quick event sample

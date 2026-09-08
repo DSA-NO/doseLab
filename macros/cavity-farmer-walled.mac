@@ -1,7 +1,7 @@
 # Standard Farmer-like walled cavity preset for doseLab.
 # Use before /run/initialize in batch or visualization macros.
 
-/doseLab/scenario/type farmer_walled
+/doseLab/scenario/type farmer-walled
 /doseLab/cavity/material G4_AIR
 /doseLab/cavity/wallMaterial G4_PLEXIGLASS
 # Water test override (both cavity and wall):
