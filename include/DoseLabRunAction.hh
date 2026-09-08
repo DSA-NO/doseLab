@@ -31,7 +31,9 @@ class DoseLabDetectorConstruction;
 class DoseLabRunAction : public G4UserRunAction
 {
   public:
-    explicit DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction = nullptr);
+    explicit DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction = nullptr,
+      const G4String& emModel = "option4",
+      G4bool enableRadioactiveDecay = false);
     ~DoseLabRunAction() override = default;
 
     void BeginOfRunAction(const G4Run*) override;
@@ -47,6 +49,8 @@ class DoseLabRunAction : public G4UserRunAction
     G4String BuildOutputFileName() const;
     static G4String SanitizeForFileName(const G4String& value);
     DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
+    G4String fEmModel;
+    G4bool fEnableRadioactiveDecay = false;
 
     std::unique_ptr<G4GenericMessenger> fMessenger;
     std::unique_ptr<G4GenericMessenger> fScenarioMessenger;

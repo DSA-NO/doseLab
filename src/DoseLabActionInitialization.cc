@@ -16,8 +16,12 @@ namespace DoseLab
 {
 
 DoseLabActionInitialization::DoseLabActionInitialization(
-  DoseLabDetectorConstruction* detectorConstruction)
+  DoseLabDetectorConstruction* detectorConstruction,
+  const G4String& emModel,
+  G4bool enableRadioactiveDecay)
 : fDetectorConstruction(detectorConstruction)
+, fEmModel(emModel)
+, fEnableRadioactiveDecay(enableRadioactiveDecay)
 {
 }
 
@@ -25,14 +29,14 @@ void DoseLabActionInitialization::BuildForMaster() const
 {
   // Keep detector wiring on the master action too: scenario commands can be
   // evaluated in master context before worker initialization.
-  SetUserAction(new DoseLabRunAction(fDetectorConstruction));
+  SetUserAction(new DoseLabRunAction(fDetectorConstruction, fEmModel, fEnableRadioactiveDecay));
 }
 
 void DoseLabActionInitialization::Build() const
 {
   SetUserAction(new DoseLabPrimaryGeneratorAction);
   // Worker run action mutates detector presets from /doseLab/scenario/*.
-  SetUserAction(new DoseLabRunAction(fDetectorConstruction));
+  SetUserAction(new DoseLabRunAction(fDetectorConstruction, fEmModel, fEnableRadioactiveDecay));
   SetUserAction(new DoseLabEventAction);
 }
 

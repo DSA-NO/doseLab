@@ -39,18 +39,24 @@ inline constexpr const char* kTrackLengthColumnName = "TrackL";
 
 inline constexpr G4int kRunInfoTagColumn = 0;
 inline constexpr G4int kRunInfoSourceColumn = 1;
-inline constexpr G4int kRunInfoFieldColumn = 2;
-inline constexpr G4int kRunInfoDepthCmColumn = 3;
-inline constexpr G4int kRunInfoChamberColumn = 4;
-inline constexpr G4int kRunInfoThreadIdColumn = 5;
+inline constexpr G4int kRunInfoGeometryColumn = 2;
+inline constexpr G4int kRunInfoRegionColumn = 3;
+inline constexpr G4int kRunInfoDepthCmColumn = 4;
+inline constexpr G4int kRunInfoEmModelColumn = 5;
+inline constexpr G4int kRunInfoRadioactiveDecayColumn = 6;
+inline constexpr G4int kRunInfoEventsColumn = 7;
+inline constexpr G4int kRunInfoThreadIdColumn = 8;
 
 inline constexpr const char* kRunInfoNtupleName = "runinfo";
 inline constexpr const char* kRunInfoNtupleTitle = "Run metadata for scenario provenance";
 inline constexpr const char* kRunInfoTagColumnName = "Tag";
 inline constexpr const char* kRunInfoSourceColumnName = "Source";
-inline constexpr const char* kRunInfoFieldColumnName = "Field";
+inline constexpr const char* kRunInfoGeometryColumnName = "Geometry";
+inline constexpr const char* kRunInfoRegionColumnName = "Region";
 inline constexpr const char* kRunInfoDepthCmColumnName = "DepthCm";
-inline constexpr const char* kRunInfoChamberColumnName = "Chamber";
+inline constexpr const char* kRunInfoEmModelColumnName = "EMModel";
+inline constexpr const char* kRunInfoRadioactiveDecayColumnName = "RadioactiveDecay";
+inline constexpr const char* kRunInfoEventsColumnName = "Events";
 inline constexpr const char* kRunInfoThreadIdColumnName = "ThreadId";
 
 }  // namespace AnalysisConfig

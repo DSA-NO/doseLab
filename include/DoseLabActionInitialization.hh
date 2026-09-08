@@ -10,6 +10,8 @@
 
 #include "G4VUserActionInitialization.hh"
 
+#include "globals.hh"
+
 namespace DoseLab
 {
 
@@ -19,7 +21,9 @@ class DoseLabDetectorConstruction;
 class DoseLabActionInitialization : public G4VUserActionInitialization
 {
   public:
-    explicit DoseLabActionInitialization(DoseLabDetectorConstruction* detectorConstruction = nullptr);
+    explicit DoseLabActionInitialization(DoseLabDetectorConstruction* detectorConstruction = nullptr,
+      const G4String& emModel = "option4",
+      G4bool enableRadioactiveDecay = false);
     ~DoseLabActionInitialization() override = default;
 
     void BuildForMaster() const override;
@@ -27,6 +31,8 @@ class DoseLabActionInitialization : public G4VUserActionInitialization
 
   private:
     DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
+    G4String fEmModel;
+    G4bool fEnableRadioactiveDecay = false;
 };
 
 }  // namespace DoseLab

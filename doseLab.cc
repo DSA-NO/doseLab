@@ -38,6 +38,31 @@ void PrintUsage()
   G4cerr << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
   G4cerr << "   -r mode   : radioactive decay physics: off (default), on" << G4endl;
 }
+
+FTFP_BERT* CreatePhysicsList(const G4String& emModel, G4bool enableRadioactiveDecay)
+{
+  auto* physicsList = new FTFP_BERT;
+  if (emModel == "option4") {
+    physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
+  }
+  else if (emModel == "livermore") {
+    physicsList->ReplacePhysics(new G4EmLivermorePhysics());
+  }
+  else if (emModel == "penelope") {
+    physicsList->ReplacePhysics(new G4EmPenelopePhysics());
+  }
+  else {
+    G4cerr << "Error: unknown EM model '" << emModel
+           << "'. Use: option4, livermore, penelope" << G4endl;
+    return nullptr;
+  }
+
+  if (enableRadioactiveDecay) {
+    physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics());
+  }
+
+  return physicsList;
+}
 }  // namespace
 
 int main(int argc, char** argv)
@@ -124,30 +149,15 @@ int main(int argc, char** argv)
   auto detConstruction = new DoseLab::DoseLabDetectorConstruction();
   runManager->SetUserInitialization(detConstruction);
 
-  auto physicsList = new FTFP_BERT;
-  if (emModel == "option4") {
-    physicsList->ReplacePhysics(new G4EmStandardPhysics_option4());
-  }
-  else if (emModel == "livermore") {
-    physicsList->ReplacePhysics(new G4EmLivermorePhysics());
-  }
-  else if (emModel == "penelope") {
-    physicsList->ReplacePhysics(new G4EmPenelopePhysics());
-  }
-  else {
-    G4cerr << "Error: unknown EM model '" << emModel
-           << "'. Use: option4, livermore, penelope" << G4endl;
+  auto* physicsList = CreatePhysicsList(emModel, enableRadioactiveDecay);
+  if (!physicsList) {
     PrintUsage();
-    delete physicsList;
     delete runManager;
     return 1;
   }
-  if (enableRadioactiveDecay) {
-    physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics());
-  }
   runManager->SetUserInitialization(physicsList);
 
-  auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction);
+  auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction, emModel, enableRadioactiveDecay);
   runManager->SetUserInitialization(actionInitialization);
 
   // Register /score UI commands before any user macro is parsed.

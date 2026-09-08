@@ -158,17 +158,20 @@ bool LoadRunInfoSummaryFromStringSchema(TTree* tree, RunInfoSummary& summary)
     return false;
   }
 
-  if (!tree->GetBranch("Tag") || !tree->GetBranch("Source") || !tree->GetBranch("Field")
+  if (!tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoTagColumnName)
+      || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoSourceColumnName)
+      || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoGeometryColumnName)
       || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoDepthCmColumnName)
-      || !tree->GetBranch("Chamber") || !tree->GetBranch("ThreadId")) {
+      || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoRegionColumnName)
+      || !tree->GetBranch(DoseLab::AnalysisConfig::kRunInfoThreadIdColumnName)) {
     return false;
   }
 
   RunInfoRow row;
   auto* tagLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoTagColumnName));
   auto* sourceLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoSourceColumnName));
-  auto* fieldLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoFieldColumnName));
-  auto* chamberLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoChamberColumnName));
+  auto* fieldLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoGeometryColumnName));
+  auto* chamberLeaf = dynamic_cast<TLeafC*>(tree->GetLeaf(DoseLab::AnalysisConfig::kRunInfoRegionColumnName));
 
   if (!tagLeaf || !sourceLeaf || !fieldLeaf || !chamberLeaf) {
     return false;

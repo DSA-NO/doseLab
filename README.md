@@ -209,6 +209,41 @@ Use `-r on|off` to enable or disable radioactive decay physics. For example:
 micromamba run -n doselab-production ./build-production/doseLab -r on -b ./build-production/run-simple.mac
 ```
 
+## Output metadata and file naming
+
+doseLab exposes output metadata commands under `/doseLab/output/`.
+
+Set metadata in a macro before `/run/beamOn`:
+
+```tcl
+/doseLab/output/tag run-ref-10x10-d5cm-6mv-farmer
+/doseLab/output/source linac-photons-6mv
+/doseLab/output/field 10x10-ssd100
+/doseLab/output/chamber farmer
+/doseLab/output/depth 5 cm
+```
+
+Output file naming:
+
+- default tag (unset): `doseLab-default.root`
+- custom tag: `doseLab-<tag>.root`
+
+Allowed `tag` characters are letters, digits, `-`, and `_`.
+
+The `runinfo` ntuple uses the standardized schema:
+
+- `Tag`
+- `Source`
+- `Geometry`
+- `Region`
+- `DepthCm`
+- `EMModel`
+- `RadioactiveDecay`
+- `Events`
+- `ThreadId`
+
+Note: the `/doseLab/output/field` and `/doseLab/output/chamber` commands populate the standardized `Geometry` and `Region` runinfo columns.
+
 Run a visual macro from the micromamba environment:
 
 ```bash

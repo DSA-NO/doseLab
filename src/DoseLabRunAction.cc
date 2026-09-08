@@ -14,6 +14,7 @@
 #include "G4AnalysisManager.hh"
 #include "G4Exception.hh"
 #include "G4GenericMessenger.hh"
+#include "G4Run.hh"
 #include "G4RunManager.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Threading.hh"
@@ -25,8 +26,12 @@
 namespace DoseLab
 {
 
-DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction)
+DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction,
+  const G4String& emModel,
+  G4bool enableRadioactiveDecay)
 : fDetectorConstruction(detectorConstruction)
+, fEmModel(emModel)
+, fEnableRadioactiveDecay(enableRadioactiveDecay)
 {
   ConfigureCommands();
 
@@ -59,9 +64,12 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
                                 AnalysisConfig::kRunInfoNtupleTitle);
   analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoTagColumnName);
   analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoSourceColumnName);
-  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoFieldColumnName);
+  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoGeometryColumnName);
+  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoRegionColumnName);
   analysisManager->CreateNtupleDColumn(AnalysisConfig::kRunInfoDepthCmColumnName);
-  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoChamberColumnName);
+  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoEmModelColumnName);
+  analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoRadioactiveDecayColumnName);
+  analysisManager->CreateNtupleIColumn(AnalysisConfig::kRunInfoEventsColumnName);
   analysisManager->CreateNtupleIColumn(AnalysisConfig::kRunInfoThreadIdColumnName);
   analysisManager->FinishNtuple(1);
 }
@@ -229,7 +237,7 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
   G4cout << "Output file: " << fileName << G4endl;
 }
 
-void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
+void DoseLabRunAction::EndOfRunAction(const G4Run* run)
 {
   const auto source = OutputMetadata::ParseSourceKind(fOutputSource);
   const auto field = OutputMetadata::ParseFieldKind(fOutputField);
@@ -247,11 +255,15 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* /*run*/)
                                        SanitizeForFileName(fOutputTag));
     analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoSourceColumn,
                                        OutputMetadata::CanonicalLabel(source));
-    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoFieldColumn,
+    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoGeometryColumn,
                                        OutputMetadata::CanonicalLabel(field));
-    analysisManager->FillNtupleDColumn(1, AnalysisConfig::kRunInfoDepthCmColumn, fOutputDepthCm);
-    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoChamberColumn,
+    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoRegionColumn,
                                        OutputMetadata::CanonicalLabel(chamber));
+    analysisManager->FillNtupleDColumn(1, AnalysisConfig::kRunInfoDepthCmColumn, fOutputDepthCm);
+    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoEmModelColumn, fEmModel);
+    analysisManager->FillNtupleSColumn(1, AnalysisConfig::kRunInfoRadioactiveDecayColumn,
+                                       fEnableRadioactiveDecay ? "on" : "off");
+    analysisManager->FillNtupleIColumn(1, AnalysisConfig::kRunInfoEventsColumn, run->GetNumberOfEvent());
     analysisManager->FillNtupleIColumn(1, AnalysisConfig::kRunInfoThreadIdColumn,
                                        G4Threading::G4GetThreadId());
     analysisManager->AddNtupleRow(1);
