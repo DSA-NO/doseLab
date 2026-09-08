@@ -12,6 +12,7 @@
 #include "G4EmLivermorePhysics.hh"
 #include "G4EmPenelopePhysics.hh"
 #include "G4EmStandardPhysics_option4.hh"
+#include "G4RadioactiveDecayPhysics.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4RunManagerFactory.hh"
@@ -29,12 +30,13 @@ namespace
 void PrintUsage()
 {
   G4cerr << " Usage: " << G4endl;
-  G4cerr << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel]" << G4endl;
+  G4cerr << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel] [-r on|off]" << G4endl;
   G4cerr << "   -b macro  : batch mode, no window" << G4endl;
   G4cerr << "   -v macro  : visual mode, opens Qt window, executes macro, stays open" << G4endl;
   G4cerr << "   (no args) : interactive Qt session" << G4endl;
   G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
   G4cerr << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
+  G4cerr << "   -r mode   : radioactive decay physics: off (default), on" << G4endl;
 }
 }  // namespace
 
@@ -50,6 +52,7 @@ int main(int argc, char** argv)
   G4String macro;
   G4String visMacro;
   G4String emModel = "option4";
+  G4bool enableRadioactiveDecay = false;
   G4bool verboseBestUnits = true;
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
@@ -61,6 +64,21 @@ int main(int argc, char** argv)
       visMacro = argv[i + 1];
     else if (G4String(argv[i]) == "-p") {
       emModel = argv[i + 1];
+    }
+    else if (G4String(argv[i]) == "-r") {
+      const G4String decayMode = argv[i + 1];
+      if (decayMode == "on") {
+        enableRadioactiveDecay = true;
+      }
+      else if (decayMode == "off") {
+        enableRadioactiveDecay = false;
+      }
+      else {
+        G4cerr << "Error: unknown radioactive decay mode '" << decayMode
+               << "'. Use: on, off" << G4endl;
+        PrintUsage();
+        return 1;
+      }
     }
 #ifdef G4MULTITHREADED
     else if (G4String(argv[i]) == "-t") {
@@ -123,6 +141,9 @@ int main(int argc, char** argv)
     delete physicsList;
     delete runManager;
     return 1;
+  }
+  if (enableRadioactiveDecay) {
+    physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics());
   }
   runManager->SetUserInitialization(physicsList);
 

@@ -203,6 +203,12 @@ Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
 micromamba run -n doselab-production ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 
+Use `-r on|off` to enable or disable radioactive decay physics. For example:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLab -r on -b ./build-production/run-simple.mac
+```
+
 Run a visual macro from the micromamba environment:
 
 ```bash
