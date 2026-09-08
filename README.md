@@ -35,6 +35,12 @@ This catches onboarding issues such as missing shell init, stale local Geant4 se
 
 ## Quick start (already cloned)
 
+
+Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
+```
 If you already have the repository checked out, use this shorter path:
 
 ```bash
@@ -189,6 +195,12 @@ Run a quick single macro test:
 
 ```bash
 micromamba run -n doselab-production ./build-production/doseLab -b ./build-production/run-simple.mac
+```
+
+Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
+
+```bash
+micromamba run -n doselab-production ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 
 Run a visual macro from the micromamba environment:
