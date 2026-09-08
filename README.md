@@ -282,6 +282,15 @@ Shared source preset catalog (required naming):
 - `source-10mv.mac`
 - `source.mac` (alias macro pointing to the default preset for quick runs)
 
+Decay-enabled example preset:
+
+- `source-cs137.mac` (run with `-r on`; Cs-137 decays via Ba-137m)
+
+Small decay example run macro:
+
+- `run-decay-cs137.mac`
+- run with: `./scripts/run-micromamba.sh run -r on -b run-decay-cs137.mac`
+
 Nested macro path robustness:
 
 - add `/control/macroPath .:macros:../macros` before nested `/control/execute` in composed run macros

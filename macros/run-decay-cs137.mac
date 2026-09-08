@@ -1,0 +1,18 @@
+# Small Cs-137 decay example run.
+# Use with: doseLab -r on -b macros/run-decay-cs137.mac
+
+/doseLab/output/tag run-decay-cs137
+/doseLab/output/source cs137
+/doseLab/output/field 10x10-ssd100
+/doseLab/output/depth 5 cm
+/doseLab/output/chamber farmer
+
+/control/execute cavity-farmer.mac
+
+/run/initialize
+
+/control/execute source-cs137.mac
+/control/execute field-ref-10x10-ssd100.mac
+
+/run/printProgress 20
+/run/beamOn 200

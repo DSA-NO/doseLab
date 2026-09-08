@@ -1,0 +1,8 @@
+# Cs-137 ion source preset (source identity and decay parent only).
+# Physics note: Cs-137 decays to Ba-137m, which then emits the 661.7 keV gamma.
+# Requires running the app with -r on to activate radioactive decay physics.
+
+/doseLab/output/source cs137
+
+/gps/particle ion
+/gps/ion 55 137 0 0

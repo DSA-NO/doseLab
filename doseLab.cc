@@ -20,10 +20,11 @@
 #include "G4SteppingVerbose.hh"
 #include "G4TScoreNtupleWriter.hh"
 #include "G4UIExecutive.hh"
-#include "G4UIcommand.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 // #include "Randomize.hh"
+
+#include <cstdlib>
 
 namespace
 {
@@ -67,13 +68,6 @@ FTFP_BERT* CreatePhysicsList(const G4String& emModel, G4bool enableRadioactiveDe
 
 int main(int argc, char** argv)
 {
-  // Evaluate arguments
-  //
-  if (argc > 9) {
-    PrintUsage();
-    return 1;
-  }
-
   G4String macro;
   G4String visMacro;
   G4String emModel = "option4";
@@ -82,16 +76,35 @@ int main(int argc, char** argv)
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
-  for (G4int i = 1; i < argc; i = i + 2) {
-    if (G4String(argv[i]) == "-b")
-      macro = argv[i + 1];
-    else if (G4String(argv[i]) == "-v")
-      visMacro = argv[i + 1];
-    else if (G4String(argv[i]) == "-p") {
-      emModel = argv[i + 1];
+  for (G4int i = 1; i < argc; ++i) {
+    const G4String arg = argv[i];
+    if (arg == "-b") {
+      if (i + 1 >= argc) {
+        PrintUsage();
+        return 1;
+      }
+      macro = argv[++i];
     }
-    else if (G4String(argv[i]) == "-r") {
-      const G4String decayMode = argv[i + 1];
+    else if (arg == "-v") {
+      if (i + 1 >= argc) {
+        PrintUsage();
+        return 1;
+      }
+      visMacro = argv[++i];
+    }
+    else if (arg == "-p") {
+      if (i + 1 >= argc) {
+        PrintUsage();
+        return 1;
+      }
+      emModel = argv[++i];
+    }
+    else if (arg == "-r") {
+      if (i + 1 >= argc) {
+        PrintUsage();
+        return 1;
+      }
+      const G4String decayMode = argv[++i];
       if (decayMode == "on") {
         enableRadioactiveDecay = true;
       }
@@ -106,8 +119,12 @@ int main(int argc, char** argv)
       }
     }
 #ifdef G4MULTITHREADED
-    else if (G4String(argv[i]) == "-t") {
-      nThreads = G4UIcommand::ConvertToInt(argv[i + 1]);
+    else if (arg == "-t") {
+      if (i + 1 >= argc) {
+        PrintUsage();
+        return 1;
+      }
+      nThreads = std::atoi(argv[++i]);
     }
 #endif
     else {

@@ -29,6 +29,7 @@ enum class SourceKind
 {
   kUnspecified,
   kCo60,
+  kCs137,
   k6MV,
   k10MV,
 };
@@ -67,9 +68,10 @@ struct ScenarioPreset
   G4double defaultDepthCm;
 };
 
-inline constexpr std::array<MetadataChoice<SourceKind>, 4> kSourceChoices{{
+inline constexpr std::array<MetadataChoice<SourceKind>, 5> kSourceChoices{{
   {SourceKind::kUnspecified, "unspecified"},
   {SourceKind::kCo60, "co60"},
+  {SourceKind::kCs137, "cs137"},
   {SourceKind::k6MV, "6mv"},
   {SourceKind::k10MV, "10mv"},
 }};

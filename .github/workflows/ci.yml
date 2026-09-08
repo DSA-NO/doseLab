@@ -54,6 +54,9 @@ jobs:
         working-directory: build-ci
         run: micromamba run -n geant4-doseLab ./doseLab -b run-simple.mac
 
+      - name: Smoke test (decay-enabled Cs-137)
+        run: micromamba run -n geant4-doseLab ./build-ci/doseLab -r on -b macros/run-decay-cs137.mac
+
   root-summary:
     name: Build (optional ROOT summary)
     runs-on: ubuntu-22.04
