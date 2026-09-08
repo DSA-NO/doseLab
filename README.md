@@ -484,7 +484,6 @@ Extended reproducibility/physics checks are split into a separate workflow:
 
 - `.github/workflows/extended-validation.yml`
   - triggers: `workflow_dispatch` and weekly schedule
-  - ROOT helper build check
   - production reference runs + baseline metrics check
   - Fano matrix summary/gate
 
@@ -495,6 +494,9 @@ When ROOT is available, CMake builds an additional executable:
 - `doseLabRootSummary`
 
 This helper reads and summarizes doseLab ROOT outputs.
+
+Note: the default `environment.yml` is Geant4-focused and does not include ROOT.
+Install ROOT separately when you need `doseLabRootSummary`.
 
 ROOT detection order in CMake:
 

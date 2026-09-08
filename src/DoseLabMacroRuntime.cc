@@ -1,3 +1,4 @@
+// Resolves macro execution working directories and normalizes macro paths.
 // doseLab - Geant4 dose calculation application
 // License: http://cern.ch/geant4/license
 // Contact: lindbohansen@gmail.com, elisabeth.hansen@dsa.no

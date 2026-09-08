@@ -30,6 +30,11 @@ if [[ -z "$ENV_PREFIX" ]]; then
   ENV_PREFIX="$HOME/micromamba/envs/$ENV_NAME"
 fi
 
+# Match CI configure environment hints for Geant4 dependency discovery.
+export CPATH="$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include${CPATH:+:$CPATH}"
+export CPLUS_INCLUDE_PATH="$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
+export LIBRARY_PATH="$ENV_PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+
 EXPAT_ARGS=()
 if [[ -f "$ENV_PREFIX/include/expat.h" && -f "$ENV_PREFIX/lib/libexpat.so" ]]; then
   EXPAT_ARGS=(
@@ -38,13 +43,34 @@ if [[ -f "$ENV_PREFIX/include/expat.h" && -f "$ENV_PREFIX/lib/libexpat.so" ]]; t
   )
 fi
 
+ZLIB_ARGS=()
+if [[ -f "$ENV_PREFIX/include/zlib.h" && -f "$ENV_PREFIX/lib/libz.so" ]]; then
+  ZLIB_ARGS=(
+    -DZLIB_INCLUDE_DIR="$ENV_PREFIX/include"
+    -DZLIB_LIBRARY="$ENV_PREFIX/lib/libz.so"
+  )
+fi
+
+FREETYPE_ARGS=()
+if [[ -d "$ENV_PREFIX/include/freetype2" && -f "$ENV_PREFIX/lib/libfreetype.so" ]]; then
+  FREETYPE_ARGS=(
+    -DFREETYPE_INCLUDE_DIR_freetype2="$ENV_PREFIX/include/freetype2"
+    -DFREETYPE_INCLUDE_DIR_ft2build="$ENV_PREFIX/include/freetype2"
+    -DFREETYPE_LIBRARY_RELEASE="$ENV_PREFIX/lib/libfreetype.so"
+  )
+fi
+
 if [[ "${1:-}" == "--create-env" ]]; then
   "$ENV_CMD" env create -f "$ENV_FILE" -y || "$ENV_CMD" env update -f "$ENV_FILE" -y
 fi
 
 run_env cmake -S . -B "$BUILD_DIR" -G Ninja \
-  -DDOSELAB_BUILD_ROOT_SUMMARY=ON \
-  -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
-  "${EXPAT_ARGS[@]}"
+  -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
+  -DDOSELAB_REQUIRE_ROOT_SUMMARY=OFF \
+  -DCMAKE_INCLUDE_PATH="$ENV_PREFIX/include/freetype2;$ENV_PREFIX/include" \
+  -DCMAKE_LIBRARY_PATH="$ENV_PREFIX/lib" \
+  "${EXPAT_ARGS[@]}" \
+  "${ZLIB_ARGS[@]}" \
+  "${FREETYPE_ARGS[@]}"
 
 run_env cmake --build "$BUILD_DIR" --parallel

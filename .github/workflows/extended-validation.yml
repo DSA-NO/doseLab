@@ -6,58 +6,6 @@ on:
     - cron: '0 2 * * 1'
 
 jobs:
-  root-summary:
-    name: Build (ROOT summary)
-    runs-on: ubuntu-22.04
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup micromamba environment
-        uses: mamba-org/setup-micromamba@v3
-        with:
-          environment-name: geant4-doseLab
-          environment-file: environment.yml
-          init-shell: bash
-          cache-environment: true
-          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
-          cache-downloads: true
-
-      - name: Toolchain info
-        run: |
-          micromamba run -n geant4-doseLab cmake --version
-          micromamba run -n geant4-doseLab root-config --version
-          micromamba run -n geant4-doseLab geant4-config --version
-
-      - name: Configure (ROOT required)
-        run: |
-          ROOT_CONFIG_PATH=$(micromamba run -n geant4-doseLab bash -lc 'command -v root-config')
-          micromamba run -n geant4-doseLab bash -lc '
-            export CPATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPATH:+:$CPATH}"
-            export CPLUS_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
-            export LIBRARY_PATH="$CONDA_PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
-            cmake -S . -B build-root -G Ninja \
-              -DDOSELAB_BUILD_ROOT_SUMMARY=ON \
-              -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
-              -DDOSELAB_ROOT_CONFIG='"$ROOT_CONFIG_PATH"' \
-              -DCMAKE_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2;$CONDA_PREFIX/include" \
-              -DCMAKE_LIBRARY_PATH="$CONDA_PREFIX/lib" \
-              -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
-              -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
-              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so" \
-              -DFREETYPE_INCLUDE_DIR_freetype2="$CONDA_PREFIX/include/freetype2" \
-              -DFREETYPE_INCLUDE_DIR_ft2build="$CONDA_PREFIX/include/freetype2" \
-              -DFREETYPE_LIBRARY_RELEASE="$CONDA_PREFIX/lib/libfreetype.so"'
-
-      - name: Build (ROOT required)
-        run: micromamba run -n geant4-doseLab cmake --build build-root --parallel
-
-      - name: Smoke test (ROOT helper)
-        working-directory: build-root
-        run: micromamba run -n geant4-doseLab test -x ./doseLabRootSummary
-
   production-validation:
     name: Production validation
     runs-on: ubuntu-22.04
