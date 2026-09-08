@@ -473,15 +473,20 @@ cmake --build build -j
 
 ## CI
 
-GitHub Actions runs on push and pull requests using `.github/workflows/ci.yml`.
+The default GitHub Actions workflow on push/pull-request is intentionally fast and development-focused:
 
-- **Build (Geant4)**
-  - Creates a micromamba environment, configures with `-DDOSELAB_BUILD_ROOT_SUMMARY=OFF`, builds, and runs a batch smoke test.
-- **Build (optional ROOT summary)**
-  - Creates a micromamba environment with ROOT and verifies `doseLabRootSummary` is produced.
-- **Production validation**
-  - Uses `envs/doselab-production.yml`, runs four reference scenarios (Farmer/Roos, with/without walls), and compares metrics against `analysis/baseline/reference_metrics.json`.
-  - Uploads `analysis/production/latest/metrics.json` as a CI artifact.
+- `.github/workflows/ci.yml`
+  - configure + build in `geant4-doseLab`
+  - smoke test (`run-simple.mac`)
+  - decay-enabled smoke test (`run-decay-cs137.mac` with `-r on`)
+
+Extended reproducibility/physics checks are split into a separate workflow:
+
+- `.github/workflows/extended-validation.yml`
+  - triggers: `workflow_dispatch` and weekly schedule
+  - ROOT helper build check
+  - production reference runs + baseline metrics check
+  - Fano matrix summary/gate
 
 ## ROOT Summary Helper
 

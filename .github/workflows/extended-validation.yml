@@ -1,0 +1,137 @@
+name: Extended Validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  root-summary:
+    name: Build (ROOT summary)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup micromamba environment
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: geant4-doseLab
+          environment-file: environment.yml
+          init-shell: bash
+          cache-environment: true
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
+          cache-downloads: true
+
+      - name: Toolchain info
+        run: |
+          micromamba run -n geant4-doseLab cmake --version
+          micromamba run -n geant4-doseLab root-config --version
+          micromamba run -n geant4-doseLab geant4-config --version
+
+      - name: Configure (ROOT required)
+        run: |
+          ROOT_CONFIG_PATH=$(micromamba run -n geant4-doseLab bash -lc 'command -v root-config')
+          micromamba run -n geant4-doseLab bash -lc '
+            export CPATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            export CPLUS_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            cmake -S . -B build-root -G Ninja \
+              -DDOSELAB_BUILD_ROOT_SUMMARY=ON \
+              -DDOSELAB_REQUIRE_ROOT_SUMMARY=ON \
+              -DDOSELAB_ROOT_CONFIG='"$ROOT_CONFIG_PATH"' \
+              -DCMAKE_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2;$CONDA_PREFIX/include" \
+              -DCMAKE_LIBRARY_PATH="$CONDA_PREFIX/lib" \
+              -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DEXPAT_LIBRARY="$CONDA_PREFIX/lib/libexpat.so" \
+              -DZLIB_INCLUDE_DIR="$CONDA_PREFIX/include" \
+              -DZLIB_LIBRARY="$CONDA_PREFIX/lib/libz.so" \
+              -DFREETYPE_INCLUDE_DIR_freetype2="$CONDA_PREFIX/include/freetype2" \
+              -DFREETYPE_INCLUDE_DIR_ft2build="$CONDA_PREFIX/include/freetype2" \
+              -DFREETYPE_LIBRARY_RELEASE="$CONDA_PREFIX/lib/libfreetype.so"'
+
+      - name: Build (ROOT required)
+        run: micromamba run -n geant4-doseLab cmake --build build-root --parallel
+
+      - name: Smoke test (ROOT helper)
+        working-directory: build-root
+        run: micromamba run -n geant4-doseLab test -x ./doseLabRootSummary
+
+  production-validation:
+    name: Production validation
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup production environment
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: doselab-production
+          environment-file: envs/doselab-production.yml
+          init-shell: bash
+          cache-environment: true
+          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
+          cache-downloads: true
+
+      - name: Build production profile
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
+
+      - name: Run production reference scenarios
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
+
+      - name: Check baseline
+        run: micromamba run -n doselab-production ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
+
+      - name: Upload production metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-metrics
+          path: analysis/production/latest/metrics.json
+
+  fano-validation:
+    name: Fano validation (precision-aware)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup production environment
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-name: doselab-production
+          environment-file: envs/doselab-production.yml
+          init-shell: bash
+          cache-environment: true
+          cache-environment-key: doselab-production-${{ hashFiles('envs/doselab-production.yml') }}
+          cache-downloads: true
+
+      - name: Build production profile
+        run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
+
+      - name: Run Fano matrix (fast mode)
+        run: |
+          DOSELAB_ENV_CMD=micromamba \
+          DOSELAB_FANO_MODE=fast \
+          DOSELAB_OUTPUT_DIR=analysis/fano/ci \
+          ./scripts/run-fano-matrix.sh
+
+      - name: Summarize and gate (physics only when precision passes)
+        run: |
+          micromamba run -n doselab-production ./scripts/summarize-fano-matrix.py \
+            --input-dir analysis/fano/ci \
+            --output-json analysis/fano/ci/summary.json \
+            --output-text analysis/fano/ci/summary.txt \
+            --strict \
+            --ci-physics-gate
+
+      - name: Upload Fano summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: fano-summary
+          path: |
+            analysis/fano/ci/summary.json
+            analysis/fano/ci/summary.txt
