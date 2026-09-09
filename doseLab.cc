@@ -1,42 +1,39 @@
-// doseLab - Geant4 dose calculation application
-// License: http://cern.ch/geant4/license
-// Contact: lindbohansen@gmail.com, elisabeth.hansen@dsa.no
-//
-/// \file doseLab.cc
-/// \brief Main program of the doseLab application
-
 #include "DoseLabActionInitialization.hh"
 #include "DoseLabDetectorConstruction.hh"
-#include "DoseLabMacroRuntime.hh"
+
 #include "FTFP_BERT.hh"
 #include "G4EmLivermorePhysics.hh"
 #include "G4EmPenelopePhysics.hh"
 #include "G4EmStandardPhysics_option4.hh"
 #include "G4RadioactiveDecayPhysics.hh"
-
 #include "G4RunManagerFactory.hh"
-#include "G4SteppingVerbose.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
-// #include "Randomize.hh"
+
+#include "DoseLabMacroRuntime.hh"
 
 #include <array>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
+#include <string>
+
+using DoseLab::MacroRuntime::ApplyWorkingDirectory;
+using DoseLab::MacroRuntime::ResolveRuntimeMacroConfig;
 
 namespace
 {
 void PrintUsage()
 {
-  G4cerr << " Usage: " << G4endl;
-  G4cerr << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel] [-r on|off]" << G4endl;
-  G4cerr << "   -b macro  : batch mode, execute the given macro" << G4endl;
-  G4cerr << "   -v macro  : visualize, execute the macro, and keep the UI open" << G4endl;
-  G4cerr << "   (no args) : interactive Qt session" << G4endl;
-  G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
-  G4cerr << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
-  G4cerr << "   -r mode   : radioactive decay physics: off (default), on" << G4endl;
+  G4cout << " Usage: " << G4endl;
+  G4cout << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel] [-r on|off]" << G4endl;
+  G4cout << "   -b macro  : batch mode, execute the given macro" << G4endl;
+  G4cout << "   -v macro  : visualize, execute the macro, and keep the UI open" << G4endl;
+  G4cout << "   -t N      : number of threads for multi-threaded builds" << G4endl;
+  G4cout << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
+  G4cout << "   -r mode   : radioactive decay physics: off (default), on" << G4endl;
+  G4cout << "   (no args) : interactive session" << G4endl;
 }
 
 bool FileExists(const G4String& path)
@@ -102,12 +99,13 @@ int main(int argc, char** argv)
   G4String visMacro;
   G4String emModel = "option4";
   G4bool enableRadioactiveDecay = false;
-  G4bool verboseBestUnits = true;
+
 #ifdef G4MULTITHREADED
   G4int nThreads = 0;
 #endif
+
   for (G4int i = 1; i < argc; ++i) {
-    const G4String arg = argv[i];
+    G4String arg = argv[i];
     if (arg == "-b") {
       if (i + 1 >= argc) {
         PrintUsage();
@@ -169,75 +167,48 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  // Create Qt UI session for interactive and visual-macro modes
-  //
   G4UIExecutive* ui = nullptr;
   if (macro.empty()) {
     ui = new G4UIExecutive(argc, argv);
   }
 
-  // Use G4SteppingVerboseWithUnits
-  if (verboseBestUnits) {
-    G4int precision = 4;
-    G4SteppingVerbose::UseBestUnit(precision);
-  }
-
-  // Construct the default run manager
-  //
-  auto runManager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::Default);
+  auto runManager = G4RunManagerFactory::CreateRunManager();
 #ifdef G4MULTITHREADED
   if (nThreads > 0) {
     runManager->SetNumberOfThreads(nThreads);
   }
 #endif
 
-  // Set mandatory initialization classes
-  //
-  auto detConstruction = new DoseLab::DoseLabDetectorConstruction();
-  runManager->SetUserInitialization(detConstruction);
-
+  auto detector = new DoseLab::DoseLabDetectorConstruction();
+  runManager->SetUserInitialization(detector);
   auto* physicsList = CreatePhysicsList(emModel, enableRadioactiveDecay);
   if (!physicsList) {
-    PrintUsage();
     delete runManager;
     return 1;
   }
   runManager->SetUserInitialization(physicsList);
+  runManager->SetUserInitialization(new DoseLab::DoseLabActionInitialization(detector, emModel, enableRadioactiveDecay));
 
-  auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction, emModel, enableRadioactiveDecay);
-  runManager->SetUserInitialization(actionInitialization);
-
-  // Initialize visualization
   auto visManager = new G4VisExecutive;
-  // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  // auto visManager = new G4VisExecutive("Quiet");
   visManager->Initialize();
 
-  // Get the pointer to the User Interface manager
-  auto UImanager = G4UImanager::GetUIpointer();
-
-  // Resolve macro paths from invocation context and move to the macro working
-  // directory so nested /control/execute behaves the same in CLI and IDE runs.
-  const auto runtimeMacroConfig = DoseLab::MacroRuntime::ResolveRuntimeMacroConfig(argv, macro, visMacro);
+  auto* UImanager = G4UImanager::GetUIpointer();
+  const auto runtimeMacroConfig = ResolveRuntimeMacroConfig(argv, macro, visMacro);
   {
     G4String warning;
-    if (!DoseLab::MacroRuntime::ApplyWorkingDirectory(runtimeMacroConfig, warning)) {
+    if (!ApplyWorkingDirectory(runtimeMacroConfig, warning)) {
       G4cerr << "Warning: " << warning << G4endl;
     }
   }
 
-  // Process macro or start UI session
-  //
   if (!macro.empty()) {
     if (!ExecuteMacroWithFallback(UImanager, runtimeMacroConfig.batchMacroArg)) {
-      delete ui;
       delete visManager;
       delete runManager;
       return 1;
     }
   }
   else if (!visMacro.empty()) {
-    // visual macro mode: Qt window open, execute macro, keep session open for inspection
     if (!ExecuteMacroWithFallback(UImanager, "init_vis.mac")) {
       delete ui;
       delete visManager;
@@ -262,7 +233,6 @@ int main(int argc, char** argv)
     delete ui;
   }
   else {
-    // interactive mode: no macro, full GUI session
     if (!ExecuteMacroWithFallback(UImanager, "init_vis.mac")) {
       delete ui;
       delete visManager;
@@ -281,7 +251,7 @@ int main(int argc, char** argv)
     delete ui;
   }
 
-  // User actions, physics list, and detector construction are owned by runManager.
   delete visManager;
   delete runManager;
+  return 0;
 }
