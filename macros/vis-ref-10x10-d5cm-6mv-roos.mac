@@ -8,6 +8,8 @@
 
 /run/initialize
 
+/vis/open OGL
+
 /control/execute vis.mac
 
 /control/execute source-6mv.mac

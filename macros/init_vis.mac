@@ -11,4 +11,5 @@
 /event/verbose 0
 
 /run/initialize
+/vis/open OGL
 /control/execute vis.mac
