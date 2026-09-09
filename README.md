@@ -210,6 +210,19 @@ Use `-r on|off` to enable or disable radioactive decay physics. For example:
 micromamba run -n geant4-doseLab ./build-production/doseLab -r on -b ./build-production/run-simple.mac
 ```
 
+## Harmonized macro lifecycle and ownership
+
+The three labs share a common lifecycle, even though their startup macros differ in style.
+
+1. Physical geometry setup comes first. Raw detector dimensions, material choices, wall thickness, cuts, axis, and other model parameters belong to the detector construction/messenger layer. These are the real geometry state and should be set before `/run/initialize`.
+2. Scenario and placement setup comes next. Depth, position, and scenario presets are orchestration-level choices: they define the detector in context and synchronize the visible experiment setup, output metadata, and expected run configuration.
+3. Source setup follows. Source preset macros should define particle type, spectrum, and emission geometry, without doing initialization or beamOn themselves.
+4. Field setup follows. Field macros define beam shape, SSD, direction, and beam metadata.
+5. Initialization happens once the full scenario is assembled. `/run/initialize` freezes the effective geometry for the run.
+6. Visualization, scoring, and execution happen after initialization. Viewer macros, scoring meshes, and `/run/beamOn` are run only after the detector and source state have been fully configured.
+
+This preserves the modular doseLab workflow while matching the simpler macro ergonomics in the newer labs. The key rule is: raw geometry remains detector-owned, scenario/output metadata remains orchestration-owned, and source/field/scoring/vis remain native Geant4 subsystems.
+
 ## Output metadata and file naming
 
 doseLab exposes output metadata commands under `/doseLab/output/`.
