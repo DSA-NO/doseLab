@@ -6,6 +6,7 @@
 #include "G4EmPenelopePhysics.hh"
 #include "G4EmStandardPhysics_option4.hh"
 #include "G4RadioactiveDecayPhysics.hh"
+#include "G4RunManager.hh"
 #include "G4RunManagerFactory.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
@@ -172,9 +173,16 @@ int main(int argc, char** argv)
     ui = new G4UIExecutive(argc, argv);
   }
 
-  auto runManager = G4RunManagerFactory::CreateRunManager();
+  G4RunManager* runManager = nullptr;
+  if (macro.empty()) {
+    // Use sequential mode for UI/visual runs to avoid Qt/OpenGL thread-affinity issues.
+    runManager = new G4RunManager();
+  }
+  else {
+    runManager = G4RunManagerFactory::CreateRunManager();
+  }
 #ifdef G4MULTITHREADED
-  if (nThreads > 0) {
+  if (!macro.empty() && nThreads > 0) {
     runManager->SetNumberOfThreads(nThreads);
   }
 #endif
@@ -209,12 +217,6 @@ int main(int argc, char** argv)
     }
   }
   else if (!visMacro.empty()) {
-    if (!ExecuteMacroWithFallback(UImanager, "init_vis.mac")) {
-      delete ui;
-      delete visManager;
-      delete runManager;
-      return 1;
-    }
     if (ui && ui->IsGUI()) {
       if (!ExecuteMacroWithFallback(UImanager, "gui.mac")) {
         delete ui;
