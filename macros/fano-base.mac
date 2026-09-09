@@ -15,9 +15,9 @@
 
 # Fano-like homogenization: force cavity and wall to water.
 # Chamber dimensions/orientation still come from the chosen preset.
-/doseLab/cavity/material G4_WATER
-/doseLab/cavity/wallMaterial G4_WATER
-/doseLab/cavity/print
+/doseLab/geometry/material G4_WATER
+/doseLab/geometry/wallMaterial G4_WATER
+/doseLab/geometry/print
 
 /run/initialize
 

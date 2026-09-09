@@ -2,5 +2,5 @@
 # Use before /run/initialize in batch macros.
 
 /doseLab/scenario/type farmer
-/doseLab/cavity/material G4_AIR
-/doseLab/cavity/print
+/doseLab/geometry/material G4_AIR
+/doseLab/geometry/print

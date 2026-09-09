@@ -12,6 +12,6 @@
 # to avoid visualization scene mismatches during live geometry rebuild.
 #
 # Typical sequence in interactive mode:
-# /doseLab/cavity/type farmer
+# /doseLab/geometry/type farmer
 # /run/initialize
 # /control/execute vis.mac

@@ -2,9 +2,9 @@
 # Use before /run/initialize in batch or visualization macros.
 
 /doseLab/scenario/type farmer-walled
-/doseLab/cavity/material G4_AIR
-/doseLab/cavity/wallMaterial G4_PLEXIGLASS
+/doseLab/geometry/material G4_AIR
+/doseLab/geometry/wallMaterial G4_PLEXIGLASS
 # Water test override (both cavity and wall):
-# /doseLab/cavity/material G4_WATER
-# /doseLab/cavity/wallMaterial G4_WATER
-/doseLab/cavity/print
+# /doseLab/geometry/material G4_WATER
+# /doseLab/geometry/wallMaterial G4_WATER
+/doseLab/geometry/print

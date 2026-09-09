@@ -158,8 +158,8 @@ for chamber in "${CHAMBERS[@]}"; do
           echo "/doseLab/output/tag ${tag}"
           echo "/control/execute ${cavity_macro}"
           if [[ "$medium" == "water" ]]; then
-            echo "/doseLab/cavity/material G4_WATER"
-            echo "/doseLab/cavity/wallMaterial G4_WATER"
+            echo "/doseLab/geometry/material G4_WATER"
+            echo "/doseLab/geometry/wallMaterial G4_WATER"
           fi
           echo "/control/execute calibration-base.mac"
           echo "/control/execute ${source_macro}"

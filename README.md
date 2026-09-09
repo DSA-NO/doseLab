@@ -283,7 +283,8 @@ CLI contract (all labs):
 
 Namespace contract:
 
-- geometry commands stay under a lab prefix (for doseLab this is primarily `/doseLab/cavity/*`)
+- geometry commands stay under a lab prefix; for doseLab the canonical namespace is `/doseLab/geometry/*`
+- legacy `/doseLab/cavity/*` aliases remain accepted for compatibility
 - output metadata commands stay under `/.../output/*`
 - scenario/preset commands stay under `/.../scenario/*`
 
