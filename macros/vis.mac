@@ -1,8 +1,8 @@
-# Visualization defaults for interactive doseLab runs.
-
-# Open a viewer
-/vis/open
-# Opens the default viewer; adjust here as needed for your local setup.
+# Visualization defaults for interactive runs.
+#
+# This file configures the already-open viewer. The bootstrap/setup of the
+# session is intentionally kept in init_vis.mac so run/vis reference macros can
+# compose their flows cleanly.
 #
 # Disable auto refresh and quieten vis messages whilst scene and
 # trajectories are established:

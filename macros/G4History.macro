@@ -1,98 +1,27 @@
 /run/verbose 2
-/control/execute gui.mac
-/gui/addMenu file File
-/gui/addButton file Quit exit
-/gui/addMenu run Run
-/gui/addButton run "beamOn 1" "/run/beamOn 1"
-/gui/addButton run "beamOn 10" "/run/beamOn 10"
-/gui/addMenu ref "Vis Ref"
-/gui/addButton ref "Farmer" "/control/execute vis-ref-10x10-d5cm-6mv-farmer.mac"
-/gui/addButton ref "Farmer Walled" "/control/execute vis-ref-10x10-d5cm-6mv-farmer-walled.mac"
-/gui/addButton ref "Roos" "/control/execute vis-ref-10x10-d5cm-6mv-roos.mac"
-/gui/addButton ref "Roos Walled" "/control/execute vis-ref-10x10-d5cm-6mv-roos-walled.mac"
-/gui/addMenu helper Helpers
-/gui/addButton helper "Disable Vis (safe run mode)" "/control/execute helper-disable-vis.mac"
-/gui/addButton helper "Draw Dose Projections" "/control/execute helper-draw-projections.mac"
-/gui/addMenu viewer Viewer
-/gui/addButton viewer "Set style surface" "/vis/viewer/set/style surface"
-/gui/addButton viewer "Set style wireframe" "/vis/viewer/set/style wireframe"
-/gui/addButton viewer "Refresh viewer" "/vis/viewer/refresh"
-/gui/addButton viewer "Update viewer (interaction or end-of-file)" "/vis/viewer/update"
-/gui/addButton viewer "Flush viewer (= refresh + update)" "/vis/viewer/flush"
-/gui/addButton viewer "Update scene" "/vis/scene/notifyHandlers"
-/run/printProgress 100
-/control/execute vis-ref-10x10-d5cm-6mv-roos-walled.mac
-/doseLab/output/tag vis-ref-10x10-d5cm-6mv-roos-walled
-/control/execute cavity-roos-walled.mac
-/doseLab/scenario/type roos-walled
-/doseLab/geometry/material G4_AIR
-/doseLab/geometry/wallMaterial G4_PLEXIGLASS
-/doseLab/geometry/print
-/control/execute depth-ref-5cm-center.mac
-/doseLab/scenario/depth 5 cm
-/doseLab/output/depth 5 cm
-/score/create/boxMesh waterPlane
-/score/mesh/boxSize 10 10 0.1 cm
-/score/mesh/nBin 20 20 1
-/score/quantity/doseDeposit dose
-/score/close
-/score/create/boxMesh chamberPlane
-/score/mesh/translate/xyz 0 0 -5 cm
-/score/mesh/boxSize 10 10 0.1 cm
-/score/mesh/nBin 20 20 1
-/score/quantity/doseDeposit dose
-/score/close
 /run/initialize
-/run/geometryModified
-/control/execute vis.mac
-/vis/open
-/vis/sceneHandler/create TSG
+/vis/scene/notifyHandlers scene-0
+/vis/open OGL
+/vis/sceneHandler/create OGL
+/vis/sceneHandler/attach
 /vis/viewer/create ! ! 600x600-0+0
 /vis/viewer/refresh
-/vis/viewer/set/autoRefresh false
-/vis/verbose errors
+/vis/viewer/set/style wireframe
+/vis/viewer/refresh
+/vis/viewer/set/viewpointThetaPhi 90 0
+/vis/viewer/refresh
+/vis/viewer/zoomTo 2
+/vis/viewer/refresh
+/vis/viewer/flush
+/vis/viewer/refresh viewer-1
+/vis/viewer/update viewer-1
 /vis/drawVolume
 /vis/scene/create
 /vis/scene/add/volume world -1 -1 none m 0 0 0 0 0 0
 /vis/sceneHandler/attach
-/vis/viewer/set/viewpointThetaPhi 90. 180.
+/vis/scene/add/axes 0 0 0 1 m
+/vis/scene/notifyHandlers
 /vis/scene/add/trajectories smooth
 /tracking/storeTrajectory 2
 /vis/scene/notifyHandlers
-/tracking/storeTrajectory 1
-/vis/modeling/trajectories/create/drawByCharge
-/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
-/vis/scene/notifyHandlers scene-0
-/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 1
-/vis/scene/notifyHandlers scene-0
-/vis/scene/endOfEventAction refresh
-/vis/viewer/set/autoRefresh true
-/vis/viewer/refresh
-/vis/verbose warnings
-/control/execute source-6mv.mac
-/doseLab/output/source 6mv
-/gps/particle gamma
-/gps/ene/type User
-/gps/hist/type energy
-/gps/hist/point 0.20 0.15
-/gps/hist/point 0.50 0.40
-/gps/hist/point 1.00 0.85
-/gps/hist/point 1.50 1.00
-/gps/hist/point 2.00 0.95
-/gps/hist/point 3.00 0.70
-/gps/hist/point 4.00 0.45
-/gps/hist/point 5.00 0.22
-/gps/hist/point 6.00 0.08
-/control/execute field-ref-10x10-ssd100.mac
-/doseLab/output/field 10x10-ssd100
-/gps/pos/type Plane
-/gps/pos/shape Square
-/gps/pos/halfx 5.0 cm
-/gps/pos/halfy 5.0 cm
-/gps/pos/centre 0 0 100 cm
-/gps/ang/type beam1d
-/gps/direction 0 0 -1
-/run/printProgress 1
-/run/beamOn 5
-/run/geometryModified
-/vis/scene/notifyHandlers scene-0
+/vis/scene/endOfEventAction accumulate 100

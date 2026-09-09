@@ -33,22 +33,37 @@ class DoseLabDetectorMessenger : public G4UImessenger
     DoseLabDetectorConstruction* fDetector;
 
     G4UIdirectory* fDoseLabDir;
+    G4UIdirectory* fGeometryDir;
     G4UIdirectory* fCavityDir;
 
     G4UIcmdWithAString* fTypeCmd;
+    G4UIcmdWithAString* fLegacyTypeCmd;
     G4UIcmdWithADoubleAndUnit* fRadiusCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyRadiusCmd;
     G4UIcmdWithADoubleAndUnit* fThicknessCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyThicknessCmd;
     G4UIcmdWithADoubleAndUnit* fDepthCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyDepthCmd;
     G4UIcmdWithAString* fAxisCmd;
+    G4UIcmdWithAString* fLegacyAxisCmd;
     G4UIcmdWithAString* fMaterialCmd;
+    G4UIcmdWithAString* fLegacyMaterialCmd;
     G4UIcmdWithADoubleAndUnit* fWallThicknessCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyWallThicknessCmd;
     G4UIcmdWithAString* fWallMaterialCmd;
+    G4UIcmdWithAString* fLegacyWallMaterialCmd;
     G4UIcmdWithADoubleAndUnit* fCavityCutCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyCavityCutCmd;
     G4UIcmdWithADoubleAndUnit* fWallCutCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyWallCutCmd;
     G4UIcmdWithADoubleAndUnit* fCavityMaxStepCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyCavityMaxStepCmd;
     G4UIcmdWithADoubleAndUnit* fWallMaxStepCmd;
+    G4UIcmdWithADoubleAndUnit* fLegacyWallMaxStepCmd;
     G4UIcmdWithoutParameter* fUpdateCmd;  // Deprecated no-op retained for backward compatibility.
+    G4UIcmdWithoutParameter* fLegacyUpdateCmd;
     G4UIcmdWithoutParameter* fPrintCmd;
+    G4UIcmdWithoutParameter* fLegacyPrintCmd;
 };
 
 }  // namespace DoseLab

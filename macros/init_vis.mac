@@ -1,17 +1,14 @@
-# Initialization macro for interactive doseLab visualization.
+# Visualization bootstrap for the lab.
 #
-# Set default verbosity.
-/control/verbose 2
-/control/saveHistory
-/run/verbose 2
-#
-# Optional: change thread count in multi-threaded mode.
-#/run/numberOfThreads 4
-#
-# Note: geometry-sensitive cavity commands should be set before /run/initialize
-# to avoid visualization scene mismatches during live geometry rebuild.
-#
-# Typical sequence in interactive mode:
-# /doseLab/geometry/type farmer
-# /run/initialize
-# /control/execute vis.mac
+# Geometry setup, source presets, and scenario commands should already be set by
+# the caller before this file is executed. This file initializes the run and then
+# applies the standard visual scene configuration used by the lab.
+
+
+/control/verbose 0
+/tracking/verbose 0
+/run/verbose 0
+/event/verbose 0
+
+/run/initialize
+/control/execute vis.mac

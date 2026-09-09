@@ -30,20 +30,22 @@ class DoseLabDetectorMessenger;
 /// - Simple cavity wall: configurable material and thickness
 ///
 /// Macro interface:
-/// - /doseLab/cavity/type farmer|roos|farmer-walled|roos-walled|custom
-/// - /doseLab/cavity/radius <value> <unit>
-/// - /doseLab/cavity/thickness <value> <unit>
-/// - /doseLab/cavity/depth <value> <unit>
-/// - /doseLab/cavity/axis x|y|z
-/// - /doseLab/cavity/material <G4_NIST_name>
-/// - /doseLab/cavity/wallThickness <value> <unit>
-/// - /doseLab/cavity/wallMaterial <G4_NIST_name>
-/// - /doseLab/cavity/cut <value> <unit>
-/// - /doseLab/cavity/wallCut <value> <unit>
-/// - /doseLab/cavity/maxStep <value> <unit>
-/// - /doseLab/cavity/wallMaxStep <value> <unit>
-/// - /doseLab/cavity/update (deprecated no-op; set cavity commands before /run/initialize)
-/// - /doseLab/cavity/print
+/// - /doseLab/geometry/type farmer|roos|farmer-walled|roos-walled|custom
+/// - /doseLab/geometry/radius <value> <unit>
+/// - /doseLab/geometry/thickness <value> <unit>
+/// - /doseLab/geometry/depth <value> <unit>
+/// - /doseLab/geometry/axis x|y|z
+/// - /doseLab/geometry/material <G4_NIST_name>
+/// - /doseLab/geometry/wallThickness <value> <unit>
+/// - /doseLab/geometry/wallMaterial <G4_NIST_name>
+/// - /doseLab/geometry/cut <value> <unit>
+/// - /doseLab/geometry/wallCut <value> <unit>
+/// - /doseLab/geometry/maxStep <value> <unit>
+/// - /doseLab/geometry/wallMaxStep <value> <unit>
+/// - /doseLab/geometry/update (configure before /run/initialize)
+/// - /doseLab/geometry/print
+///
+/// Legacy aliases remain available under /doseLab/cavity/* for backward compatibility.
 ///
 /// In ConstructSDandField() sensitive detectors are created for the cavity
 /// volume to score energy deposition and track length.

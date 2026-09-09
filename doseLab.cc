@@ -14,17 +14,16 @@
 #include "G4EmStandardPhysics_option4.hh"
 #include "G4RadioactiveDecayPhysics.hh"
 
-#include "G4AnalysisManager.hh"
 #include "G4RunManagerFactory.hh"
-#include "G4ScoringManager.hh"
 #include "G4SteppingVerbose.hh"
-#include "G4TScoreNtupleWriter.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
 // #include "Randomize.hh"
 
+#include <array>
 #include <cstdlib>
+#include <fstream>
 
 namespace
 {
@@ -32,12 +31,43 @@ void PrintUsage()
 {
   G4cerr << " Usage: " << G4endl;
   G4cerr << " doseLab [-b macro] [-v macro] [-t nThreads] [-p emModel] [-r on|off]" << G4endl;
-  G4cerr << "   -b macro  : batch mode, no window" << G4endl;
-  G4cerr << "   -v macro  : visual mode, opens Qt window, executes macro, stays open" << G4endl;
+  G4cerr << "   -b macro  : batch mode, execute the given macro" << G4endl;
+  G4cerr << "   -v macro  : visualize, execute the macro, and keep the UI open" << G4endl;
   G4cerr << "   (no args) : interactive Qt session" << G4endl;
   G4cerr << "   -t N      : set number of threads (multi-threaded build only)" << G4endl;
   G4cerr << "   -p model  : EM model: option4 (default), livermore, penelope" << G4endl;
   G4cerr << "   -r mode   : radioactive decay physics: off (default), on" << G4endl;
+}
+
+bool FileExists(const G4String& path)
+{
+  std::ifstream f(path);
+  return f.good();
+}
+
+bool ExecuteMacroWithFallback(G4UImanager* uiManager, const G4String& macro)
+{
+  const std::array<G4String, 3> candidates = {
+    macro,
+    "macros/" + macro,
+    "build/" + macro,
+  };
+
+  for (const auto& candidate : candidates) {
+    if (!FileExists(candidate)) {
+      continue;
+    }
+    const auto status = uiManager->ApplyCommand("/control/execute " + candidate);
+    if (status == 0) {
+      return true;
+    }
+    G4cerr << "Error: macro '" << candidate << "' failed with UI status " << status << "." << G4endl;
+    return false;
+  }
+
+  G4cerr << "Error: could not locate macro '" << macro
+         << "' in current directory, macros/, or build/." << G4endl;
+  return false;
 }
 
 FTFP_BERT* CreatePhysicsList(const G4String& emModel, G4bool enableRadioactiveDecay)
@@ -133,7 +163,7 @@ int main(int argc, char** argv)
     }
   }
 
-  if (macro.size() && visMacro.size()) {
+  if (!macro.empty() && !visMacro.empty()) {
     G4cerr << "Error: -b and -v are mutually exclusive." << G4endl;
     PrintUsage();
     return 1;
@@ -142,7 +172,7 @@ int main(int argc, char** argv)
   // Create Qt UI session for interactive and visual-macro modes
   //
   G4UIExecutive* ui = nullptr;
-  if (!macro.size()) {
+  if (macro.empty()) {
     ui = new G4UIExecutive(argc, argv);
   }
 
@@ -177,10 +207,6 @@ int main(int argc, char** argv)
   auto actionInitialization = new DoseLab::DoseLabActionInitialization(detConstruction, emModel, enableRadioactiveDecay);
   runManager->SetUserInitialization(actionInitialization);
 
-  // Register /score UI commands before any user macro is parsed.
-  // Mesh-scoring macros invoke /score/* prior to /run/initialize.
-  G4ScoringManager::GetScoringManager();
-
   // Initialize visualization
   auto visManager = new G4VisExecutive;
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
@@ -200,35 +226,56 @@ int main(int argc, char** argv)
     }
   }
 
-  // Activate score ntuple writer (ROOT output by default).
-  // Verbosity can also be adjusted via /score/ntuple/writerVerbose.
-  G4TScoreNtupleWriter<G4AnalysisManager> scoreNtupleWriter;
-  scoreNtupleWriter.SetVerboseLevel(1);
-  scoreNtupleWriter.SetNtupleMerging(true);
-  // Ntuple merging is available with ROOT output.
-
   // Process macro or start UI session
   //
-  if (macro.size()) {
-    // batch mode: no Qt window
-    G4String command = "/control/execute ";
-    UImanager->ApplyCommand(command + runtimeMacroConfig.batchMacroArg);
-  }
-  else if (visMacro.size()) {
-    // visual macro mode: Qt window open, execute macro, keep session open for inspection
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    if (ui->IsGUI()) {
-      UImanager->ApplyCommand("/control/execute gui.mac");
+  if (!macro.empty()) {
+    if (!ExecuteMacroWithFallback(UImanager, runtimeMacroConfig.batchMacroArg)) {
+      delete ui;
+      delete visManager;
+      delete runManager;
+      return 1;
     }
-    UImanager->ApplyCommand("/control/execute " + runtimeMacroConfig.visMacroArg);
+  }
+  else if (!visMacro.empty()) {
+    // visual macro mode: Qt window open, execute macro, keep session open for inspection
+    if (!ExecuteMacroWithFallback(UImanager, "init_vis.mac")) {
+      delete ui;
+      delete visManager;
+      delete runManager;
+      return 1;
+    }
+    if (ui && ui->IsGUI()) {
+      if (!ExecuteMacroWithFallback(UImanager, "gui.mac")) {
+        delete ui;
+        delete visManager;
+        delete runManager;
+        return 1;
+      }
+    }
+    if (!ExecuteMacroWithFallback(UImanager, runtimeMacroConfig.visMacroArg)) {
+      delete ui;
+      delete visManager;
+      delete runManager;
+      return 1;
+    }
     ui->SessionStart();
     delete ui;
   }
   else {
     // interactive mode: no macro, full GUI session
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
-    if (ui->IsGUI()) {
-      UImanager->ApplyCommand("/control/execute gui.mac");
+    if (!ExecuteMacroWithFallback(UImanager, "init_vis.mac")) {
+      delete ui;
+      delete visManager;
+      delete runManager;
+      return 1;
+    }
+    if (ui && ui->IsGUI()) {
+      if (!ExecuteMacroWithFallback(UImanager, "gui.mac")) {
+        delete ui;
+        delete visManager;
+        delete runManager;
+        return 1;
+      }
     }
     ui->SessionStart();
     delete ui;
