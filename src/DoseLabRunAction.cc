@@ -12,6 +12,7 @@
 #include "DoseLabOutputMetadata.hh"
 
 #include "G4AnalysisManager.hh"
+#include "G4AccumulableManager.hh"
 #include "G4Exception.hh"
 #include "G4GenericMessenger.hh"
 #include "G4Run.hh"
@@ -20,12 +21,27 @@
 #include "G4Threading.hh"
 #include "G4UImanager.hh"
 #include "G4UnitsTable.hh"
+#include "G4Version.hh"
+#include "Randomize.hh"
 #include "globals.hh"
 
 #include <cctype>
+#include <iomanip>
+#include <sstream>
 
 namespace DoseLab
 {
+
+namespace
+{
+// Scientific notation avoids G4BestUnit rounding tiny-but-real values down to a displayed "0".
+G4String ToScientific(G4double value, G4double unit, const G4String& unitLabel)
+{
+  std::ostringstream oss;
+  oss << std::scientific << std::setprecision(6) << (value / unit) << " " << unitLabel;
+  return oss.str();
+}
+}  // namespace
 
 DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruction,
   const G4String& emModel,
@@ -35,6 +51,7 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
 , fEnableRadioactiveDecay(enableRadioactiveDecay)
 {
   ConfigureCommands();
+  G4AccumulableManager::Instance()->Register(&fScoreStatistics);
 
   // Print progress every event (reference macros are low-statistics).
   G4RunManager::GetRunManager()->SetPrintProgress(1);
@@ -72,7 +89,10 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
   analysisManager->CreateNtupleSColumn(AnalysisConfig::kRunInfoRadioactiveDecayColumnName);
   analysisManager->CreateNtupleIColumn(AnalysisConfig::kRunInfoEventsColumnName);
   analysisManager->CreateNtupleIColumn(AnalysisConfig::kRunInfoThreadIdColumnName);
+  analysisManager->CreateNtupleSColumn("Geant4Version");
+  analysisManager->CreateNtupleSColumn("RandomEngine");
   analysisManager->FinishNtuple(1);
+  fStatisticsNtupleId = ScoreStatistics::CreateNtuple();
 }
 
 void DoseLabRunAction::ConfigureCommands()
@@ -222,6 +242,7 @@ G4String DoseLabRunAction::BuildOutputFileName() const
 
 void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 {
+  G4AccumulableManager::Instance()->Reset();
   // Get analysis manager.
   auto analysisManager = G4AnalysisManager::Instance();
 
@@ -253,6 +274,7 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 
 void DoseLabRunAction::EndOfRunAction(const G4Run* run)
 {
+  G4AccumulableManager::Instance()->Merge();
   const auto source = OutputMetadata::ParseSourceKind(fOutputSource);
   const auto field = OutputMetadata::ParseFieldKind(fOutputField);
   const auto chamber = OutputMetadata::ParseChamberKind(fOutputChamber);
@@ -281,7 +303,10 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
     analysisManager->FillNtupleIColumn(1, AnalysisConfig::kRunInfoEventsColumn, run->GetNumberOfEvent());
     analysisManager->FillNtupleIColumn(1, AnalysisConfig::kRunInfoThreadIdColumn,
                                        G4Threading::G4GetThreadId());
+    analysisManager->FillNtupleSColumn(1, 9, G4Version);
+    analysisManager->FillNtupleSColumn(1, 10, G4Random::getTheEngine()->name());
     analysisManager->AddNtupleRow(1);
+    fScoreStatistics.WriteRows(fStatisticsNtupleId, -1);
   }
 
   if (finalizeOutput && analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)) {
@@ -289,30 +314,29 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
     G4cout << "for the run " << G4endl << G4endl;
 
     G4cout << " Cavity Dose: mean = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->mean(), "Dose")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->mean(), gray, "Gy")
            << " rms = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->rms(), "Dose")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kDoseH1Id)->rms(), gray, "Gy")
            << G4endl;
 
      G4cout << " Cavity Energy Deposit: mean = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->mean(), "Energy")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->mean(), eV, "eV")
            << " rms = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->rms(), "Energy")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kEdepH1Id)->rms(), eV, "eV")
            << G4endl;
 
      G4cout << " Cavity Track Length: mean = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->mean(), "Length")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->mean(), mm, "mm")
            << " rms = "
-           << G4BestUnit(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->rms(), "Length")
+           << ToScientific(analysisManager->GetH1(AnalysisConfig::kTrackLengthH1Id)->rms(), mm, "mm")
            << G4endl;
   }
 
-  if (finalizeOutput) {
-    // save histograms & ntuple
-    analysisManager->Write();
-    // Keep analysis objects in memory for visualization commands in UI session.
-    analysisManager->CloseFile(false);
+  analysisManager->Write();
+  analysisManager->CloseFile(false);
 
+  if (finalizeOutput) {
+    fScoreStatistics.Print("cavity");
     G4cout << "Run complete: events=" << run->GetNumberOfEvent()
            << ", file=" << BuildOutputFileName()
            << ", source=" << OutputMetadata::CanonicalLabel(source)
@@ -323,6 +347,11 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
            << ", decay=" << (fEnableRadioactiveDecay ? "on" : "off")
            << G4endl;
   }
+}
+
+void DoseLabRunAction::AddEventScoring(G4double dose, G4double edep, G4double track)
+{
+  fScoreStatistics.Add(dose, edep, track);
 }
 
 }  // namespace DoseLab

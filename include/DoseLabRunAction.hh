@@ -9,6 +9,7 @@
 #define DoseLabRunAction_h 1
 
 #include "G4UserRunAction.hh"
+#include "ScoreStatistics.hh"
 
 #include "globals.hh"
 
@@ -38,6 +39,7 @@ class DoseLabRunAction : public G4UserRunAction
 
     void BeginOfRunAction(const G4Run*) override;
     void EndOfRunAction(const G4Run*) override;
+    void AddEventScoring(G4double dose, G4double edep, G4double track);
 
   private:
     void ConfigureCommands();
@@ -51,6 +53,8 @@ class DoseLabRunAction : public G4UserRunAction
     DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
     G4String fEmModel;
     G4bool fEnableRadioactiveDecay = false;
+    ScoreStatistics fScoreStatistics;
+    G4int fStatisticsNtupleId = -1;
 
     std::unique_ptr<G4GenericMessenger> fMessenger;
     std::unique_ptr<G4GenericMessenger> fScenarioMessenger;

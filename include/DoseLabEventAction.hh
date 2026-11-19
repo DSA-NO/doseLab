@@ -16,6 +16,7 @@ template <typename T> class G4THitsMap;
 
 namespace DoseLab
 {
+class DoseLabRunAction;
 
 /// Event action class
 ///
@@ -25,7 +26,7 @@ namespace DoseLab
 class DoseLabEventAction : public G4UserEventAction
 {
   public:
-    DoseLabEventAction() = default;
+    explicit DoseLabEventAction(DoseLabRunAction* runAction);
     ~DoseLabEventAction() override = default;
 
     void BeginOfEventAction(const G4Event* event) override;
@@ -42,6 +43,7 @@ class DoseLabEventAction : public G4UserEventAction
     G4int fCavityDoseHCID = -1;
     G4int fCavityEdepHCID = -1;
     G4int fCavityTrackLengthHCID = -1;
+    DoseLabRunAction* fRunAction;
 };
 
 }  // namespace DoseLab

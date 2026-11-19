@@ -36,8 +36,9 @@ void DoseLabActionInitialization::Build() const
 {
   SetUserAction(new DoseLabPrimaryGeneratorAction);
   // Worker run action mutates detector presets from /doseLab/scenario/*.
-  SetUserAction(new DoseLabRunAction(fDetectorConstruction, fEmModel, fEnableRadioactiveDecay));
-  SetUserAction(new DoseLabEventAction);
+  auto* runAction = new DoseLabRunAction(fDetectorConstruction, fEmModel, fEnableRadioactiveDecay);
+  SetUserAction(runAction);
+  SetUserAction(new DoseLabEventAction(runAction));
 }
 
 }  // namespace DoseLab

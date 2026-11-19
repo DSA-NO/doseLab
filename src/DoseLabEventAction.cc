@@ -8,19 +8,35 @@
 #include "DoseLabEventAction.hh"
 
 #include "DoseLabAnalysisConfig.hh"
+#include "DoseLabRunAction.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4Event.hh"
 #include "G4HCofThisEvent.hh"
 #include "G4RunManager.hh"
 #include "G4SDManager.hh"
+#include "G4SystemOfUnits.hh"
 #include "G4THitsMap.hh"
 #include "G4UnitsTable.hh"
 
 #include <iomanip>
+#include <sstream>
 
 namespace DoseLab
 {
+
+namespace
+{
+// Scientific notation avoids G4BestUnit rounding tiny-but-real values down to a displayed "0".
+G4String ToScientific(G4double value, G4double unit, const G4String& unitLabel)
+{
+  std::ostringstream oss;
+  oss << std::scientific << std::setprecision(6) << (value / unit) << " " << unitLabel;
+  return oss.str();
+}
+}  // namespace
+
+DoseLabEventAction::DoseLabEventAction(DoseLabRunAction* runAction) : fRunAction(runAction) {}
 
 G4THitsMap<G4double>* DoseLabEventAction::GetHitsCollection(G4int hcID, const G4Event* event) const
 {
@@ -50,9 +66,9 @@ void DoseLabEventAction::PrintEventStatistics(G4double cavityDose, G4double cavi
 {
   // Print event statistics
   //
-  G4cout << "   Cavity: dose: " << std::setw(7) << G4BestUnit(cavityDose, "Dose")
-      << "       energy deposit: " << std::setw(7) << G4BestUnit(cavityEdep, "Energy")
-         << "       total track length: " << std::setw(7) << G4BestUnit(cavityTrackLength, "Length")
+  G4cout << "   Cavity: dose: " << std::setw(7) << ToScientific(cavityDose, gray, "Gy")
+      << "       energy deposit: " << std::setw(7) << ToScientific(cavityEdep, eV, "eV")
+         << "       total track length: " << std::setw(7) << ToScientific(cavityTrackLength, mm, "mm")
          << G4endl;
 }
 
@@ -75,6 +91,7 @@ void DoseLabEventAction::EndOfEventAction(const G4Event* event)
   auto cavityDose = GetSum(GetHitsCollection(fCavityDoseHCID, event));
   auto cavityEdep = GetSum(GetHitsCollection(fCavityEdepHCID, event));
   auto cavityTrackLength = GetSum(GetHitsCollection(fCavityTrackLengthHCID, event));
+  fRunAction->AddEventScoring(cavityDose, cavityEdep, cavityTrackLength);
 
   // get analysis manager
   auto analysisManager = G4AnalysisManager::Instance();

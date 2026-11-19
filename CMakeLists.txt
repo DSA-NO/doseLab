@@ -31,6 +31,14 @@ target_include_directories(doseLab PRIVATE include)
 target_link_libraries(doseLab PRIVATE ${Geant4_LIBRARIES})
 target_compile_definitions(doseLab PRIVATE DOSELAB_SOURCE_DIR="${PROJECT_SOURCE_DIR}")
 
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(score_statistics_test tests/score_statistics.cc)
+  target_include_directories(score_statistics_test PRIVATE ${PROJECT_SOURCE_DIR}/include)
+  target_link_libraries(score_statistics_test PRIVATE ${Geant4_LIBRARIES})
+  add_test(NAME score_statistics COMMAND score_statistics_test)
+endif()
+
 # Optional ROOT-based summary helper for post-run output inspection.
 option(DOSELAB_BUILD_ROOT_SUMMARY "Build doseLabRootSummary helper when ROOT is available" ON)
 option(DOSELAB_REQUIRE_ROOT_SUMMARY "Fail configure if doseLabRootSummary cannot be configured" OFF)
