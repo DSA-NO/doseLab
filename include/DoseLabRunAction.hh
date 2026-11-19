@@ -9,7 +9,7 @@
 #define DoseLabRunAction_h 1
 
 #include "G4UserRunAction.hh"
-#include "ScoreStatistics.hh"
+#include "DoseLabScoreStatistics.hh"
 
 #include "globals.hh"
 
@@ -53,7 +53,7 @@ class DoseLabRunAction : public G4UserRunAction
     DoseLabDetectorConstruction* fDetectorConstruction = nullptr;
     G4String fEmModel;
     G4bool fEnableRadioactiveDecay = false;
-    ScoreStatistics fScoreStatistics;
+    DoseLabScoreStatistics fScoreStatistics;
     G4int fStatisticsNtupleId = -1;
 
     std::unique_ptr<G4GenericMessenger> fMessenger;

@@ -580,4 +580,3 @@ All commits are reviewed by humans.
 - This repository is released under the MIT License. See LICENSE.
 - This project uses Geant4 and follows the Geant4 license terms: http://cern.ch/geant4/license
 - Parts of this code and documentation workflow were developed with assistance from GitHub Copilot in VS Code.
-- Copilot may route requests across different language models depending on context and availability.

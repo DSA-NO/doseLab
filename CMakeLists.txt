@@ -33,7 +33,7 @@ target_compile_definitions(doseLab PRIVATE DOSELAB_SOURCE_DIR="${PROJECT_SOURCE_
 
 include(CTest)
 if(BUILD_TESTING)
-  add_executable(score_statistics_test tests/score_statistics.cc)
+  add_executable(score_statistics_test tests/score_statistics.cc src/DoseLabScoreStatistics.cc)
   target_include_directories(score_statistics_test PRIVATE ${PROJECT_SOURCE_DIR}/include)
   target_link_libraries(score_statistics_test PRIVATE ${Geant4_LIBRARIES})
   add_test(NAME score_statistics COMMAND score_statistics_test)

@@ -92,7 +92,7 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
   analysisManager->CreateNtupleSColumn("Geant4Version");
   analysisManager->CreateNtupleSColumn("RandomEngine");
   analysisManager->FinishNtuple(1);
-  fStatisticsNtupleId = ScoreStatistics::CreateNtuple();
+  fStatisticsNtupleId = DoseLabScoreStatistics::CreateNtuple();
 }
 
 void DoseLabRunAction::ConfigureCommands()
