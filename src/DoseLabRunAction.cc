@@ -10,7 +10,7 @@
 #include "DoseLabAnalysisConfig.hh"
 #include "DoseLabDetectorConstruction.hh"
 #include "DoseLabOutputMetadata.hh"
-#include "LabOutput.hh"
+#include "DoseLabOutput.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4AccumulableManager.hh"
@@ -253,7 +253,7 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* run)
   analysisManager->Reset();
 
   // Open output file.
-  fOutputPath = LabOutput::RunFile(isMaster, run->GetRunID(), BuildOutputFileName());
+  fOutputPath = Output::RunFile(isMaster, run->GetRunID(), BuildOutputFileName());
   if (!analysisManager->OpenFile(fOutputPath)) {
     G4ExceptionDescription message;
     message << "Cannot open output file '" << fOutputPath << "'.";

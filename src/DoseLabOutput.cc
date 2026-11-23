@@ -1,8 +1,6 @@
-#ifndef LabOutput_h
-#define LabOutput_h 1
+#include "DoseLabOutput.hh"
 
 #include "G4Exception.hh"
-#include "globals.hh"
 
 #include <chrono>
 #include <cstdlib>
@@ -12,7 +10,11 @@
 #include <mutex>
 #include <sstream>
 
-namespace LabOutput
+namespace DoseLab
+{
+namespace Output
+{
+namespace
 {
 struct State
 {
@@ -22,13 +24,14 @@ struct State
   G4int runId = -1;
 };
 
-inline State& GetState()
+State& GetState()
 {
   static State state;
   return state;
 }
+}  // namespace
 
-inline void Initialize(const std::filesystem::path& sourceDirectory)
+void Initialize(const std::filesystem::path& sourceDirectory)
 {
   auto& state = GetState();
   const char* configured = std::getenv("LAB_OUTPUT_DIR");
@@ -42,7 +45,7 @@ inline void Initialize(const std::filesystem::path& sourceDirectory)
     if (error && error != std::errc::no_such_file_or_directory) {
       G4ExceptionDescription message;
       message << "Cannot inspect source directory '" << sourceDirectory.string() << "': " << error.message();
-      G4Exception("LabOutput::Initialize", "LabOutput001", FatalException, message);
+      G4Exception("DoseLab::Output::Initialize", "LabOutput001", FatalException, message);
       return;
     }
     error.clear();
@@ -50,7 +53,7 @@ inline void Initialize(const std::filesystem::path& sourceDirectory)
     if (error) {
       G4ExceptionDescription message;
       message << "Cannot resolve startup directory: " << error.message();
-      G4Exception("LabOutput::Initialize", "LabOutput001", FatalException, message);
+      G4Exception("DoseLab::Output::Initialize", "LabOutput001", FatalException, message);
       return;
     }
   }
@@ -58,11 +61,11 @@ inline void Initialize(const std::filesystem::path& sourceDirectory)
   if (error) {
     G4ExceptionDescription message;
     message << "Cannot resolve output directory '" << root.string() << "': " << error.message();
-    G4Exception("LabOutput::Initialize", "LabOutput001", FatalException, message);
+    G4Exception("DoseLab::Output::Initialize", "LabOutput001", FatalException, message);
   }
 }
 
-inline G4String RunFile(G4bool isMaster, G4int runId, const G4String& fileName)
+G4String RunFile(G4bool isMaster, G4int runId, const G4String& fileName)
 {
   auto& state = GetState();
   std::lock_guard<std::mutex> lock(state.mutex);
@@ -72,7 +75,7 @@ inline G4String RunFile(G4bool isMaster, G4int runId, const G4String& fileName)
     if (error) {
       G4ExceptionDescription message;
       message << "Cannot create output directory '" << state.root.string() << "': " << error.message();
-      G4Exception("LabOutput::RunFile", "LabOutput002", FatalException, message);
+      G4Exception("DoseLab::Output::RunFile", "LabOutput002", FatalException, message);
       return "";
     }
 
@@ -84,7 +87,7 @@ inline G4String RunFile(G4bool isMaster, G4int runId, const G4String& fileName)
     const bool timeOk = gmtime_r(&now, &utc) != nullptr;
 #endif
     if (!timeOk) {
-      G4Exception("LabOutput::RunFile", "LabOutput003", FatalException, "Cannot obtain UTC timestamp.");
+      G4Exception("DoseLab::Output::RunFile", "LabOutput003", FatalException, "Cannot obtain UTC timestamp.");
       return "";
     }
     std::ostringstream timestamp;
@@ -101,17 +104,16 @@ inline G4String RunFile(G4bool isMaster, G4int runId, const G4String& fileName)
       if (error) {
         G4ExceptionDescription message;
         message << "Cannot create run directory '" << directory.string() << "': " << error.message();
-        G4Exception("LabOutput::RunFile", "LabOutput004", FatalException, message);
+        G4Exception("DoseLab::Output::RunFile", "LabOutput004", FatalException, message);
         return "";
       }
     }
   }
   if (state.runId != runId || state.runDirectory.empty()) {
-    G4Exception("LabOutput::RunFile", "LabOutput005", FatalException, "Run output directory was not initialized.");
+    G4Exception("DoseLab::Output::RunFile", "LabOutput005", FatalException, "Run output directory was not initialized.");
     return "";
   }
   return (state.runDirectory / std::string(fileName)).string();
 }
-}  // namespace LabOutput
-
-#endif
+}  // namespace Output
+}  // namespace DoseLab
