@@ -60,33 +60,22 @@ if(DOSELAB_BUILD_ROOT_SUMMARY)
   if(DOSELAB_ROOT_CONFIG)
     set(ROOT_CONFIG_EXECUTABLE "${DOSELAB_ROOT_CONFIG}")
   else()
-    set(_doseLab_root_config_hints)
-    if(DEFINED ENV{ROOTSYS})
-      list(APPEND _doseLab_root_config_hints "$ENV{ROOTSYS}/bin")
-    endif()
-    if(DEFINED ENV{CONDA_PREFIX})
-      list(APPEND _doseLab_root_config_hints "$ENV{CONDA_PREFIX}/bin")
-    endif()
-
-    # Common local ROOT locations for users who did not activate their environment.
-    file(GLOB _doseLab_mamba_bins "$ENV{HOME}/micromamba/envs/*/bin")
-    file(GLOB _doseLab_conda_bins
-      "$ENV{HOME}/miniconda3/envs/*/bin"
-      "$ENV{HOME}/anaconda3/envs/*/bin")
-    list(APPEND _doseLab_root_config_hints ${_doseLab_mamba_bins} ${_doseLab_conda_bins})
-    list(REMOVE_DUPLICATES _doseLab_root_config_hints)
-
+    unset(ROOT_CONFIG_EXECUTABLE CACHE)
     unset(ROOT_CONFIG_EXECUTABLE)
-    find_program(
-      ROOT_CONFIG_EXECUTABLE
-      NAMES root-config
-      HINTS
-        ${_doseLab_root_config_hints})
+    if(DEFINED ENV{CONDA_PREFIX} AND NOT "$ENV{CONDA_PREFIX}" STREQUAL "")
+      find_program(ROOT_CONFIG_EXECUTABLE NAMES root-config
+        PATHS "$ENV{CONDA_PREFIX}/bin" NO_DEFAULT_PATH)
+    else()
+      find_program(ROOT_CONFIG_EXECUTABLE NAMES root-config HINTS "$ENV{ROOTSYS}/bin")
+    endif()
+  endif()
 
-    if(ROOT_CONFIG_EXECUTABLE)
-      set(DOSELAB_ROOT_CONFIG
-          "${ROOT_CONFIG_EXECUTABLE}"
-          CACHE FILEPATH "Absolute path to root-config for doseLabRootSummary" FORCE)
+  if(ROOT_CONFIG_EXECUTABLE AND DEFINED ENV{CONDA_PREFIX} AND NOT "$ENV{CONDA_PREFIX}" STREQUAL "")
+    get_filename_component(_doseLab_env_prefix "$ENV{CONDA_PREFIX}" REALPATH)
+    get_filename_component(_doseLab_root_config "${ROOT_CONFIG_EXECUTABLE}" REALPATH)
+    file(RELATIVE_PATH _doseLab_root_relative "${_doseLab_env_prefix}" "${_doseLab_root_config}")
+    if(IS_ABSOLUTE "${_doseLab_root_relative}" OR _doseLab_root_relative MATCHES "^\\.\\.(/|$)")
+      message(FATAL_ERROR "root-config must be inside the active conda environment: $ENV{CONDA_PREFIX}")
     endif()
   endif()
 
@@ -120,10 +109,10 @@ if(DOSELAB_BUILD_ROOT_SUMMARY)
     if(DOSELAB_REQUIRE_ROOT_SUMMARY)
       message(FATAL_ERROR
         "ROOT not found: cannot configure doseLabRootSummary. "
-        "Ensure root-config is on PATH, or pass -DDOSELAB_ROOT_CONFIG=/absolute/path/to/root-config")
+        "Install ROOT in the active environment or pass -DDOSELAB_ROOT_CONFIG=/absolute/path/to/root-config")
     else()
       message(STATUS "ROOT not found: skipping target doseLabRootSummary")
-      message(STATUS "Hint: ensure root-config is on PATH, or set -DDOSELAB_ROOT_CONFIG=/absolute/path/to/root-config")
+      message(STATUS "Hint: install ROOT in the active environment or set DOSELAB_ROOT_CONFIG")
     endif()
   endif()
 endif()

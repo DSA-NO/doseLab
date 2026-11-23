@@ -34,7 +34,7 @@ jobs:
         run: DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
 
       - name: Check baseline
-        run: micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
+        run: ./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --baseline analysis/baseline/reference_metrics.json --report analysis/production/latest/metrics.json
 
       - name: Upload production metrics
         uses: actions/upload-artifact@v4
@@ -75,7 +75,7 @@ jobs:
 
       - name: Summarize and gate (physics only when precision passes)
         run: |
-          micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py \
+          ./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/summarize-fano-matrix.py \
             --input-dir analysis/fano/ci \
             --output-json analysis/fano/ci/summary.json \
             --output-text analysis/fano/ci/summary.txt \

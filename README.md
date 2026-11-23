@@ -39,7 +39,7 @@ This catches onboarding issues such as missing shell init, stale local Geant4 se
 Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
 
 ```bash
-micromamba run -n geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
+./scripts/run-isolated.sh micromamba geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 If you already have the repository checked out, use this shorter path:
 
@@ -85,6 +85,8 @@ rmdir "$tmp"
 ```
 
 Run these commands in a shell with `set -e` and `set -o pipefail` so a failed solve or export does not replace the lock. Lock verification checks conda package records, not changes made by pip or manual edits inside an environment. Custom production environments are not verified against the lock.
+
+Builds and batch runs use `scripts/run-isolated.sh` to clear inherited compiler, library, Geant4 dataset, ROOT, CMake and Python paths before activating the lab environment. Operating-system libraries are still required. An interactive shell or a direct `micromamba run` can reintroduce settings from the user's shell. The production build uses `cmake --fresh` (CMake 3.24 or newer) to discard stale configuration cache entries.
 
 You can also pass a specific macro directly:
 
@@ -197,7 +199,7 @@ cd doseLab
 ./scripts/run-micromamba.sh setup
 DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
 DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
-micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
 ```
 
 #### 3) Optional: initialize/refresh baseline intentionally
@@ -205,7 +207,7 @@ micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-p
 Use only after intentional physics/model changes and validation:
 
 ```bash
-micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --write-baseline
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/check-baseline.py --build-dir build-production --write-baseline
 ```
 
 #### 4) How to run after setup
@@ -224,19 +226,19 @@ Macro families (quick reference):
 Run a quick single macro test:
 
 ```bash
-micromamba run -n geant4-doseLab ./build-production/doseLab -b ./build-production/run-simple.mac
+./scripts/run-isolated.sh micromamba geant4-doseLab ./build-production/doseLab -b ./build-production/run-simple.mac
 ```
 
 Use `-p option4|livermore|penelope` to select the EM sub-model. For example:
 
 ```bash
-micromamba run -n geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
+./scripts/run-isolated.sh micromamba geant4-doseLab ./build-production/doseLab -p livermore -b ./build-production/run-simple.mac
 ```
 
 Use `-r on|off` to enable or disable radioactive decay physics. For example:
 
 ```bash
-micromamba run -n geant4-doseLab ./build-production/doseLab -r on -b ./build-production/run-simple.mac
+./scripts/run-isolated.sh micromamba geant4-doseLab ./build-production/doseLab -r on -b ./build-production/run-simple.mac
 ```
 
 ## Harmonized macro lifecycle and ownership
@@ -272,6 +274,27 @@ Output file naming:
 - custom tag: `doseLab-<tag>.root`
 
 Each run writes its ROOT file under `output/<UTC-timestamp>/` in the doseLab project directory. A numeric suffix is added if the timestamp already exists, so repeated or concurrent runs do not overwrite each other. The full output path is printed as `Output path:`. Set `LAB_OUTPUT_DIR` to use a different parent directory; a relative path is resolved from the directory where the application starts, before it switches to the macro directory. If the build's source directory no longer exists, the default is `output/` in the startup directory. The project output folder is Git-ignored; old results are not automatically deleted. Production, Fano and calibration scripts continue to update their existing collected copies in addition to preserving the original run outputs.
+
+### Read output with Uproot
+
+NumPy and Uproot are in the lab environment; full ROOT is not required. Replace the filename with the reported `Output path:`:
+
+```bash
+./scripts/run-micromamba.sh setup
+./scripts/run-isolated.sh micromamba geant4-doseLab python - /path/to/output.root <<'PY'
+import sys
+import uproot
+
+with uproot.open(sys.argv[1]) as root_file:
+    scores = root_file["cavity"]
+    print("Trees:", root_file.keys(cycle=False))
+    print("Events:", scores.num_entries)
+    print("First doses (Geant4 internal units):", scores["Dose"].array(entry_stop=5, library="np"))
+    print("Events per run/worker:", root_file["runinfo"]["Events"].array(library="np"))
+PY
+```
+
+The example reads only five doses, not a whole large output file. CI runs CTest and verifies a small generated ROOT file with Uproot.
 
 Allowed `tag` characters are letters, digits, `-`, and `_`.
 
@@ -359,10 +382,10 @@ Nested macro path robustness:
 Run a visual macro from the micromamba environment:
 
 ```bash
-micromamba run -n geant4-doseLab ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
+./scripts/run-isolated.sh micromamba geant4-doseLab ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
 ```
 
-Note: `-n` belongs to `micromamba run` and must be followed by the environment name, not the executable path. If the environment is already activated in your shell, you can also run the binary directly:
+If the environment is already activated in your shell, you can also run the binary directly, but this bypasses the isolation wrapper:
 
 ```bash
 ./build-production/doseLab -v ./build-production/vis-ref-10x10-d5cm-6mv-farmer.mac
@@ -395,13 +418,13 @@ DOSELAB_ENV_CMD=micromamba DOSELAB_FANO_PRIMARIES=5000000 ./scripts/run-fano-mat
 Summarize and gate Fano results (strict):
 
 ```bash
-micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py --strict
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/summarize-fano-matrix.py --strict
 ```
 
 CI-style gate (fails only if precision passes and physics agreement fails):
 
 ```bash
-micromamba run -n geant4-doseLab ./scripts/summarize-fano-matrix.py --strict --ci-physics-gate
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/summarize-fano-matrix.py --strict --ci-physics-gate
 ```
 
 Archive the current Fano summary to a dated baseline folder:
@@ -443,7 +466,7 @@ DOSELAB_ENV_CMD=micromamba DOSELAB_CALIB_MODE=full ./scripts/run-calibration-mat
 Summarize calibration matrix results (strict):
 
 ```bash
-micromamba run -n geant4-doseLab ./scripts/summarize-calibration-matrix.py --strict
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/summarize-calibration-matrix.py --strict
 ```
 
 Archive the current calibration summary to a dated baseline folder:
@@ -467,14 +490,10 @@ DOSELAB_CALIB_INCLUDE_ROOT=1 ./scripts/archive-calibration-baseline.sh
 Check results against baseline:
 
 ```bash
-micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
+./scripts/run-isolated.sh micromamba geant4-doseLab ./scripts/check-baseline.py --build-dir build-production
 ```
 
-Summarize a ROOT output file:
-
-```bash
-micromamba run -n geant4-doseLab ./build-production/doseLabRootSummary ./build-production/doseLab-run-ref-10x10-d5cm-6mv-farmer-walled.root
-```
+For a quick ROOT-file inspection using the production environment, see [Read output with Uproot](#read-output-with-uproot). The production build does not build the optional C++ ROOT summary helper.
 
 #### Optional fresh-user simulation
 
@@ -531,6 +550,7 @@ The default GitHub Actions workflow on push/pull-request is intentionally fast a
 
 - `.github/workflows/ci.yml`
   - configure + build in `geant4-doseLab`
+  - CTest and Uproot output verification
   - smoke test (`run-simple.mac`)
   - decay-enabled smoke test (`run-decay-cs137.mac` with `-r on`)
 
@@ -549,16 +569,7 @@ When ROOT is available, CMake builds an additional executable:
 
 This helper reads and summarizes doseLab ROOT outputs.
 
-Note: the default `environment.yml` is Geant4-focused and does not include ROOT.
-Install ROOT separately when you need `doseLabRootSummary`.
-
-ROOT detection order in CMake:
-
-1. `DOSELAB_ROOT_CONFIG` (explicit path)
-2. `PATH`
-3. `$ROOTSYS/bin`
-4. `$CONDA_PREFIX/bin`
-5. Common local env locations under `$HOME`
+The default environment does not include full ROOT, and the production build disables this helper. For a managed build that needs it, add ROOT to the environment specification, regenerate its lockfile, and configure the helper explicitly. When a conda environment is active, CMake only accepts `root-config` inside that environment, including an explicit `DOSELAB_ROOT_CONFIG`. Without an active conda environment, a host build can use `DOSELAB_ROOT_CONFIG`, `ROOTSYS` or `PATH`. Other environments are never scanned automatically. If an older build cache contains an outside `DOSELAB_ROOT_CONFIG`, clear it with `cmake -U DOSELAB_ROOT_CONFIG` when reconfiguring.
 
 ## Useful CMake Options
 

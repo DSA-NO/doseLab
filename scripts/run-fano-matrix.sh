@@ -27,7 +27,7 @@ echo "[doseLab] build dir: $BUILD_DIR"
 echo "[doseLab] fano mode: $FANO_MODE"
 
 run_env() {
-  "$ENV_CMD" run -n "$ENV_NAME" "$@"
+  "$SCRIPT_DIR/run-isolated.sh" "$ENV_CMD" "$ENV_NAME" "$@"
 }
 
 resolve_fano_primaries() {

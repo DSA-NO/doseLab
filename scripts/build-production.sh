@@ -22,7 +22,7 @@ echo "[doseLab] env command: $ENV_CMD"
 echo "[doseLab] env name: $ENV_NAME"
 
 run_env() {
-  "$ENV_CMD" run -n "$ENV_NAME" "$@"
+  "$SCRIPT_DIR/run-isolated.sh" "$ENV_CMD" "$ENV_NAME" "$@"
 }
 
 if [[ "$ENV_NAME" == "geant4-doseLab" && "$ENV_FILE" == "environment.yml" ]]; then
@@ -43,10 +43,16 @@ if [[ -z "$ENV_PREFIX" ]]; then
   ENV_PREFIX="$HOME/micromamba/envs/$ENV_NAME"
 fi
 
-# Match CI configure environment hints for Geant4 dependency discovery.
-export CPATH="$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include${CPATH:+:$CPATH}"
-export CPLUS_INCLUDE_PATH="$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
-export LIBRARY_PATH="$ENV_PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+if [[ ! -f "$ENV_PREFIX/lib/cmake/Geant4/Geant4Config.cmake" ]]; then
+  echo "ERROR: Geant4 is missing from environment $ENV_NAME ($ENV_PREFIX)." >&2
+  exit 1
+fi
+
+BUILD_ENV=(
+  "CPATH=$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include"
+  "CPLUS_INCLUDE_PATH=$ENV_PREFIX/include/freetype2:$ENV_PREFIX/include"
+  "LIBRARY_PATH=$ENV_PREFIX/lib"
+)
 
 EXPAT_ARGS=()
 if [[ -f "$ENV_PREFIX/include/expat.h" && -f "$ENV_PREFIX/lib/libexpat.so" ]]; then
@@ -73,13 +79,17 @@ if [[ -d "$ENV_PREFIX/include/freetype2" && -f "$ENV_PREFIX/lib/libfreetype.so" 
   )
 fi
 
-run_env cmake -S . -B "$BUILD_DIR" -G Ninja \
+run_env env "${BUILD_ENV[@]}" cmake --fresh -S . -B "$BUILD_DIR" -G Ninja \
   -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
   -DDOSELAB_REQUIRE_ROOT_SUMMARY=OFF \
+  -DGeant4_DIR="$ENV_PREFIX/lib/cmake/Geant4" \
+  -DCMAKE_PREFIX_PATH="$ENV_PREFIX" \
+  -DCMAKE_FIND_USE_PACKAGE_REGISTRY=FALSE \
+  -DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=FALSE \
   -DCMAKE_INCLUDE_PATH="$ENV_PREFIX/include/freetype2;$ENV_PREFIX/include" \
   -DCMAKE_LIBRARY_PATH="$ENV_PREFIX/lib" \
   "${EXPAT_ARGS[@]}" \
   "${ZLIB_ARGS[@]}" \
   "${FREETYPE_ARGS[@]}"
 
-run_env cmake --build "$BUILD_DIR" --parallel
+run_env env "${BUILD_ENV[@]}" cmake --build "$BUILD_DIR" --parallel

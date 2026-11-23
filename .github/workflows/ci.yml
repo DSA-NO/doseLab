@@ -33,12 +33,17 @@ jobs:
 
       - name: Configure
         run: |
-          micromamba run -n geant4-doseLab bash -lc '
-            export CPATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPATH:+:$CPATH}"
-            export CPLUS_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
-            export LIBRARY_PATH="$CONDA_PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+          ./scripts/run-isolated.sh micromamba geant4-doseLab bash -c '
+            export CPATH="$CONDA_PREFIX/include/freetype2:$CONDA_PREFIX/include"
+            export CPLUS_INCLUDE_PATH="$CPATH"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib"
+            test -f "$CONDA_PREFIX/lib/cmake/Geant4/Geant4Config.cmake" || { echo "Geant4 missing from active environment" >&2; exit 1; }
             cmake -S . -B build-ci -G Ninja \
               -DDOSELAB_BUILD_ROOT_SUMMARY=OFF \
+              -DGeant4_DIR="$CONDA_PREFIX/lib/cmake/Geant4" \
+              -DCMAKE_PREFIX_PATH="$CONDA_PREFIX" \
+              -DCMAKE_FIND_USE_PACKAGE_REGISTRY=FALSE \
+              -DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=FALSE \
               -DCMAKE_INCLUDE_PATH="$CONDA_PREFIX/include/freetype2;$CONDA_PREFIX/include" \
               -DCMAKE_LIBRARY_PATH="$CONDA_PREFIX/lib" \
               -DEXPAT_INCLUDE_DIR="$CONDA_PREFIX/include" \
@@ -50,11 +55,28 @@ jobs:
               -DFREETYPE_LIBRARY_RELEASE="$CONDA_PREFIX/lib/libfreetype.so"'
 
       - name: Build
-        run: micromamba run -n geant4-doseLab cmake --build build-ci --parallel
+        run: ./scripts/run-isolated.sh micromamba geant4-doseLab cmake --build build-ci --parallel
+
+      - name: CTest
+        run: ./scripts/run-isolated.sh micromamba geant4-doseLab ctest --test-dir build-ci --output-on-failure
+
+      - name: Test ROOT discovery isolation
+        run: ./scripts/run-isolated.sh micromamba geant4-doseLab bash tests/root-discovery.sh
 
       - name: Smoke test (batch macro)
         working-directory: build-ci
-        run: micromamba run -n geant4-doseLab ./doseLab -b run-simple.mac
+        run: ../scripts/run-isolated.sh micromamba geant4-doseLab ./doseLab -b run-simple.mac
 
       - name: Smoke test (decay-enabled Cs-137)
-        run: micromamba run -n geant4-doseLab ./build-ci/doseLab -r on -b macros/run-decay-cs137.mac
+        run: ./scripts/run-isolated.sh micromamba geant4-doseLab ./build-ci/doseLab -r on -b macros/run-decay-cs137.mac
+
+      - name: Verify ROOT output with Uproot
+        run: |
+          export LAB_OUTPUT_DIR="$RUNNER_TEMP/doseLab-root-smoke"
+          ./scripts/run-isolated.sh micromamba geant4-doseLab ./build-ci/doseLab -t 1 -b macros/run-simple.mac | tee "$RUNNER_TEMP/doseLab-smoke.log"
+          output="$(sed -n 's/^Output path: //p' "$RUNNER_TEMP/doseLab-smoke.log")"
+          if [[ -z "$output" || "$output" == *$'\n'* || ! -f "$output" ]]; then
+            echo "Expected exactly one existing output file, got: $output" >&2
+            exit 1
+          fi
+          ./scripts/run-isolated.sh micromamba geant4-doseLab python tests/check_root_output.py "$output" cavity 200

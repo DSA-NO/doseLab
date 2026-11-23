@@ -38,7 +38,7 @@ echo "[doseLab] build dir: $BUILD_DIR"
 echo "[doseLab] calibration mode: $CALIB_MODE"
 
 run_env() {
-  "$ENV_CMD" run -n "$ENV_NAME" "$@"
+  "$SCRIPT_DIR/run-isolated.sh" "$ENV_CMD" "$ENV_NAME" "$@"
 }
 
 resolve_calib_primaries() {

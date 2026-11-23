@@ -22,7 +22,7 @@ echo "[doseLab] env command: $ENV_CMD"
 echo "[doseLab] env name: $ENV_NAME"
 
 run_env() {
-  "$ENV_CMD" run -n "$ENV_NAME" "$@"
+  "$SCRIPT_DIR/run-isolated.sh" "$ENV_CMD" "$ENV_NAME" "$@"
 }
 
 MACROS=(

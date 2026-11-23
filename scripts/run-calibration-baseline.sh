@@ -18,7 +18,7 @@ if [[ -z "$ENV_CMD" ]]; then
 fi
 
 run_env() {
-  "$ENV_CMD" run -n "$ENV_NAME" "$@"
+  "$SCRIPT_DIR/run-isolated.sh" "$ENV_CMD" "$ENV_NAME" "$@"
 }
 
 echo "[doseLab] step 1/3 run calibration matrix"
