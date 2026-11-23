@@ -29,10 +29,59 @@ resolve_micromamba() {
 
 MICROMAMBA_BIN="${MICROMAMBA_BIN:-$(resolve_micromamba)}"
 
+LOCK_FILE="$APP_ROOT/environment-linux-64.lock"
+
+locked_platform() {
+  [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]]
+}
+
+check_lock() {
+  local expected_hash actual_hash
+  expected_hash="$(sed -n 's/^# environment.yml sha256: //p' "$LOCK_FILE")"
+  actual_hash="$(sha256sum "$APP_ROOT/environment.yml" | awk '{print $1}')"
+  if [[ -z "$expected_hash" || "$expected_hash" != "$actual_hash" ]]; then
+    echo "ERROR: environment.yml does not match environment-linux-64.lock. Regenerate the lockfile; see README." >&2
+    return 1
+  fi
+}
+
+check_env() {
+  local installed expected
+  check_lock
+  if ! installed="$("$MICROMAMBA_BIN" list -n "$ENV_NAME" --explicit --md5)"; then
+    echo "ERROR: could not inspect micromamba environment $ENV_NAME." >&2
+    return 1
+  fi
+  expected="$(grep '^https\?://' "$LOCK_FILE" | LC_ALL=C sort || true)"
+  installed="$(printf '%s\n' "$installed" | grep '^https\?://' | LC_ALL=C sort || true)"
+  if [[ -z "$expected" || "$installed" != "$expected" ]]; then
+    echo "ERROR: micromamba environment $ENV_NAME does not match environment-linux-64.lock." >&2
+    echo "Recreate the environment from the lockfile as described in README." >&2
+    return 1
+  fi
+}
+
 ensure_env() {
-  if ! "$MICROMAMBA_BIN" env list 2>/dev/null | awk '{print $1}' | grep -Fxq "$ENV_NAME"; then
+  local environments
+  if locked_platform; then
+    check_lock
+  else
+    echo "WARNING: no lockfile for this platform; environment.yml is used without lock verification." >&2
+  fi
+  if ! environments="$("$MICROMAMBA_BIN" env list)"; then
+    echo "ERROR: could not list micromamba environments." >&2
+    return 1
+  fi
+  if ! printf '%s\n' "$environments" | awk '{print $1}' | grep -Fxq "$ENV_NAME"; then
     echo "Creating micromamba environment: $ENV_NAME"
-    "$MICROMAMBA_BIN" env create -n "$ENV_NAME" -f "$APP_ROOT/environment.yml" --yes
+    if locked_platform; then
+      "$MICROMAMBA_BIN" create -n "$ENV_NAME" -f "$LOCK_FILE" --yes
+    else
+      "$MICROMAMBA_BIN" env create -n "$ENV_NAME" -f "$APP_ROOT/environment.yml" --yes
+    fi
+  fi
+  if locked_platform; then
+    check_env
   fi
 }
 
@@ -113,6 +162,18 @@ mode="${1:-run}"
 shift || true
 
 case "$mode" in
+  setup)
+    ensure_env
+    ;;
+
+  check)
+    if ! locked_platform; then
+      echo "ERROR: lock verification is only supported on Linux x86-64." >&2
+      exit 1
+    fi
+    check_env
+    ;;
+
   build)
     ensure_env
     run_hardened_configure_build
@@ -134,7 +195,7 @@ case "$mode" in
     ;;
 
   *)
-    echo "Usage: $0 [build|run|shell] [args...]"
+    echo "Usage: $0 [setup|build|run|shell|check] [args...]"
     echo "Examples:"
     echo "  $0 build"
     echo "  $0 run"

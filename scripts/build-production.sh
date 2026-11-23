@@ -25,6 +25,19 @@ run_env() {
   "$ENV_CMD" run -n "$ENV_NAME" "$@"
 }
 
+if [[ "$ENV_NAME" == "geant4-doseLab" && "$ENV_FILE" == "environment.yml" ]]; then
+  if [[ "${1:-}" == "--create-env" ]]; then
+    MICROMAMBA_BIN="$ENV_CMD" "$SCRIPT_DIR/run-micromamba.sh" setup
+  elif [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 ]]; then
+    MICROMAMBA_BIN="$ENV_CMD" "$SCRIPT_DIR/run-micromamba.sh" check
+  fi
+else
+  echo "WARNING: custom production environment is not checked against the project lockfile." >&2
+  if [[ "${1:-}" == "--create-env" ]]; then
+    "$ENV_CMD" env create -f "$ENV_FILE" -y || "$ENV_CMD" env update -f "$ENV_FILE" -y
+  fi
+fi
+
 ENV_PREFIX="$($ENV_CMD env list | awk -v env="$ENV_NAME" '$1==env {print $NF}')"
 if [[ -z "$ENV_PREFIX" ]]; then
   ENV_PREFIX="$HOME/micromamba/envs/$ENV_NAME"
@@ -58,10 +71,6 @@ if [[ -d "$ENV_PREFIX/include/freetype2" && -f "$ENV_PREFIX/lib/libfreetype.so" 
     -DFREETYPE_INCLUDE_DIR_ft2build="$ENV_PREFIX/include/freetype2"
     -DFREETYPE_LIBRARY_RELEASE="$ENV_PREFIX/lib/libfreetype.so"
   )
-fi
-
-if [[ "${1:-}" == "--create-env" ]]; then
-  "$ENV_CMD" env create -f "$ENV_FILE" -y || "$ENV_CMD" env update -f "$ENV_FILE" -y
 fi
 
 run_env cmake -S . -B "$BUILD_DIR" -G Ninja \

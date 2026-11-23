@@ -51,11 +51,40 @@ export PATH="$HOME/.local/bin:$PATH"
 ./scripts/run-micromamba.sh run
 ```
 
-This creates or reuses the `geant4-doseLab` environment from `environment.yml`, builds the app, and runs it with the default macro. For a shell inside that environment:
+On Linux x86-64, this creates `geant4-doseLab` from `environment-linux-64.lock` or checks that an existing environment matches it, then builds and runs the app with the default macro. Other platforms use `environment.yml` without lock verification. For a shell inside that environment:
 
 ```bash
 ./scripts/run-micromamba.sh shell
 ```
+
+### Locked environment maintenance
+
+`environment.yml` declares the dependencies; `environment-linux-64.lock` records the exact conda packages used locally and in Linux CI. The run script and default production build stop if the manifest or installed conda packages do not match the lock. Check without building with `./scripts/run-micromamba.sh check`.
+
+To replace a mismatched environment, first save anything you need from it. These commands remove the entire named environment, including packages you added:
+
+```bash
+micromamba env remove -n geant4-doseLab
+./scripts/run-micromamba.sh setup
+```
+
+After intentionally changing `environment.yml`, regenerate the lock on Linux x86-64 using a fresh temporary solve. Review and commit both files:
+
+```bash
+tmp="$(mktemp -d)"
+micromamba create -y -p "$tmp/env" -f environment.yml
+{
+  printf '# Generated from environment.yml for linux-64.\n'
+  printf '# environment.yml sha256: %s\n' "$(sha256sum environment.yml | awk '{print $1}')"
+  printf '@EXPLICIT\n'
+  micromamba list -p "$tmp/env" --explicit --md5 | grep '^https\?://'
+} > "$tmp/environment-linux-64.lock"
+mv "$tmp/environment-linux-64.lock" environment-linux-64.lock
+micromamba env remove -y -p "$tmp/env"
+rmdir "$tmp"
+```
+
+Run these commands in a shell with `set -e` and `set -o pipefail` so a failed solve or export does not replace the lock. Lock verification checks conda package records, not changes made by pip or manual edits inside an environment. Custom production environments are not verified against the lock.
 
 You can also pass a specific macro directly:
 
@@ -165,7 +194,7 @@ micromamba --version
 git clone git@github.com:DSA-NO/doseLab.git
 cd doseLab
 
-micromamba env create -f environment.yml -y
+./scripts/run-micromamba.sh setup
 DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
 DOSELAB_ENV_CMD=micromamba ./scripts/run-production-reference.sh
 micromamba run -n geant4-doseLab ./scripts/check-baseline.py --build-dir build-production

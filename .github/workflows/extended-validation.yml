@@ -18,11 +18,14 @@ jobs:
         uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: geant4-doseLab
-          environment-file: environment.yml
+          environment-file: environment-linux-64.lock
           init-shell: bash
           cache-environment: true
-          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment-linux-64.lock') }}
           cache-downloads: true
+
+      - name: Check locked environment
+        run: ./scripts/run-micromamba.sh check
 
       - name: Build production profile
         run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
@@ -51,11 +54,14 @@ jobs:
         uses: mamba-org/setup-micromamba@v3
         with:
           environment-name: geant4-doseLab
-          environment-file: environment.yml
+          environment-file: environment-linux-64.lock
           init-shell: bash
           cache-environment: true
-          cache-environment-key: geant4-doseLab-${{ hashFiles('environment.yml') }}
+          cache-environment-key: geant4-doseLab-${{ hashFiles('environment-linux-64.lock') }}
           cache-downloads: true
+
+      - name: Check locked environment
+        run: ./scripts/run-micromamba.sh check
 
       - name: Build production profile
         run: DOSELAB_ENV_CMD=micromamba ./scripts/build-production.sh
