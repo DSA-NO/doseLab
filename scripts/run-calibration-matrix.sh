@@ -169,14 +169,8 @@ for chamber in "${CHAMBERS[@]}"; do
         } > "$case_macro"
 
         echo "[doseLab] running beam=${beam} chamber=${chamber} model=${model} medium=${medium}"
-        run_env "$BUILD_DIR/doseLab" -p "$model" -b "$case_macro"
-
-        out_file="$BUILD_DIR/doseLab-${tag}.root"
-        if [[ ! -f "$out_file" ]]; then
-          echo "Missing expected output: $out_file" >&2
-          exit 1
-        fi
-        cp -f "$out_file" "$OUT_DIR/"
+        run_and_copy_output "doseLab-${tag}.root" "$OUT_DIR" \
+          "$BUILD_DIR/doseLab" -p "$model" -b "$case_macro"
       done
     done
   done

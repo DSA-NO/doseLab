@@ -1,6 +1,7 @@
 # Build dirs anywhere
 build/
 build-*/
+/output/
 
 # Build artifacts
 *.o

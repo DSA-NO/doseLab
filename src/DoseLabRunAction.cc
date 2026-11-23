@@ -10,6 +10,7 @@
 #include "DoseLabAnalysisConfig.hh"
 #include "DoseLabDetectorConstruction.hh"
 #include "DoseLabOutputMetadata.hh"
+#include "LabOutput.hh"
 
 #include "G4AnalysisManager.hh"
 #include "G4AccumulableManager.hh"
@@ -91,6 +92,7 @@ DoseLabRunAction::DoseLabRunAction(DoseLabDetectorConstruction* detectorConstruc
   analysisManager->CreateNtupleIColumn(AnalysisConfig::kRunInfoThreadIdColumnName);
   analysisManager->CreateNtupleSColumn("Geant4Version");
   analysisManager->CreateNtupleSColumn("RandomEngine");
+  analysisManager->CreateNtupleSColumn("RandomState");
   analysisManager->FinishNtuple(1);
   fStatisticsNtupleId = DoseLabScoreStatistics::CreateNtuple();
 }
@@ -240,7 +242,7 @@ G4String DoseLabRunAction::BuildOutputFileName() const
   return "doseLab-" + tag + ".root";
 }
 
-void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
+void DoseLabRunAction::BeginOfRunAction(const G4Run* run)
 {
   G4AccumulableManager::Instance()->Reset();
   // Get analysis manager.
@@ -251,8 +253,13 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
   analysisManager->Reset();
 
   // Open output file.
-  G4String fileName = BuildOutputFileName();
-  analysisManager->OpenFile(fileName);
+  fOutputPath = LabOutput::RunFile(isMaster, run->GetRunID(), BuildOutputFileName());
+  if (!analysisManager->OpenFile(fOutputPath)) {
+    G4ExceptionDescription message;
+    message << "Cannot open output file '" << fOutputPath << "'.";
+    G4Exception("DoseLabRunAction::BeginOfRunAction", "DoseLabOutput004", FatalException, message);
+  }
+  if (isMaster) G4cout << "Output path: " << fOutputPath << G4endl;
 
   if (fEnableRadioactiveDecay
       && (!G4Threading::IsMultithreadedApplication() || !isMaster)) {
@@ -269,7 +276,7 @@ void DoseLabRunAction::BeginOfRunAction(const G4Run* /*run*/)
 
   G4cout << "Using " << analysisManager->GetType() << G4endl;
   G4cout << "Output tag: " << fOutputTag << G4endl;
-  G4cout << "Output file: " << fileName << G4endl;
+  G4cout << "Output file: " << fOutputPath << G4endl;
 }
 
 void DoseLabRunAction::EndOfRunAction(const G4Run* run)
@@ -305,6 +312,7 @@ void DoseLabRunAction::EndOfRunAction(const G4Run* run)
                                        G4Threading::G4GetThreadId());
     analysisManager->FillNtupleSColumn(1, 9, G4Version);
     analysisManager->FillNtupleSColumn(1, 10, G4Random::getTheEngine()->name());
+    analysisManager->FillNtupleSColumn(1, 11, run->GetRandomNumberStatus());
     analysisManager->AddNtupleRow(1);
     fScoreStatistics.WriteRows(fStatisticsNtupleId, -1);
   }

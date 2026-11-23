@@ -1,5 +1,6 @@
 #include "DoseLabActionInitialization.hh"
 #include "DoseLabDetectorConstruction.hh"
+#include "LabOutput.hh"
 
 #include "FTFP_BERT.hh"
 #include "G4EmLivermorePhysics.hh"
@@ -167,6 +168,8 @@ int main(int argc, char** argv)
     PrintUsage();
     return 1;
   }
+
+  LabOutput::Initialize(DOSELAB_SOURCE_DIR);
 
   G4UIExecutive* ui = nullptr;
   if (macro.empty()) {

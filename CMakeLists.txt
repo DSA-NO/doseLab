@@ -37,6 +37,15 @@ if(BUILD_TESTING)
   target_include_directories(score_statistics_test PRIVATE ${PROJECT_SOURCE_DIR}/include)
   target_link_libraries(score_statistics_test PRIVATE ${Geant4_LIBRARIES})
   add_test(NAME score_statistics COMMAND score_statistics_test)
+  add_executable(random_state_test tests/random_state.cc)
+  target_link_libraries(random_state_test PRIVATE ${Geant4_LIBRARIES})
+  add_test(NAME random_state
+    COMMAND ${CMAKE_COMMAND}
+      "-DAPP=$<TARGET_FILE:doseLab>"
+      "-DREADER=$<TARGET_FILE:random_state_test>"
+      "-DTEST_DIR=${PROJECT_BINARY_DIR}/random-state-test"
+      "-DMT_ENABLED=${Geant4_multithreaded_FOUND}"
+      -P "${PROJECT_SOURCE_DIR}/tests/random_state.cmake")
 endif()
 
 # Optional ROOT-based summary helper for post-run output inspection.

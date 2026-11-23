@@ -34,3 +34,21 @@ resolve_env_cmd() {
 
   return 1
 }
+
+run_and_copy_output() {
+  local expected_name="$1" destination="$2" log output_path
+  shift 2
+  log="$(mktemp)"
+  if ! run_env "$@" | tee "$log"; then
+    rm -f -- "$log"
+    return 1
+  fi
+  output_path="$(sed -n 's/^Output path: //p' "$log")"
+  rm -f -- "$log"
+  if [[ -z "$output_path" || "$output_path" == *$'\n'* ||
+        "$(basename "$output_path")" != "$expected_name" || ! -f "$output_path" ]]; then
+    echo "Expected one output file named $expected_name; reported: $output_path" >&2
+    return 1
+  fi
+  cp -f -- "$output_path" "$destination/"
+}

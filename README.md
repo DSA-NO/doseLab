@@ -242,6 +242,8 @@ Output file naming:
 - default tag (unset): `doseLab-default.root`
 - custom tag: `doseLab-<tag>.root`
 
+Each run writes its ROOT file under `output/<UTC-timestamp>/` in the doseLab project directory. A numeric suffix is added if the timestamp already exists, so repeated or concurrent runs do not overwrite each other. The full output path is printed as `Output path:`. Set `LAB_OUTPUT_DIR` to use a different parent directory; a relative path is resolved from the directory where the application starts, before it switches to the macro directory. If the build's source directory no longer exists, the default is `output/` in the startup directory. The project output folder is Git-ignored; old results are not automatically deleted. Production, Fano and calibration scripts continue to update their existing collected copies in addition to preserving the original run outputs.
+
 Allowed `tag` characters are letters, digits, `-`, and `_`.
 
 The `runinfo` ntuple uses the standardized schema:
@@ -257,12 +259,15 @@ The `runinfo` ntuple uses the standardized schema:
 - `ThreadId`
 - `Geant4Version` (version used to build the application)
 - `RandomEngine` (engine used by the scoring thread)
+- `RandomState` (Geant4 serialized engine state at the beginning of that run or worker run)
 
 Policy: `runinfo` stores one row per run in sequential mode, and one row per worker in MT mode. Use `ThreadId` to identify worker provenance.
 
 Each `score_statistics` row describes one quantity (`Dose`, `Edep`, or charged `TrackL`) per worker, or the whole run in sequential mode. `Region` is -1 for the cavity; columns are `ThreadId`, `Region`, `Quantity`, `Events`, `Mean`, `M2`, `StdDev`, and `StdErr`. Every event is included, including zero scores. `M2` is the sum of squared deviations from the mean; `StdDev = sqrt(M2/(Events-1))` is the sample standard deviation and `StdErr = StdDev/sqrt(Events)` estimates the uncertainty of the per-event mean for independent events. For fewer than two events, `StdDev` and `StdErr` are NaN. Scores use Geant4 internal units; `M2` uses their squares.
 
-For MT output, do not average worker standard deviations or errors. For each quantity, combine worker counts, means, and M2 using `N = sum(n_i)`, `mean = sum(n_i*mean_i)/N`, and `M2 = sum(M2_i + n_i*(mean_i-mean)^2)`, ignoring empty workers. Then calculate the run-level standard deviation and standard error as above. The console also prints the combined statistics. These are statistical uncertainties only, not systematic uncertainties or validation of the physics model. Seed selection and provenance are unchanged and are not recorded yet.
+For MT output, do not average worker standard deviations or errors. For each quantity, combine worker counts, means, and M2 using `N = sum(n_i)`, `mean = sum(n_i*mean_i)/N`, and `M2 = sum(M2_i + n_i*(mean_i-mean)^2)`, ignoring empty workers. Then calculate the run-level standard deviation and standard error as above. The console also prints the combined statistics. These are statistical uncertainties only, not systematic uncertainties or validation of the physics model.
+
+`RandomState` records Geant4's serialized engine state at the beginning of each sequential run or MT worker run; it does not change seed selection. It is not a per-event seed log, and worker states do not by themselves guarantee exact replay of a multithreaded run. Run configuration, Geant4/CLHEP versions, thread count, and event scheduling can also affect reproducibility.
 
 At end-of-run, each worker writes its data for merging, and the master finalizes the output. A concise "Run complete" summary line is printed with events, output file, and key metadata.
 

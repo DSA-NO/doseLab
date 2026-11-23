@@ -36,7 +36,7 @@ mkdir -p "$OUT_DIR"
 
 pushd "$BUILD_DIR" >/dev/null
 for macro in "${MACROS[@]}"; do
-  run_env ./doseLab -b "$macro"
+  run_and_copy_output "doseLab-${macro%.mac}.root" "." ./doseLab -b "$macro"
 done
 popd >/dev/null
 

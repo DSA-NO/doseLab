@@ -60,6 +60,7 @@ class DoseLabRunAction : public G4UserRunAction
     std::unique_ptr<G4GenericMessenger> fScenarioMessenger;
 
     G4String fOutputTag = "default";
+    G4String fOutputPath;
     G4String fOutputSource = "unspecified";
     G4String fOutputField = "unspecified";
     G4double fOutputDepthCm = -1.;
