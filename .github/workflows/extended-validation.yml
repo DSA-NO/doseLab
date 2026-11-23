@@ -8,7 +8,7 @@ on:
 jobs:
   production-validation:
     name: Production validation
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -44,7 +44,7 @@ jobs:
 
   fano-validation:
     name: Fano validation (precision-aware)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
